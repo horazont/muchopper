@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% set title = "About" %}
+{% macro appname() %}<em>{{ config["APPNAME"] }}</em>{% endmacro %}
+{% block content %}
+<p>{{ appname() }} is a project to provide a list of public chat rooms in the Jabber Instant Messaging network.</p>
+<p>To learn more about the technical background of Jabber, visit <a href="https://xmpp.org">the home page of the XMPP Standards Foundation</a>. The XMPP Standards Foundation is the organization governing the technical development of XMPP. XMPP is the protocol on which Jabber is built.</p>
+<h3>Why is my room listed here?</h3>
+<p>All rooms which {{ appname() }} can find <em>and</em> which are explicitly configured to be public are listed here.</p>
+<p>{{ appname() }} finds rooms by:</p>
+<ul>
+    <li>Receiving an invitation to join a room.</li>
+    <li>Overhearing a mention of another in a room it is joined in.</li>
+    <li>Asking servers on which it has found rooms for more rooms.</li>
+</ul>
+<p>If you want your room to be delisted, please see the <a href="{{ url_for('privacy') }}">Privacy Policy</a> for how to do that.</p>
+<h3>Why is my room <em>not</em> listed here?</h3>
+<p>First of all, make sure you configured your room to be publicly listed and is persistent. You have to do that from within your client. You generally need to be the owner of a room to configure that.</p>
+<p>Try to invite {{ config["APPJID"] }} into your room. This will make {{ appname() }} consider your room. It may take up to two hours for the bot to pick up changes (such as enabling public listing) to a room.</p>
+<p>Only rooms where more than one user is seen are listed in the public listing.</p>
+{% endblock %}

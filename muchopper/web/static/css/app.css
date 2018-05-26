@@ -1,0 +1,93 @@
+td.nusers {
+    text-align: right;
+}
+
+table > tbody > tr:nth-child(2n) {
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+footer#footer-main {
+    text-align: center;
+}
+
+footer#footer-main > ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+}
+
+footer#footer-main > ul > li {
+    display: inline-block;
+    margin: 0;
+    margin-left: 1.5em;
+    margin-right: 1.5em;
+    padding: 0;
+}
+
+nav.pagination {
+    background: transparent;
+    margin: 1.5em;
+}
+
+nav.pagination > ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    text-align: right;
+}
+
+nav.pagination > ul > li {
+    display: inline-block;
+    padding: 0;
+    margin: 0;
+    min-width: 2em;
+    text-align: center;
+}
+
+nav.pagination > ul > li.prev > a:before {
+    content: '⟨ ';
+}
+
+nav.pagination > ul > li.next > a:after {
+    content: ' ⟩';
+}
+
+nav.pagination > ul > li > a {
+    display: block;
+    margin: 0;
+    padding: 0.5em;
+}
+
+nav.pagination > ul > li.current > a {
+    display: block;
+    font-weight: bold;
+    color: inherit;
+}
+
+div.addr {
+    font-size: 110%;
+    font-family: "Droid Sans", Arial, Helvetica, sans-serif;
+}
+
+span.localpart {
+    font-weight: bold;
+}
+
+span.at {
+    opacity: 0.5;
+}
+
+span.domain {
+    opacity: 0.95;
+}
+
+div.subtitle {
+    font-style: italic;
+    font-size: 110%;
+    color: #dfdfdf;
+}
+
+td.nusers {
+    width: 8em;
+    font-family: "Droid Sans", Arial, Helvetica, sans-serif;
+}

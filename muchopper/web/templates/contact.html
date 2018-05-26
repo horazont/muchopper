@@ -1,0 +1,8 @@
+{% extends "base.html" %}
+{% set title = "Imprint / Contact" %}
+{% macro appname() %}<em>{{ config["APPNAME"] }}</em>{% endmacro %}
+{% block content %}
+<p>If you have questions, suggestions, a problem with {{ appname() }} or want to get in contact for another reason, feel free to contact:</p>
+<p>Jonas Wielicki<br/>via Jabber: <a href="xmpp:jonas@wielicki.name">jonas@wielicki.name</a></p>
+<p>You can use English or German for your requests.</p>
+{% endblock %}
