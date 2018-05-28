@@ -41,11 +41,9 @@ def mkdir_exist_ok(path):
             raise
 
 
-def get_engine(path: pathlib.Path) -> sqlalchemy.engine.Engine:
+def get_sqlite_engine(path: pathlib.Path) -> sqlalchemy.engine.Engine:
     mkdir_exist_ok(path.parent)
-    engine = sqlalchemy.create_engine(
-        "sqlite:///{}".format(path),
-    )
+    engine = get_generic_engine("sqlite:///{}".format(path))
 
     # https://stackoverflow.com/questions/1654857/
     @sqlalchemy.event.listens_for(engine, "connect")
@@ -62,6 +60,10 @@ def get_engine(path: pathlib.Path) -> sqlalchemy.engine.Engine:
         conn.execute("BEGIN")
 
     return engine
+
+
+def get_generic_engine(uri: str) -> sqlalchemy.engine.Engine:
+    return sqlalchemy.create_engine(uri)
 
 
 class JID(sqlalchemy.types.TypeDecorator):

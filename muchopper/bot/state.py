@@ -36,13 +36,12 @@ NUSERS_MOVING_AVERAGE_INTERVAL = timedelta(hours=0.95)
 
 class State:
     def __init__(self,
-                 statefile: pathlib.Path,
+                 engine,
                  logfile: pathlib.Path):
         super().__init__()
         self.logger = logging.getLogger(__name__)
         self._mucs = {}
-        self._engine = model.get_engine(statefile)
-        model.Base.metadata.create_all(self._engine)
+        self._engine = engine
         self._sessionmaker = sqlalchemy.orm.sessionmaker(bind=self._engine)
         self._address_metadata_cache = aioxmpp.cache.LRUDict()
         self._address_metadata_cache.maxsize = 512

@@ -8,6 +8,7 @@ import toml
 
 import aioxmpp
 
+import muchopper.common.model
 import muchopper.bot.daemon
 import muchopper.bot.state
 
@@ -16,8 +17,18 @@ DEFAULT_CONFIG_PATH = pathlib.Path("/etc/muchopper/config.toml")
 
 
 async def amain(loop, args, cfg):
+    try:
+        statefile = pathlib.Path(cfg["muchopping"]["statefile"])
+    except KeyError:
+        engine = muchopper.common.model.get_generic_engine(
+            cfg["muchopping"]["db_uri"]
+        )
+    else:
+        engine = muchopper.common.model.get_sqlite_engine(statefile)
+
+
     state = muchopper.bot.state.State(
-        pathlib.Path(cfg["muchopping"]["statefile"]),
+        engine,
         pathlib.Path(cfg["muchopping"]["logfile"]),
     )
 
