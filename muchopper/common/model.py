@@ -65,20 +65,20 @@ def get_engine(path: pathlib.Path) -> sqlalchemy.engine.Engine:
 
 
 class JID(sqlalchemy.types.TypeDecorator):
-    impl = sqlalchemy.types.BLOB
+    impl = sqlalchemy.types.VARCHAR
 
     def load_dialect_impl(self, dialect):
-        return sqlalchemy.types.BLOB(3071)
+        return sqlalchemy.types.VARCHAR(3071)
 
     def process_bind_param(self, value, dialect):
         if value is None:
             return value
-        return str(value).encode("utf-8")
+        return str(value)
 
     def process_result_value(self, value, dialect):
         if value is None:
             return value
-        return aioxmpp.JID.fromstr(value.decode("utf-8"))
+        return aioxmpp.JID.fromstr(value)
 
 
 class Base(declarative_base()):
@@ -99,7 +99,7 @@ class Domain(Base):
 
     domain = Column(
         "domain",
-        sqlalchemy.types.BLOB(1023),
+        sqlalchemy.types.VARCHAR(1023),
         unique=True,
         nullable=False,
     )
@@ -140,14 +140,14 @@ class MUC(Base):
         nullable=True,
     )
 
-    last_message_ts = Column(
-        "last_message_ts",
-        DateTime(),
-        nullable=True,
-    )
-
     is_open = Column(
         "is_open",
+        Boolean(),
+        nullable=False,
+    )
+
+    was_kicked = Column(
+        "was_kicked",
         Boolean(),
         nullable=False,
     )

@@ -1,6 +1,13 @@
 import collections
+import html
+import re
+import shlex
 
-from flask import Flask, render_template, redirect, url_for
+import jinja2
+
+import sqlalchemy
+
+from flask import Flask, render_template, redirect, url_for, request
 from flask_sqlalchemy import SQLAlchemy, Pagination, BaseQuery
 from flask_menu import register_menu, Menu
 
@@ -25,6 +32,28 @@ Page = collections.namedtuple(
 )
 
 
+@app.template_filter("highlight")
+def highlight(s, keywords):
+    s = str(s)
+    if not keywords:
+        return s
+
+    keyword_re = re.compile("|".join(map(re.escape, keywords)), re.I)
+    prev_end = 0
+    parts = []
+    for match in keyword_re.finditer(s):
+        print(match)
+        start, end = match.span()
+        parts.append(html.escape(s[prev_end:start]))
+        parts.append("<span class='search-match'>")
+        parts.append(html.escape(s[start:end]))
+        parts.append("</span>")
+        prev_end = end
+    parts.append(s[prev_end:])
+
+    return jinja2.Markup("".join(parts))
+
+
 @app.route("/")
 def index():
     return redirect(url_for("room_list", page=1))
@@ -32,14 +61,14 @@ def index():
 
 @app.route("/rooms/")
 @app.route("/rooms/<int:page>")
-@register_menu(app, "rooms", "Chat Room index")
+@register_menu(app, "rooms", "All Rooms")
 def room_list(page=1):
     q = db.session.query(model.MUC, model.PubliclyListedMUC).join(
         model.PubliclyListedMUC,
     ).filter(
-        model.MUC.nusers > 1
+        model.MUC.nusers_moving_average > 1
     ).order_by(
-        model.MUC.nusers.desc(),
+        model.MUC.nusers_moving_average.desc(),
         model.MUC.address.asc(),
     )
     total = q.count()
@@ -66,6 +95,148 @@ def room_list(page=1):
 
     return render_template("room_list.html", page=page,
                            visible_pages=visible_pages)
+
+
+def chain_condition(conditional, new):
+    if conditional is None:
+        return new
+    return sqlalchemy.or_(conditional, new)
+
+
+def perform_search(query_string,
+                   search_address,
+                   search_description,
+                   search_name):
+    if not (search_address or search_description or search_name):
+        return ({"no_keywords"}, None, None)
+
+    keywords = shlex.split(query_string)
+    keywords = set(
+        keyword
+        for keyword in (
+            keyword.strip()
+            for keyword in keywords
+        )
+        if len(keyword) >= 3
+    )
+
+    if len(keywords) > 5:
+        return ({"too_many_keywords"}, None, None)
+    elif not keywords:
+        return ({"no_keywords"}, None, None)
+
+    q = db.session.query(model.PubliclyListedMUC, model.MUC)
+    for keyword in keywords:
+        conditional = None
+        if search_address:
+            conditional = chain_condition(
+                conditional,
+                model.PubliclyListedMUC.address.like("%" + keyword + "%")
+            )
+        if search_description:
+            conditional = chain_condition(
+                conditional,
+                model.PubliclyListedMUC.description.like("%" + keyword + "%")
+            )
+        if search_name:
+            conditional = chain_condition(
+                conditional,
+                model.PubliclyListedMUC.name.like("%" + keyword + "%")
+            )
+        q = q.filter(conditional)
+
+    q = q.join(model.MUC).order_by(
+        model.MUC.nusers_moving_average.desc()
+    )
+    q = q.limit(101)
+    results = [
+        (muc, public_info)
+        for public_info, muc in q
+    ]
+    if len(results) > 100:
+        del results[100:]
+        return ({"too_many_results"}, results, keywords)
+
+    return ([], results, keywords)
+
+
+@app.route("/search", methods=["POST", "GET"])
+@register_menu(app, "search", "Search")
+def search():
+    no_keywords = False
+    orig_keywords = ""
+    too_many_keywords = False
+    results = None
+    too_many_results = False
+    search_address = True
+    search_description = True
+    search_name = False
+
+    if request.method == "POST":
+        orig_keywords = request.form["keywords"]
+
+        if "full-form" in request.form:
+            search_address = "search_address" in request.form
+            search_description = "search_description" in request.form
+            search_name = "search_name" in request.form
+
+        flags, results, keywords = perform_search(
+            orig_keywords,
+            search_address,
+            search_description,
+            search_name,
+        )
+
+        no_keywords = "no_keywords" in flags
+        too_many_keywords = "too_many_keywords" in flags
+        too_many_results = "too_many_results" in flags
+    else:
+        keywords = None
+
+    return render_template(
+        "search.html",
+        no_keywords=no_keywords,
+        too_many_keywords=too_many_keywords,
+        too_many_results=too_many_results,
+        orig_keywords=orig_keywords,
+        results=results,
+        search_address=search_address,
+        search_description=search_description,
+        search_name=search_name,
+        keywords=keywords,
+    )
+
+
+@app.route("/stats")
+@register_menu(app, "stats", "Statistics")
+def statistics():
+    q = db.session.query(
+        sqlalchemy.func.count(),
+        sqlalchemy.func.count(model.PubliclyListedMUC.address),
+        sqlalchemy.func.count(sqlalchemy.func.nullif(model.MUC.is_open, False)),
+        sqlalchemy.func.sum(model.MUC.nusers)
+    ).select_from(
+        model.MUC,
+    ).outerjoin(
+        model.PubliclyListedMUC,
+    )
+
+    nmucs, npublicmucs, nopenmucs, nusers = q.one()
+
+    ndomains, = db.session.query(
+        sqlalchemy.func.count()
+    ).select_from(
+        model.Domain,
+    ).one()
+
+    return render_template(
+        "stats.html",
+        nmucs=nmucs,
+        npublicmucs=npublicmucs,
+        nopenmucs=nopenmucs,
+        nusers=nusers,
+        ndomains=ndomains,
+    )
 
 
 @app.route("/privacy")

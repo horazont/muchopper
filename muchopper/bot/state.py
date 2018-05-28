@@ -75,7 +75,7 @@ class State:
     def get_all_domains(self) -> typing.Sequence[str]:
         with model.session_scope(self._sessionmaker) as session:
             all_domains = [
-                domain.decode("utf-8")
+                domain
                 for domain, in session.query(
                     model.Domain.domain,
                 )
@@ -192,9 +192,9 @@ class State:
 
     def _require_domain(self, session, domain):
         if isinstance(domain, str):
-            key = domain.encode("utf-8")
+            key = domain
         else:
-            key = domain.domain.encode("utf-8")
+            key = domain.domain
 
         try:
             with session.begin_nested():
@@ -211,16 +211,18 @@ class State:
 
     def require_domain(self, domain):
         with model.session_scope(self._sessionmaker) as session:
-            return self._require_domain(session, domain)
+            result = self._require_domain(session, domain)
+            session.commit()
+        return result
 
     def update_muc_metadata(self, address,
                             nusers=UNCHANGED,
-                            last_message_ts=UNCHANGED,
                             is_open=UNCHANGED,
                             is_public=UNCHANGED,
                             subject=UNCHANGED,
                             name=UNCHANGED,
-                            description=UNCHANGED):
+                            description=UNCHANGED,
+                            was_kicked=UNCHANGED):
         muc_created = False
         now = datetime.utcnow()
 
@@ -232,6 +234,7 @@ class State:
                 muc = model.MUC()
                 muc.service_domain_id = domain_id
                 muc.address = address
+                muc.was_kicked = False
                 muc_created = True
                 session.add(muc)
             muc.is_open = (
@@ -239,6 +242,7 @@ class State:
                 if is_open is UNCHANGED
                 else is_open
             )
+            muc.was_kicked = muc.was_kicked or was_kicked or False
             muc.nusers = muc.nusers if nusers is UNCHANGED else nusers
             if muc.nusers_moving_average is None:
                 muc.nusers_moving_average = muc.nusers
@@ -252,7 +256,6 @@ class State:
                         nusers * (1-NUSERS_MOVING_AVERAGE_FACTOR)
                     )
                     muc.moving_average_last_update = now
-            muc.last_message_ts = last_message_ts or muc.last_message_ts
 
             if (is_public or
                     (is_public is UNCHANGED and

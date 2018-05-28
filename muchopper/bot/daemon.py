@@ -14,47 +14,21 @@ from . import worker_pool, state, utils, watcher, scanner, insideman
 
 
 INFO_BODY = {
-    aioxmpp.structs.LanguageTag.fromstr("en"): \
-        "Hi! I am the bot feeding https://muclumbus.zombofant.net. Please see "\
-        "there for my Privacy Policy and what I do.",
+    aioxmpp.structs.LanguageTag.fromstr("en"):
+        "Hi! I am the bot feeding https://muclumbus.zombofant.net. Please "
+        "see there for my Privacy Policy and what I do.",
+}
+
+ACK_BODY = {
+    aioxmpp.structs.LanguageTag.fromstr("en"):
+        "Hi, and thank you for your invite. I will consider it. It may take a "
+        "while (approximately two hours) until your suggestion is added to "
+        "the public list. I will not actually join the room, though.",
 }
 
 
-class InvitationHandler(aioxmpp.service.Service):
-    ORDER_AFTER = [
-        aioxmpp.im.dispatcher.IMDispatcher,
-    ]
-
-    suggest_jid = None
-
-    @aioxmpp.service.depfilter(
-        aioxmpp.im.dispatcher.IMDispatcher,
-        "message_filter")
-    def _handle_message(self, message, peer, sent, source):
-        if not self.suggest_jid:
-            return message
-
-        if (message.xep0045_muc_user and
-                message.xep0045_muc_user.invites):
-            invite = message.xep0045_muc_user.invites[0]
-
-            if invite.from_:
-                # mediated invite
-                self.suggest_jid(
-                    message.from_.bare()
-                )
-            elif invite.to:
-                # direct invite
-                self.suggest_jid(
-                    invite.to.bare()
-                )
-
-            return None
-
-        return message
-
-
-class ReplyHandler(aioxmpp.service.Service):
+class InteractionHandler(aioxmpp.service.Service,
+                         utils.MuchopperService):
     HELLO_EXPIRE = 3600
     HELLO_EXPIRE_INTERVAL = HELLO_EXPIRE / 4
 
@@ -75,7 +49,7 @@ class ReplyHandler(aioxmpp.service.Service):
                               self._expire_spoken_to)
 
     def _expire_spoken_to(self):
-        threshold = time.monotonic() - HELLO_EXPIRE
+        threshold = time.monotonic() - self.HELLO_EXPIRE
         to_delete = [
             key for key, ts in self._spoken_to.items()
             if ts < threshold
@@ -101,10 +75,45 @@ class ReplyHandler(aioxmpp.service.Service):
         self.logger.debug("reply: %s", reply)
         self.client.enqueue(reply)
 
+    def _handle_invite(self, message, invite):
+        self.logger.debug("received invite: %s / %s",
+                          message, invite)
+
+        if invite.from_:
+            # mediated invite
+            self._suggester(
+                message.from_.bare()
+            )
+            return
+
+        if invite.to:
+            # direct invite
+            self._suggester(
+                invite.to.bare()
+            )
+
+            self._spoken_to[message.from_] = time.monotonic()
+
+            reply = message.make_reply()
+            reply.type_ = aioxmpp.MessageType.CHAT
+            reply.body.clear()
+            reply.body.update(ACK_BODY)
+            self.logger.debug("sending reply to direct invite: %s", reply)
+            self.client.enqueue(reply)
+
     @aioxmpp.service.depfilter(
         aioxmpp.im.dispatcher.IMDispatcher,
         "message_filter")
     def _handle_message(self, message, peer, sent, source):
+        if message.type_ == aioxmpp.MessageType.ERROR:
+            return message
+
+        if (message.xep0045_muc_user and
+                message.xep0045_muc_user.invites):
+            invite = message.xep0045_muc_user.invites[0]
+            self._handle_invite(message, invite)
+            return None
+
         if (message.type_ != aioxmpp.MessageType.GROUPCHAT and
                 message.type_ != aioxmpp.MessageType.ERROR):
             if message.body:
@@ -130,11 +139,11 @@ class MUCHopper:
             logger=logging.getLogger("muchopper.client")
         )
         self._client.summon(aioxmpp.DiscoServer)
-        self._client.summon(InvitationHandler).suggest_jid = \
-            self.suggest_new_address_nonblocking
+        self._interaction = self._client.summon(InteractionHandler)
+        self._interaction.state = state
+        self._interaction.suggester = self.suggest_new_address_nonblocking
         self._muc_svc = self._client.summon(aioxmpp.MUCClient)
         self._disco_svc = self._client.summon(aioxmpp.DiscoClient)
-        self._client.summon(ReplyHandler)
         self._watcher = self._client.summon(watcher.Watcher)
         self._watcher.state = state
         self._watcher.suggester = self.suggest_new_address
@@ -142,7 +151,7 @@ class MUCHopper:
         self._scanner.state = state
         self._scanner.suggester = self.suggest_new_address
         self._insideman = self._client.summon(insideman.InsideMan)
-        self._insideman.state = state
+        # self._insideman.state = state
         self._insideman.default_nickname = default_nickname
         self._insideman.suggester = self.suggest_new_address_nonblocking
 
@@ -159,11 +168,14 @@ class MUCHopper:
         )
 
     async def suggest_new_address(self, address):
+        self.logger.debug("queue-ing JID for investigation: %s", address)
         await self._analysis_pool.enqueue((address, None))
+        self.logger.debug("queued JID for investigation: %s", address)
 
     def suggest_new_address_nonblocking(self, address):
         try:
             self._analysis_pool.enqueue_nowait((address, None))
+            self.logger.debug("queued JID for investigation: %s", address)
         except asyncio.QueueFull:
             self.logger.warning(
                 "dropping suggested JID due to queue overrun: %s",

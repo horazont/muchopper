@@ -103,10 +103,11 @@ class RoomHandler:
         self.logger.debug("updating MUC %s: %r",
                           self.room.jid,
                           updates)
-        self._state.update_muc_metadata(
-            self.room.jid,
-            **updates,
-        )
+        if updates:
+            self._state.update_muc_metadata(
+                self.room.jid,
+                **updates,
+            )
 
     def _on_failure(self, exc, **kwargs):
         self.logger.warning(
@@ -268,8 +269,8 @@ class InsideMan(aioxmpp.service.Service,
         if leave_tasks:
             try:
                 await asyncio.wait(leave_tasks,
-                                timeout=120,
-                                return_when=asyncio.ALL_COMPLETED)
+                                   timeout=120,
+                                   return_when=asyncio.ALL_COMPLETED)
             except asyncio.TimeoutError:
                 self.logger.debug(
                     "not all leave operations finished in time ... continuing "
@@ -309,6 +310,8 @@ class InsideMan(aioxmpp.service.Service,
                 utils.CACHE_TTL_BANNED,
             )
             self._state.delete_all_muc_data(self.room.jid)
+        elif leave_mode == aioxmpp.muc.LeaveMode.KICKED:
+            handler._queue_update({"was_kicked": True})
         elif exc is not None:
             # failed to join MUC for other reasons, treat as unreachable
             self._state.cache_address_metadata(
@@ -323,5 +326,6 @@ class InsideMan(aioxmpp.service.Service,
                 utils.CACHE_TTL_UNREACHABLE,
             )
         else:
-            # got removed from MUC in another way, we just re-try joining
-            self._join_pool.enqueue_nowait((jid,))
+            # got removed from MUC in another way, we will re-join later
+            pass
+        handler._execute_update()

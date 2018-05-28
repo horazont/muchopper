@@ -164,6 +164,7 @@ class PeriodicBackgroundTask(MuchopperService,
     WORKER_POOL_SIZE = 4
     MIN_INTERVAL = timedelta(minutes=1)
     MIN_PROCESS_INTERVAL = timedelta(seconds=1)
+    TIMEOUT = timedelta(seconds=60)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -192,7 +193,25 @@ class PeriodicBackgroundTask(MuchopperService,
             return
 
         try:
-            result = await self._process_item(state, item, fut)
+            coro = self._process_item(state, item, fut)
+
+            if self.TIMEOUT is None:
+                result = await coro
+            else:
+                try:
+                    await asyncio.wait_for(
+                        coro,
+                        timeout=self.TIMEOUT.total_seconds()
+                    )
+                except asyncio.TimeoutError as exc:
+                    self.logger.warning(
+                        "processing of item %s timed out",
+                        item,
+                    )
+                    if fut is not None and not fut.done():
+                        fut.set_exception(exc)
+                    return
+
             if fut is not None and not fut.done():
                 fut.set_result(result)
         except Exception as exc:
@@ -346,6 +365,7 @@ async def collect_muc_metadata(
     }
 
     if is_public:
+        kwargs["name"] = generic_info.identities[0].name
         if room_info.subject.value is not None:
             kwargs["subject"] = room_info.subject.value
         if room_info.description.value is not None:

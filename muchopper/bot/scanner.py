@@ -7,6 +7,7 @@ for MUC rooms. It compares the lists against the locally available lists and
 synchronizes them (for publicly listed MUCs only).
 """
 import asyncio
+import random
 import time
 
 import aioxmpp
@@ -32,7 +33,9 @@ class Scanner(aioxmpp.service.Service,
         self._disco_svc = self.dependencies[aioxmpp.DiscoClient]
 
     async def _get_items(self, state):
-        return state.get_all_domains()
+        domains = state.get_all_domains()
+        random.shuffle(domains)
+        return domains
 
     async def _process_muc_domain(self, state, domain):
         suggester = await self._suggester_future
@@ -55,10 +58,14 @@ class Scanner(aioxmpp.service.Service,
                 await suggester(address)
 
     async def _process_other_domain(self, state, domain):
-        items = await self._disco_svc.query_items(domain)
+        result = await self._disco_svc.query_items(domain)
 
-        for item in items:
+        for item in result.items:
             address = item.jid
+            if item.node:
+                # otherwise, we run into a huge overhead for pubsub things
+                continue
+            self.logger.debug("domain scanner found %r", address)
             if address.localpart or address.resource:
                 # we don’t want items with local/resourcepart for domain
                 # discovery
@@ -70,10 +77,24 @@ class Scanner(aioxmpp.service.Service,
     async def _process_item(self, state, domain, fut):
         address = aioxmpp.JID(localpart=None, domain=domain, resource=None)
 
-        info = await self._disco_svc.query_info(address)
-        if "http://jabber.org/protocol/muc" in info.features:
-            # is a MUC domain
-            await self._process_muc_domain(state, address)
-        else:
-            # is unknown domain, use disco#items to find more
-            await self._process_other_domain(state, address)
+        try:
+            info = await self._disco_svc.query_info(address)
+        except aioxmpp.errors.XMPPError as exc:
+            self.logger.error("failed to disco#info %s: %s",
+                              address,
+                              exc)
+            return
+
+        try:
+            if "http://jabber.org/protocol/muc" in info.features:
+                # is a MUC domain
+                await self._process_muc_domain(state, address)
+            else:
+                # is unknown domain, use disco#items to find more
+                await self._process_other_domain(state, address)
+        except aioxmpp.errors.XMPPError as exc:
+            self.logger.error("received error response while scanning %s: %s",
+                              address, exc)
+        except aioxmpp.errors.ErroneousStanza as exc:
+            self.logger.error("received invalid response while scanning %s: %s",
+                              address, exc)

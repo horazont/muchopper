@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% set title = "Statistics" %}
+{% block content %}
+<table>
+    <thead>
+        <tr>
+            <th>Metric</th>
+            <th>Value</th>
+            <th>Notes</th>
+        </tr>
+    </thead>
+    <tr>
+        <th>Chat rooms</th>
+        <td class="numeric">{{ nmucs }}</td>
+        <td>Includes all persistent rooms known (public/non-public and open/non-open)</td>
+    </tr>
+    <tr>
+        <th>Public rooms</th>
+        <td class="numeric">{{ npublicmucs }}</td>
+        <td>Only publicly listed rooms</td>
+    </tr>
+    <tr>
+        <th>Open rooms</th>
+        <td class="numeric">{{ nopenmucs }}</td>
+        <td>Only rooms which can be joined without password/invitation</td>
+    </tr>
+    <tr>
+        <th>Total users</th>
+        <td class="numeric">{{ nusers }}</td>
+        <td>Total number of users in all MUCs. Since we do not (and can not) track the real identities of users, this most certainly includes duplicates.</td>
+    </tr>
+    <tr>
+        <th>Domains</th>
+        <td class="numeric">{{ ndomains }}</td>
+        <td>Number of domains known; this includes non-MUC service domains and usually a single XMPP service has multiple domains (e.g. a base domain and a MUC service domain).</td>
+    </tr>
+</table>
+{% endblock %}

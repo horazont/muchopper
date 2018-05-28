@@ -7,19 +7,27 @@
         <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/screen/screen-PAGE-layout.css') }}">
         <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/screen/typography.css') }}">
         <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/navigation/hlist.css') }}">
+        <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/forms/gray-theme.css') }}">
         <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/app.css') }}">
     </head>
     <body><div class="ym-wrapper"><div class="ym-wbox">
         <header>
-            <h1>{{ config["APPNAME"] }}</h1>
-            <div class="subtitle">A listing of public XMPP/Jabber chat rooms.</div>
+            <h1><a href="{{ url_for('index') }}">Public Jabber Chat rooms</a></h1>
+            <div class="subtitle">{{ config["APPNAME"] }}: A listing of public XMPP/Jabber chat rooms/groups.</div>
         </header>
         <nav id="nav-main" class="ym-hlist">
-            <ul>
-                {%- for item in current_menu.children %}
-                <li class="{{ 'active' if item.active else ''}}"><a href="{{ item.url }}">{{ item.text }}</a></li>
-                {% endfor -%}
-            </ul>
+            <div class="ym-grid"><div class="ym-g66 ym-gl"><div class="ym-gbox">
+                <ul>
+                    {%- for item in current_menu.children %}
+                    <li class="{{ 'active' if item.active else ''}}"><a href="{{ item.url }}">{{ item.text }}</a></li>
+                    {% endfor -%}
+                </ul>
+            </div></div><div class="ym-g33 ym-gr"><div class="ym-gbox">
+                <form class="searchbox" name="searchbox" method="POST" action="{{ url_for('search') }}">
+                    <input type="text" name="keywords" placeholder="Search..."/>
+                    <input type="submit" value="Go"/>
+                </form>
+            </div></div></div>
         </nav>
         <main>{% block body %}
             <h2>{{ title }}</h2>
@@ -27,9 +35,12 @@
         {% endblock %}</main>
         <footer id="footer-main">
             <ul>
-                <li><a href="{{ url_for('privacy') }}">Privacy Policy</a></li>
+                <li><a href="{{ url_for('privacy') }}">Privacy Policy</a></li>{{ '' -}}
                 <li><a href="{{ url_for('contact') }}">Imprint / Contact</a></li>
             </ul>
+            <p>
+                Made with <a href="http://yaml.de">the award-winning YAML CSS Framework</a>, <a href="http://flask.pocoo.org/">Flask</a> and <a href="https://github.com/horazont/aioxmpp">aioxmpp</a>. Licensed under <a href="https://www.gnu.org/licenses/agpl.html">AGPLv3+</a>. <a href="https://github.com/horazont/muchopper">View the source</a> on GitHub.
+            </p>
         </footer>
     </div></div></body>
 </html>

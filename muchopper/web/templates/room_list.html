@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% from "library.tpl" import room_table %}
 {% set title = "Chat room index" %}
 {% macro pagination() %}
 <nav class="pagination">
@@ -14,47 +15,8 @@
     </ul>
 </nav>
 {% endmacro %}
-{% macro room_label(muc, public_info) %}
-{% if public_info.name %}
-{{ public_info.name }}
-{% else %}
-{% if muc.address.localpart %}
-<span class="localpart">{{ muc.address.localpart }}</span><span class="at">@</span><span class="domain">{{ muc.address.domain }}</span>
-{% else %}
-{{ muc.address }}
-{% endif %}
-{% endif %}
-{% endmacro %}
-{% macro closed_marker() %}
-{{ '  ' }}<span class="closed-marker" title="This room requires a password or invitation.">🔒</span>
-{% endmacro %}
 {% block content %}
 {{ pagination() }}
-<table>
-    <colgroup>
-        <col class="label"/>
-        <col class="nusers"/>
-    </colgroup>
-    <thead>
-        <tr>
-            <th>Address &amp; Description</th>
-            <th>Online users</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for muc, public_info in page.items %}
-        <tr>
-            <td class="addr-descr">
-                <div class="addr"><a href="xmpp:{{ muc.address }}?join">{{ room_label(muc, public_info) }}</a>{% if not muc.is_open %}{{ closed_marker() }}{% endif %}</div>
-                {% set descr = public_info.description or public_info.subject %}
-                {% if descr %}
-                <div class="descr">{{ descr }}</div>
-                {% endif %}
-            </td>
-            <td class="nusers">{{ muc.nusers }}</td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
+{{ room_table(page.items) }}
 {{ pagination() }}
 {% endblock %}

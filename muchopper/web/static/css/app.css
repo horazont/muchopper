@@ -1,5 +1,15 @@
-td.nusers {
+td.numeric {
     text-align: right;
+}
+
+header > h1 > a {
+    color: inherit;
+}
+
+header > h1 > a:hover,
+header > h1 > a:focus,
+header > h1 > a:active {
+    background-color: transparent;
 }
 
 table > tbody > tr:nth-child(2n) {
@@ -22,6 +32,23 @@ footer#footer-main > ul > li {
     margin-left: 1.5em;
     margin-right: 1.5em;
     padding: 0;
+}
+
+nav#nav-main > div > div > div > ul {
+    margin: 0;
+    padding: 0;
+}
+
+nav#nav-main > div > div > div > ul > li {
+    margin: 0;
+    padding: 0;
+    border-radius: 0;
+}
+
+nav#nav-main > div > div > div > ul > li > a,
+nav#nav-main > div > div > div > ul > li > span {
+    padding: 0.5em;
+    border-radius: 0;
 }
 
 nav.pagination {
@@ -90,4 +117,24 @@ div.subtitle {
 td.nusers {
     width: 8em;
     font-family: "Droid Sans", Arial, Helvetica, sans-serif;
+}
+
+span.search-match {
+    text-decoration: underline;
+    color: #800;
+    font-weight: bold;
+}
+
+.searchbox {
+    padding: 0.5em;
+    display: flex;
+}
+
+.searchbox > input[type="text"] {
+    flex: 1 0 auto;
+    margin-right: 0.5em;
+}
+
+.searchbox > input[type="submit"] {
+    flex: 0 0 auto;
 }

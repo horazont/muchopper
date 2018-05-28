@@ -32,9 +32,8 @@ async def amain(loop, args, cfg):
     )
 
     for addr in cfg["muchopping"].get("seed", []):
-        state.update_muc_metadata(
-            aioxmpp.JID.fromstr(addr),
-            is_open=True,
+        state.require_domain(
+            addr,
         )
 
     try:
