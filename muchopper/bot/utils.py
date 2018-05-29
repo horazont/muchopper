@@ -372,11 +372,11 @@ async def collect_muc_metadata(
     if is_public:
         kwargs["name"] = generic_info.identities[0].name
         if room_info.subject.value is not None:
-            kwargs["subject"] = room_info.subject.value
+            kwargs["subject"] = room_info.subject.value or None
         if room_info.description.value is not None:
-            kwargs["description"] = room_info.description.value
+            kwargs["description"] = room_info.description.value or None
         elif room_info.description_alt.value is not None:
-            kwargs["description"] = room_info.description_alt.value
+            kwargs["description"] = room_info.description_alt.value or None
         if room_info.language.value is not None:
             kwargs["language"] = room_info.language.value or None
 
