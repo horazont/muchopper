@@ -61,7 +61,7 @@ def index():
 
 @app.route("/rooms/")
 @app.route("/rooms/<int:page>")
-@register_menu(app, "rooms", "All Rooms")
+@register_menu(app, "rooms", "All Rooms", order=1)
 def room_list(page=1):
     q = db.session.query(model.MUC, model.PubliclyListedMUC).join(
         model.PubliclyListedMUC,
@@ -161,7 +161,7 @@ def perform_search(query_string,
 
 
 @app.route("/search", methods=["POST", "GET"])
-@register_menu(app, "search", "Search")
+@register_menu(app, "search", "Search", order=2)
 def search():
     no_keywords = False
     orig_keywords = ""
@@ -208,7 +208,7 @@ def search():
 
 
 @app.route("/stats")
-@register_menu(app, "stats", "Statistics")
+@register_menu(app, "stats", "Statistics", order=3)
 def statistics():
     q = db.session.query(
         sqlalchemy.func.count(),
@@ -250,6 +250,6 @@ def contact():
 
 
 @app.route("/about")
-@register_menu(app, "about", "About")
+@register_menu(app, "about", "About", order=4)
 def about():
     return render_template("about.html")
