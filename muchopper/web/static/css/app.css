@@ -108,6 +108,10 @@ span.domain {
     opacity: 0.95;
 }
 
+span.name {
+    font-weight: bold;
+}
+
 div.subtitle {
     font-style: italic;
     font-size: 110%;

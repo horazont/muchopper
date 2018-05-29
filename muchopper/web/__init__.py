@@ -170,7 +170,7 @@ def search():
     too_many_results = False
     search_address = True
     search_description = True
-    search_name = False
+    search_name = True
 
     if request.method == "POST":
         orig_keywords = request.form["keywords"]
