@@ -17,18 +17,19 @@
 {% macro room_table(items, keywords=[], caller=None) %}
 <table>
     <colgroup>
-        <col class="label"/>
         <col class="nusers"/>
+        <col class="label"/>
     </colgroup>
     <thead>
         <tr>
-            <th>Address &amp; Description</th>
             <th>Online users</th>
+            <th>Address &amp; Description</th>
         </tr>
     </thead>
     <tbody>
         {% for muc, public_info in items %}
         <tr>
+            <td class="nusers numeric">{{ "%.0f" | format((muc.nusers_moving_average or muc.nusers) | round) }}</td>
             <td class="addr-descr">
                 <div class="addr"><a href="xmpp:{{ muc.address }}?join">{{ room_label(muc, public_info, keywords) }}</a>{% if not muc.is_open %}{{ closed_marker() }}{% endif %}</div>
                 {% set descr = public_info.description or public_info.name or public_info.subject %}
@@ -36,7 +37,6 @@
                 <div class="descr">{{ descr | highlight(keywords) }}</div>
                 {% endif %}
             </td>
-            <td class="nusers numeric">{{ "%.0f" | format((muc.nusers_moving_average or muc.nusers) | round) }}</td>
         </tr>
         {% endfor %}
     </tbody>
