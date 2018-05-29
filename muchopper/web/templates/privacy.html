@@ -3,13 +3,15 @@
 {% macro appname() %}<em>{{ config["APPNAME"] }}</em>{% endmacro %}
 {% block content %}
 <p>{{ appname() }} does not process any data which hasn’t been purposely made public by the persons responsible to the objects the data refers to.</p>
-<h2>I don’t want my room to be listed here!</h2>
+
+<h3>I don’t want my room to be listed here!</h3>
 <p>If you want your room to not appear in <em>any</em> public listing, use your client to disable that option for the room. Many clients offer that option by typing <code>/configure</code> in the message input. Refer to your clients manual or support channel, searching for "Room configuration". {{ appname() }} <em>only</em> lists rooms which <em>explicitly</em> allow to be listed. If you room is listed here, chances are it will also be listed elsewhere.</p>
-<p>Note that the listing is refreshed only once per hour, so it may take a while for the change to propagate to the web listing.</p>
+<p>Note that the listing is refreshed approximately once per hour, so it may take a while for changes (such as public/non-public) to propagate to the web listing.</p>
 <p>If you want your room to appear in public listings in general, but not in <em>this</em> listing, please contact the representative at the end of this page.</p>
-<h2>Data Processing</h2>
+
+<h3>Data Processing</h3>
 <p>{{ appname() }} collects and stores information about chat rooms and domains in the Jabber/XMPP network. In this document, we will refer to these rooms as <em>MUCs</em> (short for "Multi-User Chats"). Only data of persistent MUCs is stored.</p>
-<h3>Data associated with Chat Rooms</h3>
+<h4>Data associated with Chat Rooms</h4>
 <p>The following data is collected and stored with about a MUC:</p>
 <ul>
     <li>Its identifying address (Jabber ID, JID).</li>
@@ -17,6 +19,7 @@
     <li>The timestamp of the last message seen in the MUC (if available).</li>
     <li>Whether the MUC can be joined into by everybody (<code>muc_open</code> flag and not <code>muc_passwordprotected</code> flag).</li>
     <li>Whether the MUC shall be publicly listed (<code>muc_public</code> flag)</li>
+    <li>The language of the room (if given).</li>
 </ul>
 <p>In addition, for publicly listed MUCs, the following data is stored:</p>
 <ul>
@@ -24,14 +27,15 @@
     <li>The room name (if available).</li>
     <li>The current room subject (if available).</li>
 </ul>
-<h3>Data associated with domains</h3>
+
+<h4>Data associated with domains</h4>
 <p>Only the domain name is stored for domains. All domains which host MUC services or are referenced (via <a href="https://xmpp.org/extensions/xep-0030.html">XEP-0030</a>) are stored.</p>
 
-<h2>Data Sharing</h2>
+<h3>Data Sharing</h3>
 <p>{{ appname() }} allows anyone to query all information it has stored about publicly listed MUCs. This is the information seen on this website.</p>
 <p>This is merely a convenience service, since Jabber services already expose publicly listed MUCs in directories central to their domain.</p>
 
-<h2>Representative</h2>
+<h3>Representative</h3>
 <p>The representative for all purposes of data protection is:</p>
 <p>Jonas Wielicki<br/>E-mail: <a href="mailto:jonas@wielicki.name">jonas@wielicki.name</a><br/>Jabber: <a href="xmpp:jonas@wielicki.name">jonas@wielicki.name</a></p>
 {% endblock %}
