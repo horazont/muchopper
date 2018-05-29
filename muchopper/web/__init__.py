@@ -131,17 +131,17 @@ def perform_search(query_string,
         if search_address:
             conditional = chain_condition(
                 conditional,
-                model.PubliclyListedMUC.address.like("%" + keyword + "%")
+                model.PubliclyListedMUC.address.ilike("%" + keyword + "%")
             )
         if search_description:
             conditional = chain_condition(
                 conditional,
-                model.PubliclyListedMUC.description.like("%" + keyword + "%")
+                model.PubliclyListedMUC.description.ilike("%" + keyword + "%")
             )
         if search_name:
             conditional = chain_condition(
                 conditional,
-                model.PubliclyListedMUC.name.like("%" + keyword + "%")
+                model.PubliclyListedMUC.name.ilike("%" + keyword + "%")
             )
         q = q.filter(conditional)
 
