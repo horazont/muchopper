@@ -17,6 +17,8 @@ from datetime import timedelta
 import aioxmpp
 import aioxmpp.service
 
+from aioxmpp.utils import namespaces
+
 from . import utils, state, worker_pool
 
 
@@ -40,9 +42,23 @@ class Watcher(aioxmpp.service.Service,
         return items
 
     async def _process_item(self, state, item, fut):
-        info = await utils.collect_muc_metadata(self._disco_svc,
-                                                item,
-                                                require_fresh=True)
+        try:
+            info = await utils.collect_muc_metadata(self._disco_svc,
+                                                    item,
+                                                    require_fresh=True)
+        except aioxmpp.errors.XMPPCancelError as e:
+            if e.condition == (namespaces.stanzas, "item-not-found"):
+                # delete muc
+                self.logger.info(
+                    "MUC does not exist anymore, "
+                    "erasing from database"
+                )
+                if fut is not None and not fut.done():
+                    fut.set_exception(e)
+                state.delete_all_muc_data(item)
+                return
+            raise
+
         if fut is not None and not fut.done():
             fut.set_result(info)
         self.logger.debug("jid %s: updating metadata: %r",
