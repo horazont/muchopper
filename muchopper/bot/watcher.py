@@ -61,6 +61,7 @@ class Watcher(aioxmpp.service.Service,
 
         if fut is not None and not fut.done():
             fut.set_result(info)
+
         self.logger.debug("jid %s: updating metadata: %r",
                           item, info)
         state.update_muc_metadata(item, **info)

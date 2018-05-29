@@ -221,9 +221,15 @@ class State:
                             subject=UNCHANGED,
                             name=UNCHANGED,
                             description=UNCHANGED,
-                            was_kicked=UNCHANGED):
+                            was_kicked=UNCHANGED,
+                            is_saveable=UNCHANGED):
         muc_created = False
         now = datetime.utcnow()
+
+        self._address_metadata_cache.pop(address, None)
+
+        if is_saveable is False:
+            return self.delete_all_muc_data(address)
 
         with model.session_scope(self._sessionmaker) as session:
             muc = model.MUC.get(session, address)

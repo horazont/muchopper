@@ -359,6 +359,7 @@ async def collect_muc_metadata(
         nusers = None
 
     kwargs = {
+        "is_saveable": "muc_persistent" in generic_info.features,
         "is_open": is_joinable,
         "is_public": is_public,
         "nusers": nusers
