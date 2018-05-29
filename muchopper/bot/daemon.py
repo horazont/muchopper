@@ -248,8 +248,11 @@ class MUCHopper:
                 )
                 return
 
-        metadata = await utils.collect_address_metadata(self._disco_svc,
-                                                        address)
+        metadata = await utils.collect_address_metadata(
+            self._disco_svc,
+            address,
+            require_fresh=True
+        )
 
         self.logger.info("jid %s: discovered metadata: %s",
                          address, metadata)
