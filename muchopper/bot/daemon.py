@@ -27,6 +27,18 @@ ACK_BODY = {
 }
 
 
+if not hasattr("aioxmpp.Message", "xep0249_invite"):
+    class DirectInvite(aioxmpp.xso.XSO):
+        TAG = ("jabber:x:conference", "x")
+
+        jid = aioxmpp.xso.Attr(
+            "jid",
+            type_=aioxmpp.xso.JID(),
+        )
+
+    aioxmpp.Message.xep0249_invite = aioxmpp.xso.Child([DirectInvite])
+
+
 class InteractionHandler(aioxmpp.service.Service,
                          utils.MuchopperService):
     HELLO_EXPIRE = 3600
@@ -75,7 +87,7 @@ class InteractionHandler(aioxmpp.service.Service,
         self.logger.debug("reply: %s", reply)
         self.client.enqueue(reply)
 
-    def _handle_invite(self, message, invite):
+    def _handle_mediated_invite(self, message, invite):
         self.logger.debug("received invite: %s / %s",
                           message, invite)
 
@@ -86,20 +98,24 @@ class InteractionHandler(aioxmpp.service.Service,
             )
             return
 
-        if invite.to:
-            # direct invite
-            self._suggester(
-                invite.to.bare()
-            )
+    def _handle_direct_invite(self, message):
+        self.logger.debug("received direct: %s / %s", message,
+                          message.xep0249_invite)
+        invite = message.xep0249_invite
 
-            self._spoken_to[message.from_] = time.monotonic()
+        # direct invite
+        self._suggester(
+            invite.jid.bare()
+        )
 
-            reply = message.make_reply()
-            reply.type_ = aioxmpp.MessageType.CHAT
-            reply.body.clear()
-            reply.body.update(ACK_BODY)
-            self.logger.debug("sending reply to direct invite: %s", reply)
-            self.client.enqueue(reply)
+        self._spoken_to[message.from_] = time.monotonic()
+
+        reply = message.make_reply()
+        reply.type_ = aioxmpp.MessageType.CHAT
+        reply.body.clear()
+        reply.body.update(ACK_BODY)
+        self.logger.debug("sending reply to direct invite: %s", reply)
+        self.client.enqueue(reply)
 
     @aioxmpp.service.depfilter(
         aioxmpp.im.dispatcher.IMDispatcher,
@@ -111,7 +127,11 @@ class InteractionHandler(aioxmpp.service.Service,
         if (message.xep0045_muc_user and
                 message.xep0045_muc_user.invites):
             invite = message.xep0045_muc_user.invites[0]
-            self._handle_invite(message, invite)
+            self._handle_mediated_invite(message, invite)
+            return None
+
+        if message.xep0249_invite:
+            self._handle_direct_invite(message)
             return None
 
         if (message.type_ != aioxmpp.MessageType.GROUPCHAT and
