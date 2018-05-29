@@ -24,17 +24,11 @@ def upgrade():
                 sa.Boolean(),
                 nullable=False,
                 default=False,
+                server_default="FALSE",
             )
         )
 
 
 def downgrade():
     with op.batch_alter_table("muc") as batch_op:
-        batch_op.drop_column(
-            sa.Column(
-                "is_hidden",
-                sa.Boolean(),
-                nullable=False,
-                default=False,
-            )
-        )
+        batch_op.drop_column("is_hidden")
