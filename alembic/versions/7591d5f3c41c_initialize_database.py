@@ -26,14 +26,14 @@ def upgrade():
                   nullable=False,
                   autoincrement=True),
         sa.Column("domain",
-                  sa.BLOB(1023),
+                  sa.LargeBinary(1023),
                   unique=True,
                   nullable=False),
     )
 
     op.create_table(
         "muc",
-        sa.Column("address", JID(),
+        sa.Column("address", sa.LargeBinary(3071),
                   primary_key=True,
                   nullable=False),
         sa.Column("domain_id", sa.Integer,
@@ -57,7 +57,7 @@ def upgrade():
 
     op.create_table(
         "public_muc",
-        sa.Column("address", JID(),
+        sa.Column("address", sa.LargeBinary(3071),
                   sa.ForeignKey("muc.address",
                                 ondelete="CASCADE",
                                 onupdate="CASCADE"),
