@@ -52,6 +52,8 @@ class InteractionHandler(aioxmpp.service.Service,
         aioxmpp.MUCClient,
     ]
 
+    PRIVILEGED_ENTITIES = []
+
     def __init__(self, client, **kwargs):
         super().__init__(client, **kwargs)
         self._spoken_to = aioxmpp.cache.LRUDict()
@@ -103,9 +105,12 @@ class InteractionHandler(aioxmpp.service.Service,
                           message.xep0249_invite)
         invite = message.xep0249_invite
 
+        privileged = message.from_.bare() in self.PRIVILEGED_ENTITIES
+
         # direct invite
         self._suggester(
-            invite.jid.bare()
+            invite.jid.bare(),
+            privileged=privileged,
         )
 
         self._spoken_to[message.from_] = time.monotonic()
@@ -148,7 +153,8 @@ class MUCHopper:
                  loop,
                  jid, security_layer,
                  default_nickname,
-                 state):
+                 state,
+                 privileged_entities):
         self.logger = logging.getLogger("muclogger")
         self._loop = loop
         self._state = state
@@ -162,6 +168,7 @@ class MUCHopper:
         self._interaction = self._client.summon(InteractionHandler)
         self._interaction.state = state
         self._interaction.suggester = self.suggest_new_address_nonblocking
+        self._interaction.PRIVILEGED_ENTITIES.extend(privileged_entities)
         self._muc_svc = self._client.summon(aioxmpp.MUCClient)
         self._disco_svc = self._client.summon(aioxmpp.DiscoClient)
         self._watcher = self._client.summon(watcher.Watcher)
@@ -184,17 +191,18 @@ class MUCHopper:
             4,
             self._analyse_address,
             delay=0.5,
+            max_queue_size=128,
             logger=self.logger.getChild("analysis"),
         )
 
-    async def suggest_new_address(self, address):
+    async def suggest_new_address(self, address, privileged=False):
         self.logger.debug("queue-ing JID for investigation: %s", address)
-        await self._analysis_pool.enqueue((address, None))
+        await self._analysis_pool.enqueue((address, None, privileged))
         self.logger.debug("queued JID for investigation: %s", address)
 
-    def suggest_new_address_nonblocking(self, address):
+    def suggest_new_address_nonblocking(self, address, privileged=False):
         try:
-            self._analysis_pool.enqueue_nowait((address, None))
+            self._analysis_pool.enqueue_nowait((address, None, privileged))
             self.logger.debug("queued JID for investigation: %s", address)
         except asyncio.QueueFull:
             self.logger.warning(
@@ -221,8 +229,10 @@ class MUCHopper:
         self._analysis_pool.enqueue_nowait((dest_jid, None))
 
     async def _analyse_address(self, info):
-        address, notifier = info
-        self.logger.debug("jid %s: investigating", address)
+        address, notifier, privileged = info
+        self.logger.debug("jid %s: investigating (privileged=%s)",
+                          address,
+                          privileged)
 
         metadata = self._state.get_address_metadata(address)
         if metadata is not None:
@@ -270,9 +280,6 @@ class MUCHopper:
 
         if metadata.is_joinable_muc or metadata.is_indexable_muc:
             await self._watcher.queue_request(address)
-
-    def handle_new_address(self, address):
-        self._analysis_pool.enqueue_nowait((address, None))
 
     async def run(self):
         self._loop.add_signal_handler(signal.SIGTERM, self._handle_intr)

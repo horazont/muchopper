@@ -26,7 +26,6 @@ async def amain(loop, args, cfg):
     else:
         engine = muchopper.common.model.get_sqlite_engine(statefile)
 
-
     state = muchopper.bot.state.State(
         engine,
         pathlib.Path(cfg["muchopping"]["logfile"]),
@@ -40,6 +39,8 @@ async def amain(loop, args, cfg):
         ),
         cfg["muchopping"]["nickname"],
         state,
+        list(map(aioxmpp.JID.fromstr,
+                 cfg["muchopping"].get("privileged_entities", []))),
     )
 
     for addr in cfg["muchopping"].get("seed", []):

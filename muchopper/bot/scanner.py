@@ -55,7 +55,7 @@ class Scanner(aioxmpp.service.Service,
             if info is None:
                 self.logger.debug("jid %s is not yet known, suggesting",
                                   address)
-                await suggester(address)
+                await suggester(address, privileged=True)
 
     async def _process_other_domain(self, state, domain):
         result = await self._disco_svc.query_items(domain)
