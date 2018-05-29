@@ -25,6 +25,11 @@
         <td>Only rooms which can be joined without password/invitation</td>
     </tr>
     <tr>
+        <th>Hidden rooms</th>
+        <td class="numeric">{{ nhiddenmucs }}</td>
+        <td>Publicly listed MUCs where owners have requested de-listing from this directory</td>
+    </tr>
+    <tr>
         <th>Total users</th>
         <td class="numeric">{{ nusers }}</td>
         <td>Total number of users in all MUCs. Since we do not (and can not) track the real identities of users, this most certainly includes duplicates.</td>

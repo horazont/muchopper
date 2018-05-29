@@ -148,6 +148,13 @@ class MUC(Base):
         nullable=False,
     )
 
+    is_hidden = Column(
+        "is_hidden",
+        Boolean(),
+        nullable=False,
+        default=False,
+    )
+
     was_kicked = Column(
         "was_kicked",
         Boolean(),

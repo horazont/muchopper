@@ -59,18 +59,41 @@ def index():
     return redirect(url_for("room_list", page=1))
 
 
+def base_query(session, *,
+               min_users=1,
+               include_closed=False):
+    q = session.query(
+        model.MUC,
+        model.PubliclyListedMUC
+    ).join(
+        model.PubliclyListedMUC
+    )
+
+    if not include_closed:
+        q = q.filter(
+            model.MUC.is_open == True  # NOQA
+        )
+
+    q = q.filter(
+        model.MUC.is_hidden == False  # NOQA
+    )
+
+    if min_users > 0:
+        q = q.filter(
+            model.MUC.nusers_moving_average > min_users
+        )
+
+    return q.order_by(
+        model.MUC.nusers_moving_average.desc(),
+        model.MUC.address.asc(),
+    )
+
+
 @app.route("/rooms/")
 @app.route("/rooms/<int:page>")
 @register_menu(app, "rooms", "All Rooms", order=1)
 def room_list(page=1):
-    q = db.session.query(model.MUC, model.PubliclyListedMUC).join(
-        model.PubliclyListedMUC,
-    ).filter(
-        model.MUC.nusers_moving_average > 1
-    ).order_by(
-        model.MUC.nusers_moving_average.desc(),
-        model.MUC.address.asc(),
-    )
+    q = base_query(db.session)
     total = q.count()
     per_page = 25
     pages = (total+per_page-1) // per_page
@@ -125,7 +148,8 @@ def perform_search(query_string,
     elif not keywords:
         return ({"no_keywords"}, None, None)
 
-    q = db.session.query(model.PubliclyListedMUC, model.MUC)
+    q = base_query(db.session,
+                   min_users=0)
     for keyword in keywords:
         conditional = None
         if search_address:
@@ -145,14 +169,8 @@ def perform_search(query_string,
             )
         q = q.filter(conditional)
 
-    q = q.join(model.MUC).order_by(
-        model.MUC.nusers_moving_average.desc()
-    )
     q = q.limit(101)
-    results = [
-        (muc, public_info)
-        for public_info, muc in q
-    ]
+    results = list(q)
     if len(results) > 100:
         del results[100:]
         return ({"too_many_results"}, results, keywords)
@@ -214,6 +232,9 @@ def statistics():
         sqlalchemy.func.count(),
         sqlalchemy.func.count(model.PubliclyListedMUC.address),
         sqlalchemy.func.count(sqlalchemy.func.nullif(model.MUC.is_open, False)),
+        sqlalchemy.func.count(
+            sqlalchemy.func.nullif(model.MUC.is_hidden, False)
+        ),
         sqlalchemy.func.sum(model.MUC.nusers)
     ).select_from(
         model.MUC,
@@ -221,7 +242,7 @@ def statistics():
         model.PubliclyListedMUC,
     )
 
-    nmucs, npublicmucs, nopenmucs, nusers = q.one()
+    nmucs, npublicmucs, nopenmucs, nhiddenmucs, nusers = q.one()
 
     ndomains, = db.session.query(
         sqlalchemy.func.count()
@@ -234,6 +255,7 @@ def statistics():
         nmucs=nmucs,
         npublicmucs=npublicmucs,
         nopenmucs=nopenmucs,
+        nhiddenmucs=nhiddenmucs,
         nusers=nusers,
         ndomains=ndomains,
     )
