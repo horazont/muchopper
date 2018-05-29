@@ -49,7 +49,7 @@ def highlight(s, keywords):
         parts.append(html.escape(s[start:end]))
         parts.append("</span>")
         prev_end = end
-    parts.append(s[prev_end:])
+    parts.append(html.escape(s[prev_end:]))
 
     return jinja2.Markup("".join(parts))
 
