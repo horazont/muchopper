@@ -15,7 +15,7 @@ from . import worker_pool, state, utils, watcher, scanner, insideman
 
 INFO_BODY = {
     aioxmpp.structs.LanguageTag.fromstr("en"):
-        "Hi! I am the bot feeding https://muclumbus.zombofant.net. Please "
+        "Hi! I am the bot feeding https://muclumbus.jabbercat.org. Please "
         "see there for my Privacy Policy and what I do.",
 }
 
