@@ -36,7 +36,7 @@ Page = collections.namedtuple(
 def highlight(s, keywords):
     s = str(s)
     if not keywords:
-        return s
+        return jinja2.Markup(html.escape(s))
 
     keyword_re = re.compile("|".join(map(re.escape, keywords)), re.I)
     prev_end = 0

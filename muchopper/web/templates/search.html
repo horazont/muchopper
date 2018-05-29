@@ -32,7 +32,7 @@
 {% if results is not none %}
 {% if results %}
 <h3>Results</h3>
-{{ room_table(results, keywords) | safe }}
+{{ room_table(results, keywords) }}
 {% else %}
 <p class="box warning">
     <strong>No results for search terms:</strong> {{ keywords | join(", ")}}.
