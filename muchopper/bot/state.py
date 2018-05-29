@@ -221,6 +221,7 @@ class State:
                             subject=UNCHANGED,
                             name=UNCHANGED,
                             description=UNCHANGED,
+                            language=UNCHANGED,
                             was_kicked=UNCHANGED,
                             is_saveable=UNCHANGED):
         muc_created = False
@@ -278,6 +279,10 @@ class State:
                     (public_muc.description
                      if description is UNCHANGED
                      else description)
+                public_muc.language = \
+                    (public_muc.language
+                     if language is UNCHANGED
+                     else language)
 
             elif is_public is False:
                 session.query(model.PubliclyListedMUC).filter(

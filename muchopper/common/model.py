@@ -200,6 +200,12 @@ class PubliclyListedMUC(Base):
         nullable=True,
     )
 
+    language = Column(
+        "language",
+        Unicode(32),
+        nullable=True,
+    )
+
     muc = relationship(MUC)
 
     @classmethod

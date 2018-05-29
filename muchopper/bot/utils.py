@@ -61,6 +61,10 @@ class InfoForm(aioxmpp.forms.Form):
         label='Current Discussion Topic'
     )
 
+    language = aioxmpp.forms.TextSingle(
+        var='muc#roominfo_lang',
+    )
+
 
 def get_roominfo(exts) -> InfoForm:
     for ext in exts:
@@ -373,6 +377,8 @@ async def collect_muc_metadata(
             kwargs["description"] = room_info.description.value
         elif room_info.description_alt.value is not None:
             kwargs["description"] = room_info.description_alt.value
+        if room_info.language.value is not None:
+            kwargs["language"] = room_info.language.value or None
 
     return kwargs
 
