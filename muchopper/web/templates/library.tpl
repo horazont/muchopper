@@ -14,7 +14,7 @@
 {%- endif -%}
 {%- endmacro %}
 
-{% macro room_table(items, keywords=[]) %}
+{% macro room_table(items, keywords=[], caller=None) %}
 <table>
     <colgroup>
         <col class="label"/>

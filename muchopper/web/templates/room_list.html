@@ -17,6 +17,6 @@
 {% endmacro %}
 {% block content %}
 {{ pagination() }}
-{{ room_table(page.items) }}
+{% call room_table(page.items) %}{% endcall %}
 {{ pagination() }}
 {% endblock %}
