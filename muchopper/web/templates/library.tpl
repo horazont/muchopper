@@ -36,7 +36,7 @@
                 {% set show_descr = descr and descr != muc.address.localpart %}
                 {% set show_lang = public_info.language %}
                 {% if show_descr or show_lang %}
-                <div class="descr">{% if show_lang %}<span class="language">{{ public_info.language | prettify_lang }}</span>{% if show_descr %} {% endif %}{% endif %}{% if show_descr %}<span class="descr">{{ descr | highlight(keywords) }}</span>{% endif %}</div>
+                <div class="descr">{% if show_descr %}<span class="descr">{{ descr | highlight(keywords) }}</span>{% endif %}{% if show_lang %}{% if show_descr %} {% endif %}<span class="language">{% if show_descr %}({% endif %}Primary language: {{ public_info.language | prettify_lang }}{% if show_descr %}){% endif %}</span>{% endif %}</div>
                 {% endif %}
             </td>
         </tr>

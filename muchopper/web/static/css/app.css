@@ -154,6 +154,7 @@ span.language:after {
 } */
 
 span.language {
-    margin-right: 1ex;
+    margin-left: 1ex;
     font-style: italic;
+    font-family: "Droid Sans", Arial, Helvetica, sans-serif;
 }
