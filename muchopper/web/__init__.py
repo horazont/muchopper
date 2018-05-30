@@ -1,3 +1,4 @@
+import babel
 import collections
 import html
 import re
@@ -32,6 +33,9 @@ Page = collections.namedtuple(
 )
 
 
+DISPLAY_LOCALE = babel.Locale("en_GB")
+
+
 @app.template_filter("highlight")
 def highlight(s, keywords):
     s = str(s)
@@ -52,6 +56,29 @@ def highlight(s, keywords):
     parts.append(html.escape(s[prev_end:]))
 
     return jinja2.Markup("".join(parts))
+
+
+@app.template_filter('prettify_lang')
+def prettify_lang(s):
+    s = str(s)
+    try:
+        lang_name, region_name = s.split("-", 2)[:2]
+    except ValueError:
+        lang_name, region_name = s, None
+
+    options = [
+        lang_name,
+    ]
+    if region_name is not None:
+        options.insert(0, "{}_{}".format(lang_name, region_name.upper()))
+
+    for option in options:
+        try:
+            return babel.Locale(lang_name).get_display_name(DISPLAY_LOCALE)
+        except babel.core.UnknownLocaleError:
+            pass
+
+    return s
 
 
 @app.route("/")

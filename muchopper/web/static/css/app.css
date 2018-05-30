@@ -142,3 +142,18 @@ span.search-match {
 .searchbox > input[type="submit"] {
     flex: 0 0 auto;
 }
+
+/* span.language:before {
+    content: '[';
+    font-style: normal;
+}
+
+span.language:after {
+    content: ']';
+    font-style: normal;
+} */
+
+span.language {
+    margin-right: 1ex;
+    font-style: italic;
+}

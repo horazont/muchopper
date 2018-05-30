@@ -33,8 +33,10 @@
             <td class="addr-descr">
                 <div class="addr"><a href="xmpp:{{ muc.address }}?join">{{ room_label(muc, public_info, keywords) }}</a>{% if not muc.is_open %}{{ closed_marker() }}{% endif %}</div>
                 {% set descr = public_info.description or public_info.name or public_info.subject %}
-                {% if descr and descr != muc.address.localpart %}
-                <div class="descr">{{ descr | highlight(keywords) }}</div>
+                {% set show_descr = descr and descr != muc.address.localpart %}
+                {% set show_lang = public_info.language %}
+                {% if show_descr or show_lang %}
+                <div class="descr">{% if show_lang %}<span class="language">{{ public_info.language | prettify_lang }}</span>{% if show_descr %} {% endif %}{% endif %}{% if show_descr %}<span class="descr">{{ descr | highlight(keywords) }}</span>{% endif %}</div>
                 {% endif %}
             </td>
         </tr>
