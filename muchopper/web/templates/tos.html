@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% set title = "Terms of Service" %}
+{% block content %}
+<p><strong>This service is provided as-is. We cannot provide guarantees about the completeness, correctness, availability or any other property of the data herein.</strong></p>
+<p>We do operate this service in our free time. The goal is to provide a usable list of public rooms. Thus, we may, at our discretion, remove rooms from the listing we deem counter-productive to this goal. Due to the maintenance overhead of such a decision, we won’t do this lightly.</p>
+<div class="box">
+    <p><strong>Examples of rooms we may blacklist:</strong></p>
+    <ul>
+        <li>A room which has a description which is obviously planning to deface public listings.</li>
+        <li>A room or group of rooms or a domain which pushes its ranking with the use of many automated entities or fake information.</li>
+    </ul>
+</div>
+<p>We reserve the right to exclude individual rooms or entire (groups of) domains from the listing as we deem fit. We also reserve the right to limit access to the web- or XMPP based interfaces to query the listing.</p>
+<p>Please also observe our <a href="{{ url_for('privacy') }}">Privacy Policy</a>.</p>
+{% endblock %}
