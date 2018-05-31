@@ -328,14 +328,20 @@ def about():
     return render_template("about.html")
 
 
+@app.route("/tos")
+@register_menu(app, "meta.tos", "Terms of Service", order=2)
+def tos():
+    return render_template("tos.html")
+
+
 @app.route("/privacy")
-@register_menu(app, "meta.privacy", "Privacy Policy", order=2)
+@register_menu(app, "meta.privacy", "Privacy Policy", order=3)
 def privacy():
     return render_template("privacy.html")
 
 
 @app.route("/contact")
-@register_menu(app, "meta.contact", "Contact", order=3)
+@register_menu(app, "meta.contact", "Contact", order=4)
 def contact():
     return render_template("contact.html")
 
