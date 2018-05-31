@@ -17,7 +17,12 @@ from ..common import model
 app = Flask(__name__)
 app.config.from_envvar("MUCHOPPER_WEB_CONFIG")
 db = SQLAlchemy(app, metadata=model.Base.metadata)
-Menu(app)
+main_menu = Menu(app)
+
+
+with app.app_context():
+    main_menu.root().submenu('data').register(order=0, text="Data")
+    main_menu.root().submenu('meta').register(order=1, text="Meta")
 
 
 Page = collections.namedtuple(
@@ -134,7 +139,7 @@ def room_page(page, per_page, include_closed=False):
 
 @app.route("/rooms/")
 @app.route("/rooms/<int:pageno>")
-@register_menu(app, "rooms", "All Rooms", order=1)
+@register_menu(app, "data.rooms", "All Rooms", order=1)
 def room_list(pageno=1):
     per_page = 25
     page = room_page(pageno, per_page)
@@ -214,7 +219,7 @@ def perform_search(query_string,
 
 
 @app.route("/search", methods=["POST", "GET"])
-@register_menu(app, "search", "Search", order=2)
+@register_menu(app, "data.search", "Search", order=2)
 def search():
     no_keywords = False
     orig_keywords = ""
@@ -261,7 +266,7 @@ def search():
 
 
 @app.route("/stats")
-@register_menu(app, "stats", "Statistics", order=3)
+@register_menu(app, "data.stats", "Statistics", order=3)
 def statistics():
     q = db.session.query(
         sqlalchemy.func.count(),
@@ -296,17 +301,21 @@ def statistics():
     )
 
 
+@app.route("/about")
+@register_menu(app, "meta.about", "About", order=1)
+def about():
+    return render_template("about.html")
+
+
 @app.route("/privacy")
+@register_menu(app, "meta.privacy", "Privacy Policy", order=2)
 def privacy():
     return render_template("privacy.html")
 
 
 @app.route("/contact")
+@register_menu(app, "meta.contact", "Contact", order=3)
 def contact():
     return render_template("contact.html")
 
 
-@app.route("/about")
-@register_menu(app, "about", "About", order=4)
-def about():
-    return render_template("about.html")

@@ -34,21 +34,50 @@ footer#footer-main > ul > li {
     padding: 0;
 }
 
-nav#nav-main > div > div > div > ul {
+nav#nav-footer {
+    font-family: "Droid Sans", Arial, Helvetica, sans-serif;
+    background-color: #ddd;
+    color: #333;
+}
+
+nav#nav-footer ul {
+    list-style-type: none;
+    margin: 0;
+}
+
+nav#nav-footer li {
     margin: 0;
     padding: 0;
 }
 
-nav#nav-main > div > div > div > ul > li {
-    margin: 0;
-    padding: 0;
-    border-radius: 0;
+nav#nav-footer > ul {
+    display: flex;
+    flex-wrap: wrap;
 }
 
-nav#nav-main > div > div > div > ul > li > a,
-nav#nav-main > div > div > div > ul > li > span {
-    padding: 0.5em;
-    border-radius: 0;
+nav#nav-footer > ul > li {
+    display: block;
+    flex: 1 0 auto;
+    max-width: 15em;
+    margin: 1.5em;
+}
+
+nav#nav-footer > ul > li > ul {
+    list-style-type: disc;
+    margin-left: 1.5em;
+}
+
+nav#nav-footer > ul > li > ul > li > a,
+nav#nav-footer > ul > li > ul > li > span {
+    display: block;
+}
+
+nav#nav-footer > ul > li > ul > li.active {
+    font-weight: bold;
+}
+
+nav#nav-footer h6 {
+    color: #111;
 }
 
 nav.pagination {
