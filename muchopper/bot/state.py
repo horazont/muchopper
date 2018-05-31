@@ -53,7 +53,8 @@ class State:
                  logfile: pathlib.Path,
                  max_name_length: int,
                  max_description_length: int,
-                 max_subject_length: int):
+                 max_subject_length: int,
+                 max_language_length: int):
         super().__init__()
         self.logger = logging.getLogger(__name__)
         self._mucs = {}
@@ -65,6 +66,7 @@ class State:
         self._max_name_length = max_name_length
         self._max_description_length = max_description_length
         self._max_subject_length = max_subject_length
+        self._max_language_length = max_language_length
 
     def is_active(self, address: aioxmpp.JID) -> bool:
         return address in self._active_addresses
@@ -276,6 +278,11 @@ class State:
             subject,
             self._max_subject_length
         )
+
+        if language is not UNCHANGED:
+            language = language or None
+            if language is not None:
+                language = language[:self._max_language_length]
 
         with model.session_scope(self._sessionmaker) as session:
             muc = model.MUC.get(session, address)

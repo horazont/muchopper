@@ -34,6 +34,7 @@ async def amain(loop, args, cfg):
         int(limits.get("max_name_length", 1024)),
         int(limits.get("max_description_length", 1024)),
         int(limits.get("max_subject_length", 1024)),
+        int(limits.get("max_language_length", 126)),
     )
 
     daemon = muchopper.bot.daemon.MUCHopper(
