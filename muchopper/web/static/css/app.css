@@ -234,3 +234,27 @@ code {
 pre > code {
     display: block;
 }
+
+ul.inline {
+    display: inline-block;
+    margin: 0;
+    padding: 0;
+}
+
+ul.inline > li {
+    display: inline-block;
+    margin: 0;
+    padding: 0;
+}
+
+ul.inline > li:before {
+    content: '• ';
+}
+
+ul.inline > li:after {
+    content: ', ';
+}
+
+ul.inline > li:last-child:after {
+    content: '';
+}

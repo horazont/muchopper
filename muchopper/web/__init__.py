@@ -349,11 +349,16 @@ def contact():
 # API
 
 @app.route("/api/1.0/rooms.json")
+@app.route("/api/1.0/rooms/unsafe")
 def api_rooms():
     try:
         pageno = int(request.args["p"])
+        order_by = request.args.get("order_by", "nusers")
         include_closed = request.args.get("include_closed") is not None
     except ValueError:
+        return abort(400)
+
+    if order_by != "nusers":
         return abort(400)
 
     if pageno <= 0:
