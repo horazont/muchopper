@@ -116,27 +116,35 @@ def base_query(session, *,
     )
 
 
-@app.route("/rooms/")
-@app.route("/rooms/<int:page>")
-@register_menu(app, "rooms", "All Rooms", order=1)
-def room_list(page=1):
-    q = base_query(db.session)
+def room_page(page, per_page, include_closed=False):
+    q = base_query(db.session, include_closed=include_closed)
     total = q.count()
-    per_page = 25
     pages = (total+per_page-1) // per_page
-    visible_pages = \
-        set(range(max(1, page-2), min(page+2, pages)+1)) | \
-        set(range(1, min(2, pages)+1)) | \
-        set(range(max(1, pages-1), pages+1))
-    visible_pages = sorted(visible_pages)
     page = Page(
         has_prev=page > 1,
         has_next=page < pages,
         page=page,
         pages=pages,
         total=total,
-        items=list(q.offset((page-1)*25).limit(25)),
+        items=list(q.offset((page-1)*per_page).limit(per_page)),
     )
+
+    return page
+
+
+@app.route("/rooms/")
+@app.route("/rooms/<int:pageno>")
+@register_menu(app, "rooms", "All Rooms", order=1)
+def room_list(pageno=1):
+    per_page = 25
+    page = room_page(pageno, per_page)
+
+    pages = page.pages
+    visible_pages = \
+        set(range(max(1, pageno-2), min(pageno+2, pages)+1)) | \
+        set(range(1, min(2, pages)+1)) | \
+        set(range(max(1, pages-1), pages+1))
+    visible_pages = sorted(visible_pages)
 
     visible_pages = [
         (pageno, prev + 1 != pageno)
