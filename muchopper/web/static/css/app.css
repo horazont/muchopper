@@ -2,6 +2,10 @@ td.numeric {
     text-align: right;
 }
 
+abbr {
+    font-variant: normal;
+}
+
 header > h1 > a {
     color: inherit;
 }
@@ -10,10 +14,6 @@ header > h1 > a:hover,
 header > h1 > a:focus,
 header > h1 > a:active {
     background-color: transparent;
-}
-
-table.roomlist > tbody > tr:nth-child(2n) {
-    background-color: rgba(0, 0, 0, 0.05);
 }
 
 table.features {
@@ -151,9 +151,35 @@ div.subtitle {
     color: #dfdfdf;
 }
 
-td.nusers {
-    width: 8em;
+table.roomlist > tbody > tr:nth-child(2n) {
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+table.roomlist td.nusers {
     font-family: "Droid Sans", Arial, Helvetica, sans-serif;
+}
+
+table.roomlist th.nusers {
+    width: auto;
+}
+
+table.roomlist th.addr-descr {
+    width: 100%;
+}
+
+@media screen and ( max-width: 760px ) {
+    td.nusers {
+        width: auto;
+    }
+
+    span.name {
+        display: block;
+    }
+
+    span.address-suffix,
+    span.address {
+        display: block;
+    }
 }
 
 span.search-match {

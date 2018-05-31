@@ -4,10 +4,10 @@
 
 {% macro room_label(muc, public_info, keywords=[]) -%}
 {%- if public_info.name and public_info.description and public_info.name != public_info.description and public_info.name != muc.address.localpart -%}
-<span class="name">{{ public_info.name | highlight(keywords) }}</span> ({{ muc.address | highlight(keywords) }})
+<span class="name">{{ public_info.name | highlight(keywords) }}</span><span class="address-suffix"> ({{ muc.address | highlight(keywords) }})</span>
 {%- else -%}
 {%- if muc.address.localpart -%}
-<span class="localpart">{{ muc.address.localpart | highlight(keywords) }}</span><span class="at">@</span><span class="domain">{{ muc.address.domain | highlight(keywords) }}</span>
+<span class="address"><span class="localpart">{{ muc.address.localpart | highlight(keywords) }}</span><span class="at">@</span><span class="domain">{{ muc.address.domain | highlight(keywords) }}</span></span>
 {%- else -%}
 {{ muc.address | highlight(keywords) }}
 {%- endif -%}
@@ -22,8 +22,8 @@
     </colgroup>
     <thead>
         <tr>
-            <th>Online users</th>
-            <th>Address &amp; Description</th>
+            <th class="nusers"><abbr title="Number of online users">#users<abbr></th>
+            <th class="addr-descr">Address &amp; Description</th>
         </tr>
     </thead>
     <tbody>
