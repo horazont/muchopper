@@ -191,3 +191,16 @@ span.language {
     font-style: italic;
     font-family: "Droid Sans", Arial, Helvetica, sans-serif;
 }
+
+th > div.feature-id {
+    font-weight: normal;
+}
+
+code {
+    background: rgba(240, 240, 240, 0.8);
+    padding: 0.2em;
+    margin-top: -0.2em;
+    margin-bottom: -0.2em;
+    border: 1px solid rgba(220, 220, 220, 0.8);
+    box-shadow: 0 0 1px rgba(220, 220, 220, 0.8);
+}
