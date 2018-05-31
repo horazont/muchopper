@@ -8,7 +8,9 @@ import jinja2
 
 import sqlalchemy
 
-from flask import Flask, render_template, redirect, url_for, request
+from flask import (
+    Flask, render_template, redirect, url_for, request, abort, jsonify
+)
 from flask_sqlalchemy import SQLAlchemy, Pagination, BaseQuery
 from flask_menu import register_menu, Menu
 
@@ -314,6 +316,12 @@ def operators():
     return render_template("for_operators.html")
 
 
+@app.route("/docs/api")
+@register_menu(app, "docs.developers", "For developers", order=3)
+def developers():
+    return render_template("for_developers.html")
+
+
 @app.route("/about")
 @register_menu(app, "meta.about", "About", order=1)
 def about():
@@ -332,3 +340,33 @@ def contact():
     return render_template("contact.html")
 
 
+# API
+
+@app.route("/api/1.0/rooms.json")
+def api_rooms():
+    try:
+        pageno = int(request.args["p"])
+        include_closed = request.args.get("include_closed") is not None
+    except ValueError:
+        return abort(400)
+
+    if pageno <= 0:
+        return abort(400)
+
+    page = room_page(pageno, per_page=200, include_closed=include_closed)
+
+    return jsonify({
+        "total": page.total,
+        "npages": page.pages,
+        "page": page.page,
+        "items": [
+            {
+                "address": str(muc.address),
+                "nusers": round(muc.nusers_moving_average),
+                "is_open": muc.is_open,
+                "name": public_info.name,
+                "description": public_info.description,
+            }
+            for muc, public_info in page.items
+        ],
+    })

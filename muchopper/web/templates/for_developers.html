@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% set title = "Documentation for Developers" %}
+{% macro appname() %}<em>{{ config["APPNAME"] }}</em>{% endmacro %}
+{% block content %}
+<article>
+    <h3>HTTP API</h3>
+    <p>We offer a minimalistic HTTP-based JSON API to query the room list.</p>
+    <h6>Rate limiting</h6>
+    <p>We offer this service as a best-effort service. If you receive a 429 status code, please wait at least one minute for your next request.</p>
+    <p>Please avoid downloading the whole list unless you have to do so. For example, when showing the user a list of rooms, only download the first page at first. This already tells you how many list entries you need. Then download further pages as needed when the users scrolls to that place in the list (lazy loading).</p>
+    <h6>API calls</h6>
+    <ul>
+        <li><a href="#api-v1.0-rooms.json">Room list</a> (<code>GET /api/v1.0/rooms.json</code>)</li>
+    </ul>
+    <section class="api-call">
+        <h4><a name="api-v1.0-rooms.json"></a><code>GET /api/v1.0/rooms.json</code></h4>
+        <h6>Description</h6>
+        <p>Return the list of rooms as JSON object. The list is paginated with a (fairly) constant number items per page and ordered by number of users descendingly.</p>
+        <h6>Parameters</h6>
+        <dl>
+            <dt><code>p</code></dt>
+            <dd>The page of the listing. The first page is page 1.</p>
+        </dl>
+        <h6>Error conditions</h6>
+        <dl>
+            <dt><code>400</code></dt>
+            <dd><ul>
+                <li>The given page was not an integer.</li>
+                <li>The given page was less than one.</li>
+            </ul></dd>
+            <dt><code>429</code></dt>
+            <dd>Rate limit exceeded. Please wait at least one minute before issuing the next request.</dd>
+        </dl>
+        <h6>Response</h6>
+        <p>The response is a JSON object formatted like this:</p>
+        <pre><code>
+{
+    "page": &lt;(int) page number&gt;,
+    "total": &lt;(int) total number of items in all pages&gt;,
+    "pages": &lt;(int) total number of pages&gt;,
+    "items": [
+        {
+            "address": &lt;(str) address of the room&gt;,
+            "nusers": &lt;(int or null) approximate number of users&gt;,
+            "is_open": &lt;(bool) whether it can be joined by anyone&gt;,
+            "name": &lt;(str or null) name of the room&gt;,
+            "description": &lt;(str or null) description of the room&gt;
+        },
+        &lt; ... &gt;
+    ]
+}
+        </code></pre>
+        <p>The number of pages is a service constant. We may change it in the future, but we won’t do that often. You can mostly rely on it.</p>
+    </section>
+    <h3>XMPP API</h3>
+    <p>We currently do not offer an XMPP API, but we plan to do so in the future.</p>
+</article>
+{% endblock %}
