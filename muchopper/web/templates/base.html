@@ -25,8 +25,8 @@
             <div class="subtitle">{{ config["APPNAME"] }}: A listing of public XMPP/Jabber chat rooms/groups.</div>
         </header>
         <nav id="nav-search" class="ym-hlist">
-            <form class="searchbox" name="searchbox" method="POST" action="{{ url_for('search') }}">
-                <input type="text" name="keywords" placeholder="Search for a room..."/>
+            <form class="searchbox" name="searchbox" method="GET" action="{{ url_for('search') }}">
+                <input type="text" name="q" placeholder="Search for a room..."/>
                 <input type="submit" value="Go"/>
             </form>
         </nav>

@@ -221,7 +221,7 @@ def perform_search(query_string,
     return ([], results, keywords)
 
 
-@app.route("/search", methods=["POST", "GET"])
+@app.route("/search")
 @register_menu(app, "data.search", "Search", order=2)
 def search():
     no_keywords = False
@@ -233,13 +233,13 @@ def search():
     search_description = True
     search_name = True
 
-    if request.method == "POST":
-        orig_keywords = request.form["keywords"]
+    if "q" in request.args:
+        orig_keywords = request.args["q"]
 
-        if "full-form" in request.form:
-            search_address = "search_address" in request.form
-            search_description = "search_description" in request.form
-            search_name = "search_name" in request.form
+        if "f" in request.args:
+            search_address = "sinaddr" in request.args
+            search_description = "sindescr" in request.args
+            search_name = "sinname" in request.args
 
         flags, results, keywords = perform_search(
             orig_keywords,

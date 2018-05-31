@@ -2,17 +2,17 @@
 {% from "library.tpl" import room_table %}
 {% set title = "Search" %}
 {% block content %}
-<form method="POST" class="ym-form">
+<form method="GET" class="ym-form">
     <div class="ym-fbox ym-fbox-text">
         <label for="keywords">Search terms<sup class="ym-required">*</sup></label>
-        <input id="keywords" type="text" name="keywords" value="{{ orig_keywords }}" required="required"/>
-        <input type="hidden" name="full-form" value="y"/>
+        <input id="keywords" type="text" name="q" value="{{ orig_keywords }}" required="required"/>
+        <input type="hidden" name="f" value="y"/>
     </div>
     <div class="ym-fbox ym-fbox-check">
         <div class="ym-fbox-wrap">
-            <div class="ym-fbox-check"><input type="checkbox" id="search_address" name="search_address" {{ 'checked' if search_address else '' }}/><label for="search_address">Search in addresses</label></div>
-            <div class="ym-fbox-check"><input type="checkbox" id="search_description" name="search_description" {{ 'checked' if search_description else '' }}/><label for="search_description">Search in description</label></div>
-            <div class="ym-fbox-check"><input type="checkbox" id="search_name" name="search_name" {{ 'checked' if search_name else '' }}/><label for="search_name">Search in name</label></div>
+            <div class="ym-fbox-check"><input type="checkbox" id="search_address" name="sinaddr" {{ 'checked' if search_address else '' }}/><label for="search_address">Search in addresses</label></div>
+            <div class="ym-fbox-check"><input type="checkbox" id="search_description" name="sindescr" {{ 'checked' if search_description else '' }}/><label for="search_description">Search in description</label></div>
+            <div class="ym-fbox-check"><input type="checkbox" id="search_name" name="sinname" {{ 'checked' if search_name else '' }}/><label for="search_name">Search in name</label></div>
         </div>
     </div>
     <div class="ym-fbox-footer ym-fbox-button">
