@@ -4,14 +4,14 @@
 {% macro pagination() %}
 <nav class="pagination">
     <ul>
-    {%- if page.has_prev %}<li class="prev"><a href="{{ url_for('room_list', page=page.page-1) }}">Previous page</a>{% endif -%}
+    {%- if page.has_prev %}<li class="prev"><a href="{{ url_for('room_list', pageno=page.page-1) }}">Previous page</a>{% endif -%}
     {%- for pageno, insert_skip in visible_pages -%}
     {%- if insert_skip -%}
     <li>...</li>
     {%- endif -%}
-    <li class="{{ 'current' if pageno == page.page else '' }}"><a href="{{ url_for('room_list', page=pageno) }}">{{ pageno }}</a></li>
+    <li class="{{ 'current' if pageno == page.page else '' }}"><a href="{{ url_for('room_list', pageno=pageno) }}">{{ pageno }}</a></li>
     {%- endfor -%}
-    {%- if page.has_next %}<li class="next"><a href="{{ url_for('room_list', page=page.page+1) }}">Next page</a>{% endif -%}
+    {%- if page.has_next %}<li class="next"><a href="{{ url_for('room_list', pageno=page.page+1) }}">Next page</a>{% endif -%}
     </ul>
 </nav>
 {% endmacro %}
