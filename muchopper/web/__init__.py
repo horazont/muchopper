@@ -391,7 +391,7 @@ def api_rooms_unsafe():
         "npages": page.pages,
         "page": page.page,
         "items": [
-            room_to_json(page.items)
+            room_to_json(muc, public_info)
             for muc, public_info in page.items
         ],
     })
