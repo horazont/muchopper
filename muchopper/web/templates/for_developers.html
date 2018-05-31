@@ -49,7 +49,7 @@
         &lt; ... &gt;
     ]
 }</code></pre>
-        <p>The number of items per page is a service constant. We may change it in the future, but we won’t do that often. You can mostly rely on it.</p>
+        <p>The number of items per page is a service constant.</p>
         <p>To continue to the next page, send a new request with the <code>after</code> argument set to the <code>address</code> of the last item in the previous page.Paginating backwards is not supported.</p>
         <p>This method is intended to obtain a complete listing of the rooms. If rooms are added concurrently with the listing, they may or may not be included. If a <code>min_users</code> condition is used and the number of users in the room crosses the threshold concurrently to the listing, it may or may not be included.</p>
     </section>
@@ -94,7 +94,7 @@
         &lt; ... &gt;
     ]
 }</code></pre>
-        <p>The number of items per page is a service constant. We may change it in the future, but we won’t do that often. You can mostly rely on it.</p>
+        <p>The number of items per page is a service constant.</p>
         <p class="box warning">
             <strong>Warning:</strong> This listing is not safe against insert/reorder/delete race conditions when fetching multiple pages. This means that rooms can be missing or can be duplicated in the result.
         </p>
