@@ -22,7 +22,8 @@ main_menu = Menu(app)
 
 with app.app_context():
     main_menu.root().submenu('data').register(order=0, text="Data")
-    main_menu.root().submenu('meta').register(order=1, text="Meta")
+    main_menu.root().submenu('docs').register(order=1, text="Documentation")
+    main_menu.root().submenu('meta').register(order=2, text="Meta")
 
 
 Page = collections.namedtuple(
@@ -299,6 +300,18 @@ def statistics():
         nusers=nusers,
         ndomains=ndomains,
     )
+
+
+@app.route("/docs/owners")
+@register_menu(app, "docs.owners", "For room owners", order=1)
+def owners():
+    return render_template("for_owners.html")
+
+
+@app.route("/docs/operators")
+@register_menu(app, "docs.operators", "For service operators", order=2)
+def operators():
+    return render_template("for_operators.html")
 
 
 @app.route("/about")

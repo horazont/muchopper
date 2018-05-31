@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% set title = "Documentation for Service Operators" %}
+{% macro appname() %}<em>{{ config["APPNAME"] }}</em>{% endmacro %}
+{% block content %}
+<article>
+    <h3>Domain listing criteria</h3>
+    <p>There are no criteria for a domain to be included in the crawl, except that we need to know about it.</p>
+    <h3>Domain delisting</h3>
+    <p>If you are the owner of a domain and want it to be <em>completely</em> excluded from the listing, please <a href="{{ url_for('contact') }}">get in touch</a>. Be prepared to provide proof that you are the owner of the domain. A good (zero-roundtrip) way to do so is to contact us from an XMPP address which is listed in your services <a href="https://xmpp.org/extensions/xep-0157.html">contact addresses</a>.</p>
+    <h3>Traffic</h3>
+    <p>We crawl all known domains for public rooms approximately once per hour. In addition, we query all rooms we know for their meta-information in the same rhythm. We rate-limit our requests and shuffle the list of rooms to spread the load evenly across the time window.</p>
+    <p>If you still find that we cause too much traffic on your domain, please get in touch (see above). We can work out to reduce the frequency for your domain or apply other means.</p>
+    <h3>Features</h3>
+    <p>In order to provide your room owners with optimal integration, we suggest that you update your server software to the latest release. Below is a table of features and the required server software versions (to the best of our knowledge):</p>
+    <table class="features">
+        <thead>
+            <tr>
+                <th>Feature</th>
+                <th>Prosody</th>
+                <th>ejabberd</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Public rooms</td>
+                <td>supported</td>
+                <td>supported</td>
+            </tr>
+            <tr>
+                <td>Name and description</td>
+                <td>supported</td>
+                <td>supported</td>
+            </tr>
+            <tr>
+                <td>Room lanugage</td>
+                <td><div>=0.10.x: with <code>mod_muc_lang</code></div><div>&gt;0.10: supported</div></td>
+                <td>&gt;18.04</td>
+            </tr>
+        </tbody>
+    </table>
+</article>
+{% endblock %}

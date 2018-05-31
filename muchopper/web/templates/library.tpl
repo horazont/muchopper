@@ -15,7 +15,7 @@
 {%- endmacro %}
 
 {% macro room_table(items, keywords=[], caller=None) %}
-<table>
+<table class="roomlist">
     <colgroup>
         <col class="nusers"/>
         <col class="label"/>

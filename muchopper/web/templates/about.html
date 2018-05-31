@@ -4,24 +4,4 @@
 {% block content %}
 <p>{{ appname() }} is a project to provide a list of public chat rooms in the Jabber Instant Messaging network.</p>
 <p>To learn more about the technical background of Jabber, visit <a href="https://xmpp.org">the home page of the XMPP Standards Foundation</a>. The XMPP Standards Foundation is the organization governing the technical development of XMPP. XMPP is the protocol on which Jabber is built.</p>
-
-<h3>Why is my room listed here?</h3>
-<p>All rooms which {{ appname() }} can find <em>and</em> which are explicitly configured to be public are listed here.</p>
-<p>{{ appname() }} finds rooms by:</p>
-<ul>
-    <li>Receiving an invitation to join a room.</li>
-    <li>Overhearing a mention of another in a room it is joined in.</li>
-    <li>Asking servers on which it has found rooms for more rooms.</li>
-</ul>
-<p>If you want your room to be delisted, please see the <a href="{{ url_for('privacy') }}">Privacy Policy</a> for how to do that.</p>
-<h3>Why is my room <em>not</em> listed here?</h3>
-<p>First of all, make sure you configured your room to be publicly listed and is persistent. You have to do that from within your client. You generally need to be the owner of a room to configure that.</p>
-<p>Try to invite {{ config["APPJID"] }} into your room. This will make {{ appname() }} consider your room. It takes between an hour and a day for the bot to pick up changes (such as enabling/disabling public listing) to a room. Note that the bot will not automatically join your room following an invite.</p>
-<p>Only rooms where more than one user is seen are listed in the public listing.</p>
-<h3>Why is no text shown for my room?</h3>
-<p>The text shown below the address is the room <em>description</em>. This is different from the room topic/subject (which is what is shown in clients inside the room). The room subject is only shown if the description is not known or empty. However, many services do not give us the room subject without joining the room. This means that the room subject is often not shown instead of the description because we simply have not joined that room yet. Also, it might be out of date, because we can only refresh it while joined.</p>
-<p>In summary, it is better to properly set the room description. You can do that at the same place where you set whether the room shall be listed publicly.</p>
-<h3>The number of users does not match the real number</h3>
-<p>Like all other room stats, the number of occupants is queried in a dynamic interval depending on the load (unless {{ appname() }} is joined in a room). In addition, we perform a moving average on (up to, again, depending on the load) hourly samples. This helps to avoid having the listing fluctuate too much due to the usual in and out flux of occupants.</p>
-<p>In any case, the number of occupants should at most be used as a rough hint to the popularity of the room. It is used as the primary sorting criterium because we don’t have any better.</p>
 {% endblock %}

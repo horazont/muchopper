@@ -12,8 +12,12 @@ header > h1 > a:active {
     background-color: transparent;
 }
 
-table > tbody > tr:nth-child(2n) {
+table.roomlist > tbody > tr:nth-child(2n) {
     background-color: rgba(0, 0, 0, 0.05);
+}
+
+table.features {
+    width: auto;
 }
 
 footer#footer-main {
