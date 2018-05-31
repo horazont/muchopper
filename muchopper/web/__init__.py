@@ -365,6 +365,7 @@ def room_to_json(muc, public_info):
         "is_open": muc.is_open,
         "name": public_info.name,
         "description": public_info.description,
+        "language": public_info.language,
     }
 
 
