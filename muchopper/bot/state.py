@@ -196,17 +196,15 @@ class State:
             key = domain.domain
 
         try:
+            return session.query(model.Domain).filter(
+                model.Domain.domain == key
+            ).one()
+        except sqlalchemy.orm.exc.NoResultFound:
             with session.begin_nested():
                 dom = model.Domain()
                 dom.domain = key
                 session.add(dom)
                 return dom
-        except sqlalchemy.exc.IntegrityError:
-            # domain exists
-            session.rollback()
-            return session.query(model.Domain).filter(
-                model.Domain.domain == key
-            ).one()
 
     def require_domain(self, domain):
         with model.session_scope(self._sessionmaker) as session:
