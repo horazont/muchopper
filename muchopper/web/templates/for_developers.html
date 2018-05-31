@@ -10,8 +10,48 @@
     <p>Please avoid downloading the whole list unless you have to do so. For example, when showing the user a list of rooms, only download the first page at first. This already tells you how many list entries you need. Then download further pages as needed when the users scrolls to that place in the list (lazy loading).</p>
     <h6>API calls</h6>
     <ul>
-        <li><a href="#api-1.0-rooms/unsafe">Room list</a> (<code>GET /api/1.0/rooms/unsafe</code>)</li>
+        <li><a href="#api-1.0-rooms">Complete room listing</a> (<code>GET /api/1.0/rooms</code>)</li>
+        <li><a href="#api-1.0-rooms/unsafe">Quick (unsafe) room listing</a> (<code>GET /api/1.0/rooms/unsafe</code>)</li>
     </ul>
+    <section class="api-call">
+        <h4><a name="api-1.0-rooms"></a><code>GET /api/1.0/rooms</code></h4>
+        <h6>Description</h6>
+        <p>Return the list of rooms as JSON object. The list is paginated with a constant number items per page and ordered by the address ascendingly.</p>
+        <h6>Parameters</h6>
+        <dl>
+            <dt><code>after</code></dt>
+            <dd>Optional JID. Only MUCs whose address orders after the given JID will be returned. This is used for pagination.</p>
+            <dt><code>min_users</code></dt>
+            <dd>Optional integer number. Only MUCs whose number of users moving average is greater than or equal to this number will be returned.</p>
+        </dl>
+        <h6>Error conditions</h6>
+        <dl>
+            <dt><code>400</code></dt>
+            <dd><ul>
+                <li>The <code>after</code> argument is not a valid JID.</li>
+                <li>The <code>min_users</code> argument is not an integer.</li>
+            </ul></dd>
+            <dt><code>429</code></dt>
+            <dd>Rate limit exceeded. Please wait at least one minute before issuing the next request.</dd>
+        </dl>
+        <h6>Response</h6>
+        <p>The response is a JSON object formatted like this:</p>
+        <pre><code>{
+    "items": [
+        {
+            "address": &lt;(str) address of the room&gt;,
+            "nusers": &lt;(int or null) approximate number of users&gt;,
+            "is_open": &lt;(bool) whether it can be joined by anyone&gt;,
+            "name": &lt;(str or null) name of the room&gt;,
+            "description": &lt;(str or null) description of the room&gt;
+        },
+        &lt; ... &gt;
+    ]
+}</code></pre>
+        <p>The number of items per page is a service constant. We may change it in the future, but we won’t do that often. You can mostly rely on it.</p>
+        <p>To continue to the next page, send a new request with the <code>after</code> argument set to the <code>address</code> of the last item in the previous page.Paginating backwards is not supported.</p>
+        <p>This method is intended to obtain a complete listing of the rooms. If rooms are added concurrently with the listing, they may or may not be included. If a <code>min_users</code> condition is used and the number of users in the room crosses the threshold concurrently to the listing, it may or may not be included.</p>
+    </section>
     <section class="api-call">
         <h4><a name="api-1.0-rooms/unsafe"></a><code>GET /api/1.0/rooms/unsafe</code></h4>
         <h6>Description</h6>

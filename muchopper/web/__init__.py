@@ -8,6 +8,8 @@ import jinja2
 
 import sqlalchemy
 
+import aioxmpp
+
 from flask import (
     Flask, render_template, redirect, url_for, request, abort, jsonify
 )
@@ -95,7 +97,6 @@ def index():
 
 
 def base_query(session, *,
-               min_users=1,
                include_closed=False):
     q = session.query(
         model.MUC,
@@ -113,6 +114,14 @@ def base_query(session, *,
         model.MUC.is_hidden == False  # NOQA
     )
 
+    return q
+
+
+def common_query(session, *,
+                 min_users=1,
+                 include_closed=False):
+    q = base_query(session, include_closed=include_closed)
+
     if min_users > 0:
         q = q.filter(
             model.MUC.nusers_moving_average > min_users
@@ -125,7 +134,7 @@ def base_query(session, *,
 
 
 def room_page(page, per_page, include_closed=False):
-    q = base_query(db.session, include_closed=include_closed)
+    q = common_query(db.session, include_closed=include_closed)
     total = q.count()
     pages = (total+per_page-1) // per_page
     page = Page(
@@ -191,7 +200,7 @@ def perform_search(query_string,
     elif not keywords:
         return ({"no_keywords"}, None, None)
 
-    q = base_query(db.session,
+    q = common_query(db.session,
                    min_users=0)
     for keyword in keywords:
         conditional = None
@@ -348,9 +357,20 @@ def contact():
 
 # API
 
+
+def room_to_json(muc, public_info):
+    return {
+        "address": str(muc.address),
+        "nusers": round(muc.nusers_moving_average),
+        "is_open": muc.is_open,
+        "name": public_info.name,
+        "description": public_info.description,
+    }
+
+
 @app.route("/api/1.0/rooms.json")
 @app.route("/api/1.0/rooms/unsafe")
-def api_rooms():
+def api_rooms_unsafe():
     try:
         pageno = int(request.args["p"])
         order_by = request.args.get("order_by", "nusers")
@@ -371,13 +391,55 @@ def api_rooms():
         "npages": page.pages,
         "page": page.page,
         "items": [
-            {
-                "address": str(muc.address),
-                "nusers": round(muc.nusers_moving_average),
-                "is_open": muc.is_open,
-                "name": public_info.name,
-                "description": public_info.description,
-            }
+            room_to_json(page.items)
             for muc, public_info in page.items
+        ],
+    })
+
+
+def optional_typecast_argument(args, name, type_):
+    try:
+        value_s = request.args[name]
+    except KeyError:
+        return None
+    else:
+        return type_(value_s)
+
+
+@app.route("/api/1.0/rooms")
+def api_rooms_safe():
+    PAGE_SIZE = 200
+
+    try:
+        after = optional_typecast_argument(request.args, "after",
+                                           aioxmpp.JID.fromstr)
+        include_closed = request.args.get("include_closed") is not None
+        min_users = optional_typecast_argument(
+            request.args, "min_users",
+            int,
+        )
+    except ValueError:
+        return abort(400)
+
+    q = base_query(db.session, include_closed=include_closed)
+    if after is not None:
+        q = q.filter(
+            model.MUC.address > after
+        )
+    if min_users is not None:
+        q = q.filter(
+            model.MUC.nusers_moving_average >= min_users
+        )
+    q = q.order_by(
+        model.MUC.address.asc()
+    )
+
+    q = q.limit(PAGE_SIZE)
+    results = list(q)
+
+    return jsonify({
+        "items": [
+            room_to_json(muc, public_info)
+            for muc, public_info in results
         ],
     })
