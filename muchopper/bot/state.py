@@ -34,10 +34,26 @@ NUSERS_MOVING_AVERAGE_FACTOR = 0.82
 NUSERS_MOVING_AVERAGE_INTERVAL = timedelta(hours=0.95)
 
 
+def process_text(text, length_soft_limit, length_hard_limit=None):
+    length_hard_limit = length_hard_limit or length_soft_limit*2
+
+    if len(text) > length_hard_limit:
+        text = text[:length_hard_limit]
+
+    text = " ".join(text.strip().split())
+    if len(text) > length_soft_limit:
+        text = text[:length_soft_limit-1] + "…"
+
+    return text
+
+
 class State:
     def __init__(self,
                  engine,
-                 logfile: pathlib.Path):
+                 logfile: pathlib.Path,
+                 max_name_length: int,
+                 max_description_length: int,
+                 max_subject_length: int):
         super().__init__()
         self.logger = logging.getLogger(__name__)
         self._mucs = {}
@@ -46,6 +62,9 @@ class State:
         self._address_metadata_cache = aioxmpp.cache.LRUDict()
         self._address_metadata_cache.maxsize = 512
         self._active_addresses = set()
+        self._max_name_length = max_name_length
+        self._max_description_length = max_description_length
+        self._max_subject_length = max_subject_length
 
     def is_active(self, address: aioxmpp.JID) -> bool:
         return address in self._active_addresses
@@ -212,6 +231,16 @@ class State:
             session.commit()
         return result
 
+    def _prepare_text_update(self, value, max_length):
+        if value is UNCHANGED:
+            return value
+
+        value = value or None
+        if value is None:
+            return value
+
+        return process_text(value, max_length)
+
     def update_muc_metadata(self, address,
                             nusers=UNCHANGED,
                             is_open=UNCHANGED,
@@ -229,6 +258,24 @@ class State:
 
         if is_saveable is False:
             return self.delete_all_muc_data(address)
+
+        description = self._prepare_text_update(
+            description,
+            self._max_description_length
+        )
+        # allow name to overflow if description is unset
+        # in the UI, we’ll show the name at the place where the description
+        # lives in those cases
+        name = self._prepare_text_update(
+            name,
+            (self._max_name_length
+             if description and description is not UNCHANGED
+             else self._max_description_length)
+        )
+        subject = self._prepare_text_update(
+            subject,
+            self._max_subject_length
+        )
 
         with model.session_scope(self._sessionmaker) as session:
             muc = model.MUC.get(session, address)

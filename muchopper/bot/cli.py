@@ -26,9 +26,14 @@ async def amain(loop, args, cfg):
     else:
         engine = muchopper.common.model.get_sqlite_engine(statefile)
 
+    limits = cfg["muchopping"].get("limits", {})
+
     state = muchopper.bot.state.State(
         engine,
         pathlib.Path(cfg["muchopping"]["logfile"]),
+        int(limits.get("max_name_length", 1024)),
+        int(limits.get("max_description_length", 1024)),
+        int(limits.get("max_subject_length", 1024)),
     )
 
     daemon = muchopper.bot.daemon.MUCHopper(
