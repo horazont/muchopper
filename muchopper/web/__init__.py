@@ -91,7 +91,7 @@ def prettify_lang(s):
 
 @app.route("/")
 def index():
-    return redirect(url_for("room_list", page=1))
+    return redirect(url_for("room_list", pageno=1))
 
 
 def base_query(session, *,
