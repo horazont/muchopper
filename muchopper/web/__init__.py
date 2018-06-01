@@ -1,8 +1,12 @@
 import babel
+import contextlib
 import collections
 import html
+import os
+import pathlib
 import re
 import shlex
+import tempfile
 
 import jinja2
 
@@ -11,7 +15,8 @@ import sqlalchemy
 import aioxmpp
 
 from flask import (
-    Flask, render_template, redirect, url_for, request, abort, jsonify
+    Flask, render_template, redirect, url_for, request, abort, jsonify,
+    send_file,
 )
 from flask_sqlalchemy import SQLAlchemy, Pagination, BaseQuery
 from flask_menu import register_menu, Menu
@@ -44,6 +49,85 @@ Page = collections.namedtuple(
 
 
 DISPLAY_LOCALE = babel.Locale("en_GB")
+
+
+@contextlib.contextmanager
+def safe_writer(destpath, mode="wb", extra_paranoia=False):
+    """
+    Safely overwrite a file.
+
+    This guards against the following situations:
+
+    * error/exception while writing the file (the original file stays intact
+      without modification)
+    * most cases of unclean shutdown (*either* the original *or* the new file
+      will be seen on disk)
+
+    It does that with the following means:
+
+    * a temporary file next to the target file is used for writing
+    * if an exception is raised in the context manager, the temporary file is
+      discarded and nothing else happens
+    * otherwise, the temporary file is synced to disk and then used to replace
+      the target file.
+
+    If `extra_paranoia` is true, the parent directory of the target file is
+    additionally synced after the replacement. `extra_paranoia` is only needed
+    if it is required that the new file is seen after a crash (and not the
+    original file).
+    """
+
+    destpath = pathlib.Path(destpath)
+    with tempfile.NamedTemporaryFile(
+            mode=mode,
+            dir=str(destpath.parent),
+            delete=False) as tmpfile:
+        try:
+            yield tmpfile
+        except:  # NOQA
+            os.unlink(tmpfile.name)
+            raise
+        else:
+            tmpfile.flush()
+            os.fsync(tmpfile.fileno())
+            os.replace(tmpfile.name, str(destpath))
+
+
+STATIC_RENDERED = set()
+
+
+def render_static_template(path):
+    if app.debug:
+        return render_template(path)
+
+    try:
+        static_path = pathlib.Path(app.config["STATIC_PAGE_CACHE"])
+    except KeyError:
+        return render_template(path)
+
+    rendered_path = (static_path / path).absolute()
+    # basic escape check
+    if not str(rendered_path).startswith(str(static_path)):
+        return render_template(path)
+
+    if (rendered_path in STATIC_RENDERED and
+            rendered_path.is_file()):
+        return send_file(str(rendered_path),
+                         mimetype="text/html",
+                         conditional=True,
+                         as_attachment=False)
+
+    content = render_template(path)
+
+    try:
+        with safe_writer(rendered_path, mode="w") as f:
+            f.write(content)
+    except IOError:
+        pass
+    else:
+        STATIC_RENDERED.add(rendered_path)
+
+    return content
 
 
 @app.template_filter("highlight")
@@ -316,43 +400,43 @@ def statistics():
 @app.route("/docs/owners")
 @register_menu(app, "docs.owners", "For room owners", order=1)
 def owners():
-    return render_template("for_owners.html")
+    return render_static_template("for_owners.html")
 
 
 @app.route("/docs/operators")
 @register_menu(app, "docs.operators", "For service operators", order=2)
 def operators():
-    return render_template("for_operators.html")
+    return render_static_template("for_operators.html")
 
 
 @app.route("/docs/api")
 @register_menu(app, "docs.developers", "For developers", order=3)
 def developers():
-    return render_template("for_developers.html")
+    return render_static_template("for_developers.html")
 
 
 @app.route("/about")
 @register_menu(app, "meta.about", "About", order=1)
 def about():
-    return render_template("about.html")
+    return render_static_template("about.html")
 
 
 @app.route("/tos")
 @register_menu(app, "meta.tos", "Terms of Service", order=2)
 def tos():
-    return render_template("tos.html")
+    return render_static_template("tos.html")
 
 
 @app.route("/privacy")
 @register_menu(app, "meta.privacy", "Privacy Policy", order=3)
 def privacy():
-    return render_template("privacy.html")
+    return render_static_template("privacy.html")
 
 
 @app.route("/contact")
 @register_menu(app, "meta.contact", "Contact", order=4)
 def contact():
-    return render_template("contact.html")
+    return render_static_template("contact.html")
 
 
 # API
