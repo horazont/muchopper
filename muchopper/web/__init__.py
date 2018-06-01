@@ -34,6 +34,18 @@ with app.app_context():
     main_menu.root().submenu('docs').register(order=1, text="Documentation")
     main_menu.root().submenu('meta').register(order=2, text="Meta")
 
+    try:
+        cache_path = app.config["STATIC_PAGE_CACHE"]
+    except KeyError:
+        pass
+    else:
+        cache_path.mkdir(
+            exist_ok=True,
+            parents=True,
+            mode=0o755
+        )
+        cache_path.chmod(0o755)
+
 
 Page = collections.namedtuple(
     "Page",
