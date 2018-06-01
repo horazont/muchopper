@@ -35,7 +35,7 @@ with app.app_context():
     main_menu.root().submenu('meta').register(order=2, text="Meta")
 
     try:
-        cache_path = app.config["STATIC_PAGE_CACHE"]
+        cache_path = pathlib.Path(app.config["STATIC_PAGE_CACHE"])
     except KeyError:
         pass
     else:
