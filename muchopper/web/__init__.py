@@ -1,6 +1,7 @@
 import babel
 import contextlib
 import collections
+import gzip
 import html
 import os
 import pathlib
@@ -134,12 +135,21 @@ def render_static_template(path):
     try:
         with safe_writer(rendered_path, mode="w") as f:
             f.write(content)
+        with safe_writer(
+                rendered_path.with_name(rendered_path.name + ".gz"),
+                mode="wb") as f:
+            with gzip.GzipFile(fileobj=f, mode="wb") as zf:
+                zf.write(content.encode("utf-8"))
     except IOError:
         pass
     else:
         STATIC_RENDERED.add(rendered_path)
+        return send_file(str(rendered_path),
+                         mimetype="text/html",
+                         conditional=True,
+                         as_attachment=False)
 
-    return content
+    return render_template(path)
 
 
 @app.template_filter("highlight")
