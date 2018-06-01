@@ -47,6 +47,8 @@ with app.app_context():
         )
         cache_path.chmod(0o755)
 
+    CACHE_USE_ETAGS = app.config.get("CACHE_USE_ETAGS", False)
+
 
 Page = collections.namedtuple(
     "Page",
@@ -127,6 +129,7 @@ def render_static_template(path):
             rendered_path.is_file()):
         return send_file(str(rendered_path),
                          mimetype="text/html",
+                         add_etags=CACHE_USE_ETAGS,
                          conditional=True,
                          as_attachment=False)
 
