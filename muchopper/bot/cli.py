@@ -37,6 +37,11 @@ async def amain(loop, args, cfg):
         int(limits.get("max_language_length", 126)),
     )
 
+    components = list(map(
+        muchopper.bot.daemon.Component,
+        cfg["muchopping"].get("components", ["watcher", "scanner"])
+    ))
+
     daemon = muchopper.bot.daemon.MUCHopper(
         loop,
         aioxmpp.JID.fromstr(cfg["xmpp"]["jid"]),
@@ -47,6 +52,7 @@ async def amain(loop, args, cfg):
         state,
         list(map(aioxmpp.JID.fromstr,
                  cfg["muchopping"].get("privileged_entities", []))),
+        components,
     )
 
     for addr in cfg["muchopping"].get("seed", []):

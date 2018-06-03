@@ -7,10 +7,11 @@ import time
 import urllib.parse
 
 from datetime import datetime
+from enum import Enum
 
 import aioxmpp
 
-from . import worker_pool, state, utils, watcher, scanner, insideman
+from . import worker_pool, state, utils, watcher, scanner, insideman, spokesman
 
 
 INFO_BODY = {
@@ -25,6 +26,14 @@ ACK_BODY = {
         "while (approximately two hours) until your suggestion is added to "
         "the public list. I will not actually join the room, though.",
 }
+
+
+class Component(Enum):
+    WATCHER = "watcher"
+    INSIDEMAN = "insideman"
+    SCANNER = "scanner"
+    SPOKESMAN = "spokesman"
+    INTERACTION = "interaction"
 
 
 if not hasattr("aioxmpp.Message", "xep0249_invite"):
@@ -154,7 +163,8 @@ class MUCHopper:
                  jid, security_layer,
                  default_nickname,
                  state,
-                 privileged_entities):
+                 privileged_entities,
+                 components):
         self.logger = logging.getLogger("muclogger")
         self._loop = loop
         self._state = state
@@ -165,25 +175,40 @@ class MUCHopper:
             logger=logging.getLogger("muchopper.client")
         )
         self._client.summon(aioxmpp.DiscoServer)
-        self._interaction = self._client.summon(InteractionHandler)
-        self._interaction.state = state
-        self._interaction.suggester = self.suggest_new_address_nonblocking
-        self._interaction.PRIVILEGED_ENTITIES.extend(privileged_entities)
         self._muc_svc = self._client.summon(aioxmpp.MUCClient)
         self._disco_svc = self._client.summon(aioxmpp.DiscoClient)
-        self._watcher = self._client.summon(watcher.Watcher)
-        self._watcher.state = state
-        self._watcher.suggester = self.suggest_new_address
-        self._scanner = self._client.summon(scanner.Scanner)
-        self._scanner.state = state
-        self._scanner.suggester = self.suggest_new_address
-        self._insideman = self._client.summon(insideman.InsideMan)
-        # self._insideman.state = state
-        self._insideman.default_nickname = default_nickname
-        self._insideman.suggester = self.suggest_new_address_nonblocking
+
+        if Component.INTERACTION in components:
+            self._interaction = self._client.summon(InteractionHandler)
+            self._interaction.state = state
+            self._interaction.suggester = self.suggest_new_address_nonblocking
+            self._interaction.PRIVILEGED_ENTITIES.extend(privileged_entities)
+
+        if Component.WATCHER in components:
+            self._watcher = self._client.summon(watcher.Watcher)
+            self._watcher.state = state
+            self._watcher.suggester = self.suggest_new_address
+        else:
+            self._watcher = None
+
+        if Component.SCANNER in components:
+            self._scanner = self._client.summon(scanner.Scanner)
+            self._scanner.state = state
+            self._scanner.suggester = self.suggest_new_address
+
+        if Component.INSIDEMAN in components:
+            self._insideman = self._client.summon(insideman.InsideMan)
+            self._insideman.state = state
+            self._insideman.default_nickname = default_nickname
+            self._insideman.suggester = self.suggest_new_address_nonblocking
+
+        if Component.SPOKESMAN in components:
+            self._spokesman = self._client.summon(spokesman.Spokesman)
+            self._spokesman.state = state
+            self._spokesman.suggester = self.suggest_new_address
 
         version_svc = self._client.summon(aioxmpp.VersionServer)
-        version_svc.name = "MUCHopper"
+        version_svc.name = "Christopher Muclumbus"
         version_svc.version = "0.1.0"
         version_svc.os = ""
 
@@ -282,7 +307,8 @@ class MUCHopper:
             notifier(address, metadata)
 
         if metadata.is_joinable_muc or metadata.is_indexable_muc:
-            await self._watcher.queue_request(address)
+            if self._watcher is not None:
+                await self._watcher.queue_request(address)
 
     async def run(self):
         self._loop.add_signal_handler(signal.SIGTERM, self._handle_intr)
