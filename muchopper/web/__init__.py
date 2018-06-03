@@ -177,6 +177,12 @@ def highlight(s, keywords):
     return jinja2.Markup("".join(parts))
 
 
+@app.template_filter("force_escape")
+def force_escape(s):
+    s = str(s)
+    return jinja2.Markup(html.escape(s))
+
+
 @app.template_filter('prettify_lang')
 def prettify_lang(s):
     s = str(s)

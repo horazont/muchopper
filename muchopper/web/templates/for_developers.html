@@ -1,9 +1,169 @@
 {% extends "base.html" %}
 {% set title = "Documentation for Developers" %}
 {% macro appname() %}<em>{{ config["APPNAME"] }}</em>{% endmacro %}
+{% macro escape(caller=None) %}{{ caller() | force_escape }}{% endmacro %}
 {% block content %}
 <article>
-    <h3>HTTP API</h3>
+    <h3>Overview</h3>
+    <p>We offer two ways to access our data:</p>
+    <ol>
+        <li>The <a href="#xmpp">XMPP API</a> (preferred)</li>
+        <li>The <a href="#http">anonymous HTTP API</a> (discouraged)</li>
+    </ol>
+    <p>If you have not noticed by now, the usage of the XMPP API is preferred. The reason is that you need to be authenticated to perform requests against the XMPP API, which makes it easier for us to work against abuse.</p>
+    <p>The HTTP API can be used anonymously, so we might rate-limit it more strictly in the future.</p>
+    <h3><a name="xmpp"></a>XMPP API</h3>
+    <p>The XMPP API is based on <a href="https://xmpp.org/extensions/xep-0004.html">XEP-0004 (Data Forms)</a> and <a href="https://xmpp.org/extensions/xep-0059.html">XEP-0059 (Result Set Management)</a> (don’t worry: the results are <em>not</em> in a XEP-0004 report!).</p>
+    <p>The search parameters are sent via a XEP-0004 form. The results are in a custom wire format which is paginated using XEP-0059 RSM.</p>
+    <p>The XMPP API endpoint is <a href="xmpp:rodrigo.de.mucobedo@dreckshal.de"><code>rodrigo.de.mucobedo@dreckshal.de</code></a>.</p>
+    <h6>Obtaining the search parameters form</h6>
+    <p>To request the search form, send the following request:</p>
+    <pre><code>{% call escape() %}<iq to="rodrigo.de.mucobedo@dreckshal.de" type="get">
+    <search xmlns="https://xmlns.zombofant.net/muclumbus/search/1.0"/>
+</iq>{% endcall %}</code></pre>
+    <p class="box">
+        <strong>Reminder:</strong> You have to set a unique <code>id</code> attribute on the IQ.
+    </p>
+    <p>The service will respond with the form:</p>
+    <pre><code>{% call escape() %}<iq type='result' from='rodrigo.de.mucobedo@dreckshal.de'>
+  <search xmlns='https://xmlns.zombofant.net/muclumbus/search/1.0'>
+    <x xmlns='jabber:x:data' type='form'>
+      <field type='hidden' var='FORM_TYPE'>
+        <value>https://xmlns.zombofant.net/muclumbus/search/1.0#params</value>
+      </field>
+      <field type='text-single' var='q' label='Search for'>
+      </field>
+      <field type='boolean' var='sinname' label='Search in name'>
+        <value>true</value>
+      </field>
+      <field type='boolean' var='sindescription' label='Search in description'>
+        <value>true</value>
+      </field>
+      <field type='boolean' var='sinaddr' label='Search in address'>
+        <value>true</value>
+      </field>
+      <field type='text-single' var='min_users' label='Minimum number of users'>
+        <value>1</value>
+      </field>
+      <field type='list-single' var='key' label='Sort results by'>
+        <value>nusers</value>
+        <option label='Number of online users'><value>nusers</value></option>
+        <option label='Address'><value>address</value></option>
+      </field>
+    </x>
+  </search>
+</iq>{% endcall %}</code></pre>
+    <h6>Search parameters</h6>
+    <dl>
+        <dt><code>q</code></dt>
+        <dd>Optional string. Operates like the search box on the website. If left blank, keyword search is disabled altogether and a full result is returned.</dd>
+        <dt><code>sinname</code></dt>
+        <dd>Optional boolean (default: true). Flag to indicate that the search should search within the MUC names.</dd>
+        <dt><code>sindescription</code></dt>
+        <dd>Optional boolean (default: true). Flag to indicate that the search should search within the MUC descriptions.</dd>
+        <dt><code>sinaddr</code></dt>
+        <dd>Optional boolean (default: true). Flag to indicate that the search should search within the MUC addresess.</dd>
+        <dt><code>min_users</code></dt>
+        <dd>Optional integer (default: 1). Minimum number of users in the MUCs to return.</dd>
+        <dt><code>key</code></dt>
+        <dd>The key of the result set management and the field by which the results are ordered. See below for details.</dd>
+    </dl>
+    <p>The <code>key</code> field specifies the order in which results are returned and also the field which is used for XEP-0059 pagination. Two values are allowed:</p>
+    <dl>
+        <dt><code>address</code></dt>
+        <dd>Order ascendingly by the address of the MUC. Paginating through this result will provide a duplicate-free but not necessarily complete view of the database (with respect to the keyword search and min users parameters). If a MUC is updated to match the search criteria or added while the pagination happens it may or may not be included in the complete result set.</dd>
+        <dt><code>nusers</code></dt>
+        <dd>Order descendingly by the number of users in the MUC. Paginating through the result may have duplicates and may not include all items.</dd>
+    </dl>
+    <h6>Executing the search</h6>
+    <p>To execute the search, the filled-out search form must be sent. For example, to search for <code>xmpp.org</code> in ascending order of the address with a page size of 5 and only returning MUCs which have at least one user, use:</p>
+    <pre><code>{% call escape() %}<iq to="rodrigo.de.mucobedo@dreckshal.de" type="get">
+  <search xmlns="https://xmlns.zombofant.net/muclumbus/search/1.0">
+    <set xmlns="http://jabber.org/protocol/rsm">
+      <max>20</max>
+    </set>
+    <x xmlns="jabber:x:data" type="submit">
+      <field var="FORM_TYPE" type="hidden">
+        <value>https://xmlns.zombofant.net/muclumbus/search/1.0#params</value>
+      </field>
+      <field var="q" type="text-single" label="Search for">
+        <value>xmpp.org</value>
+      </field>
+      <field var="sinname" type="boolean" label="Search in name">
+        <value>true</value>
+      </field>
+      <field var="sindescription" type="boolean" label="Search in description">
+        <value>true</value>
+      </field>
+      <field var="sinaddr" type="boolean" label="Search in address">
+        <value>true</value>
+      </field>
+      <field var="min_users" type="text-single" label="Minimum number of users">
+        <value>1</value>
+      </field>
+      <field var="key" type="list-single" label="Sort results by">
+        <value>address</value>
+        <option label="Number of online users"><value>nusers</value></option>
+        <option label="Address"><value>address</value></option>
+      </field>
+    </x>
+  </search>
+</iq>{% endcall %}</code></pre>
+    <p>The XEP-0059 element is optional in the initial search request. It MAY be used to configure the page size. Note that the service may override your choice.</p>
+    <p>The server will then respond with the first page of the result set:</p>
+  <pre><code>{% call escape() %}<iq type='result' from='rodrigo.de.mucobedo@dreckshal.de'>
+  <result xmlns='https://xmlns.zombofant.net/muclumbus/search/1.0'>
+    <item address='commteam@muc.xmpp.org'>
+      <name>commteam</name>
+      <nusers>10</nusers>
+      <is-open/>
+    </item>
+    […]
+    <item address='operators@muc.xmpp.org'>
+      <name>XMPP Service Operators</name>
+      <description>Discussion venue for operators of federated XMPP services</description>
+      <nusers>43</nusers>
+      <is-open/>
+    </item>
+    <set xmlns='http://jabber.org/protocol/rsm'>
+      <first>opaque-string-1</first>
+      <last>opaque-string-2</last>
+      <max>5</max>
+    </set>
+  </result>
+</iq>{% endcall %}</code></pre>
+    <p class="box">
+        <strong>Note:</strong> The child element of the <code>iq</code> is a different one than used in the request!
+    </p>
+    <p>The result contains of a sequence of items and a XEP-0059 element. The latter is used for pagination. The <code>&lt;max/&gt;</code> child is always included; it indicates the page size chosen by the service. If the number of items returned is less than the page size, you have reached the last page and should not continue to paginate further.</p>
+    <p>The result <code>&lt;item/&gt;</code> elements have the following syntax:</p>
+    <dl>
+        <dt>@<code>address</code></dt>
+        <dd>This attribute carries the address of the result MUC.</dd>
+        <dt><code>&lt;name/&gt;</code></dt>
+        <dd>Optional string. The name of the MUC. May be omitted if unknown.</dd>
+        <dt><code>&lt;description/&gt;</code></dt>
+        <dd>Optional string. The description of the MUC. May be omitted if unknown.</dd>
+        <dt><code>&lt;language/&gt;</code></dt>
+        <dd>Optional string. The language of the MUC. May be omitted if unknown.</dd>
+        <dt><code>&lt;is-open/&gt;</code></dt>
+        <dd>Optional. Does not have children or text. Its presence indicates that the MUC is open to join by anyone.</dd>
+    </dl>
+    <h6>Pagination</h6>
+    <p>To paginate through the results, send the same form again and set the &lt;after/&gt; element of the XEP-0059 element to the value given in the &lt;last/&gt; element of the last page your received:</p>
+    <pre><code>{% call escape() %}<iq to="rodrigo.de.mucobedo@dreckshal.de" id="xfdrffYzW2FTxdE2i6+0W" type="get">
+    <search xmlns="https://xmlns.zombofant.net/muclumbus/search/1.0">
+    <set xmlns="http://jabber.org/protocol/rsm">
+      <after>opaque-string-2</after>
+      <max>5</max>
+    </set>
+    <x xmlns="jabber:x:data" type="submit">
+      <!-- Your search goes here -->
+    </x>
+  </search>
+</iq>{% endcall %}</code></pre>
+    <p>The server will then return the next page. You can repeat this until your recieve a result set which has fewer items than indicated in the &lt;max/&gt; element of the results RSM element.</p>
+    <h3><a name="http"></a>HTTP API</h3>
     <p>We offer a minimalistic HTTP-based JSON API to query the room list.</p>
     <h6>Rate limiting</h6>
     <p>We offer this service as a best-effort service. If you receive a 429 status code, please wait at least one minute for your next request.</p>
@@ -99,7 +259,5 @@
             <strong>Warning:</strong> This listing is not safe against insert/reorder/delete race conditions when fetching multiple pages. This means that rooms can be missing or can be duplicated in the result.
         </p>
     </section>
-    <h3>XMPP API</h3>
-    <p>We currently do not offer an XMPP API, but we plan to do so in the future.</p>
 </article>
 {% endblock %}
