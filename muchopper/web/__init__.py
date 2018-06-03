@@ -22,7 +22,7 @@ from flask import (
 from flask_sqlalchemy import SQLAlchemy, Pagination, BaseQuery
 from flask_menu import register_menu, Menu
 
-from ..common import model
+from ..common import model, queries
 
 app = Flask(__name__)
 app.config.from_envvar("MUCHOPPER_WEB_CONFIG")
@@ -205,45 +205,8 @@ def index():
     return redirect(url_for("room_list", pageno=1))
 
 
-def base_query(session, *,
-               include_closed=False):
-    q = session.query(
-        model.MUC,
-        model.PubliclyListedMUC
-    ).join(
-        model.PubliclyListedMUC
-    )
-
-    if not include_closed:
-        q = q.filter(
-            model.MUC.is_open == True  # NOQA
-        )
-
-    q = q.filter(
-        model.MUC.is_hidden == False  # NOQA
-    )
-
-    return q
-
-
-def common_query(session, *,
-                 min_users=1,
-                 include_closed=False):
-    q = base_query(session, include_closed=include_closed)
-
-    if min_users > 0:
-        q = q.filter(
-            model.MUC.nusers_moving_average > min_users
-        )
-
-    return q.order_by(
-        model.MUC.nusers_moving_average.desc(),
-        model.MUC.address.asc(),
-    )
-
-
 def room_page(page, per_page, include_closed=False):
-    q = common_query(db.session, include_closed=include_closed)
+    q = queries.common_query(db.session, include_closed=include_closed)
     total = q.count()
     pages = (total+per_page-1) // per_page
     page = Page(
@@ -281,64 +244,6 @@ def room_list(pageno=1):
                            visible_pages=visible_pages)
 
 
-def chain_condition(conditional, new):
-    if conditional is None:
-        return new
-    return sqlalchemy.or_(conditional, new)
-
-
-def perform_search(query_string,
-                   search_address,
-                   search_description,
-                   search_name):
-    if not (search_address or search_description or search_name):
-        return ({"no_keywords"}, None, None)
-
-    keywords = shlex.split(query_string)
-    keywords = set(
-        keyword
-        for keyword in (
-            keyword.strip()
-            for keyword in keywords
-        )
-        if len(keyword) >= 3
-    )
-
-    if len(keywords) > 5:
-        return ({"too_many_keywords"}, None, None)
-    elif not keywords:
-        return ({"no_keywords"}, None, None)
-
-    q = common_query(db.session,
-                   min_users=0)
-    for keyword in keywords:
-        conditional = None
-        if search_address:
-            conditional = chain_condition(
-                conditional,
-                model.PubliclyListedMUC.address.ilike("%" + keyword + "%")
-            )
-        if search_description:
-            conditional = chain_condition(
-                conditional,
-                model.PubliclyListedMUC.description.ilike("%" + keyword + "%")
-            )
-        if search_name:
-            conditional = chain_condition(
-                conditional,
-                model.PubliclyListedMUC.name.ilike("%" + keyword + "%")
-            )
-        q = q.filter(conditional)
-
-    q = q.limit(101)
-    results = list(q)
-    if len(results) > 100:
-        del results[100:]
-        return ({"too_many_results"}, results, keywords)
-
-    return ([], results, keywords)
-
-
 @app.route("/search")
 @register_menu(app, "data.search", "Search", order=2)
 def search():
@@ -359,16 +264,35 @@ def search():
             search_description = "sindescr" in request.args
             search_name = "sinname" in request.args
 
-        flags, results, keywords = perform_search(
-            orig_keywords,
-            search_address,
-            search_description,
-            search_name,
-        )
+        keywords = queries.prepare_keywords(orig_keywords)
+        if len(keywords) > 5:
+            too_many_keywords = True
+        elif not keywords:
+            no_keywords = True
+        elif (not search_address and
+              not search_description and
+              not search_name):
+            no_keywords = True
+        else:
+            q = queries.common_query(
+                db.session,
+                min_users=0,
+            )
 
-        no_keywords = "no_keywords" in flags
-        too_many_keywords = "too_many_keywords" in flags
-        too_many_results = "too_many_results" in flags
+            q = queries.apply_search_conditions(
+                q,
+                keywords,
+                search_address,
+                search_description,
+                search_name,
+            )
+
+            q = q.limit(101)
+            results = list(q)
+
+            if len(results) > 100:
+                results = results[:100]
+                too_many_results = True
     else:
         keywords = None
 
@@ -531,7 +455,7 @@ def api_rooms_safe():
     except ValueError:
         return abort(400)
 
-    q = base_query(db.session, include_closed=include_closed)
+    q = queries.base_query(db.session, include_closed=include_closed)
     if after is not None:
         q = q.filter(
             model.MUC.address > after
