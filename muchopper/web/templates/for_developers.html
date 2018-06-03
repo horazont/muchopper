@@ -27,7 +27,7 @@
     <p class="box">
         <strong>Note:</strong> You may find it weird that the <code>to</code> address is a bare JID. This is intended and correct. <code>rodrigo.de.mucobedo@dreckshal.de</code> is in fact a proxy service which delegates the query to one of possibly multiple workers.
     </p>
-    <p>The service will respond with the form:</p>
+    <p>The service will respond with the form (<a href="#xmpp-form-type">see below for the full form type specification</a>):</p>
     <pre><code>{% call escape() %}<iq type='result' from='rodrigo.de.mucobedo@dreckshal.de'>
   <search xmlns='https://xmlns.zombofant.net/muclumbus/search/1.0'>
     <x xmlns='jabber:x:data' type='form'>
@@ -169,7 +169,38 @@
     <p class="box warning">
         <strong>Note:</strong> This service does <em>not</em> support the full XEP-0059 semantics. Paginating is only supported through the &lt;after/&gt; element.
     </p>
-
+    <h6><a name="xmpp-form-type"></a>Form specification</h6>
+    <pre><code>{% call escape() %}<form_type>
+  <name>https://xmlns.zombofant.net/muclumbus/search/1.0</name>
+  <doc>https://muclumbus.jabbercat.org/docs/api</doc>
+  <desc>
+    Form to search through a public MUC directory.
+  </desc>
+  <field
+     var='q'
+     type='text-single'
+     label='Search for'/>
+  <field
+      var='sinname'
+      type='boolean'
+      label='Search in name'/>
+  <field
+      var='sindescription'
+      type='boolean'
+      label='Search in description'/>
+  <field
+      var='sinaddr'
+      type='boolean'
+      label='Search in address'/>
+  <field
+      var='min_users'
+      type='text-single'
+      label='Minimum number of users'/>
+  <field
+      var='key'
+      type='list-single'
+      label='Sort results by'/>
+</form_type>{% endcall %}</code></pre>
     <h3><a name="http"></a>HTTP API</h3>
     <p>We offer a minimalistic HTTP-based JSON API to query the room list.</p>
     <h6>Rate limiting</h6>
