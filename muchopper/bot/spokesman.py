@@ -201,7 +201,7 @@ class Spokesman(utils.MuchopperService, aioxmpp.service.Service):
             reply.rsm = aioxmpp.rsm.xso.ResultSetMetadata()
             if results:
                 reply.rsm.first = aioxmpp.rsm.xso.First()
-                reply.rsm.first.value = str(key_func(*results[-1]))
+                reply.rsm.first.value = str(key_func(*results[0]))
                 reply.rsm.last = aioxmpp.rsm.xso.Last()
                 reply.rsm.last.value = str(key_func(*results[-1]))
                 reply.rsm.max_ = max_
