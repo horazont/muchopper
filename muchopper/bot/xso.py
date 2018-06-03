@@ -16,7 +16,7 @@ class SearchForm(aioxmpp.forms.Form):
     query = aioxmpp.forms.TextSingle(
         var="q",
         label="Search for",
-        required=True,
+        required=False,
     )
 
     search_name = aioxmpp.forms.Boolean(
