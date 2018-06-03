@@ -204,7 +204,7 @@ class Spokesman(utils.MuchopperService, aioxmpp.service.Service):
                 reply.rsm.first.value = str(key_func(*results[0]))
                 reply.rsm.last = aioxmpp.rsm.xso.Last()
                 reply.rsm.last.value = str(key_func(*results[-1]))
-                reply.rsm.max_ = max_
+            reply.rsm.max_ = max_
 
             session.rollback()
 
