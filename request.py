@@ -72,7 +72,6 @@ async def amain(args, password):
 
             request.rsm.after = aioxmpp.rsm.xso.After()
             request.rsm.after.value = reply.rsm.last.value
-            print(request.rsm.after.value)
 
 
 if __name__ == "__main__":
