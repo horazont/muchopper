@@ -163,6 +163,10 @@
   </search>
 </iq>{% endcall %}</code></pre>
     <p>The server will then return the next page. You can repeat this until your recieve a result set which has fewer items than indicated in the &lt;max/&gt; element of the results RSM element.</p>
+    <p class="box warning">
+        <strong>Note:</strong> This service does <em>not</em> support the full XEP-0059 semantics. Paginating is only supported through the &lt;after/&gt; element.
+    </p>
+
     <h3><a name="http"></a>HTTP API</h3>
     <p>We offer a minimalistic HTTP-based JSON API to query the room list.</p>
     <h6>Rate limiting</h6>
