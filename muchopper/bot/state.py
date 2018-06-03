@@ -375,3 +375,6 @@ class State:
                 model.MUC.address == address,
             ).delete()
             session.commit()
+
+    def get_session(self):
+        return model.session_scope(self._sessionmaker)
