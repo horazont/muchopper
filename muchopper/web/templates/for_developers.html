@@ -24,6 +24,9 @@
     <p class="box">
         <strong>Reminder:</strong> You have to set a unique <code>id</code> attribute on the IQ.
     </p>
+    <p class="box">
+        <strong>Note:</strong> You may find it weird that the <code>to</code> address is a bare JID. This is intended and correct. <code>rodrigo.de.mucobedo@dreckshal.de</code> is in fact a proxy service which delegates the query to one of possibly multiple workers.
+    </p>
     <p>The service will respond with the form:</p>
     <pre><code>{% call escape() %}<iq type='result' from='rodrigo.de.mucobedo@dreckshal.de'>
   <search xmlns='https://xmlns.zombofant.net/muclumbus/search/1.0'>
