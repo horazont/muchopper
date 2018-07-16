@@ -48,11 +48,14 @@ class Watcher(aioxmpp.service.Service,
                                                     item,
                                                     require_fresh=True)
         except aioxmpp.errors.XMPPCancelError as e:
-            if e.condition == (namespaces.stanzas, "item-not-found"):
+            # TODO: follow new address in gone if available
+            if e.condition in ((namespaces.stanzas, "item-not-found"),
+                               (namespaces.stanzas, "gone")):
                 # delete muc
                 self.logger.info(
-                    "MUC does not exist anymore, "
-                    "erasing from database"
+                    "MUC %s does not exist anymore, "
+                    "erasing from database",
+                    item,
                 )
                 if fut is not None and not fut.done():
                     fut.set_exception(e)
