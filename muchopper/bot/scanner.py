@@ -13,7 +13,7 @@ import time
 import aioxmpp
 import aioxmpp.service
 
-from datetime import timedelta
+from datetime import timedelta, datetime
 
 from . import utils
 
@@ -31,6 +31,7 @@ class Scanner(aioxmpp.service.Service,
     def __init__(self, client, **kwargs):
         super().__init__(client, **kwargs)
         self._disco_svc = self.dependencies[aioxmpp.DiscoClient]
+        self.expire_after = timedelta(days=7)
 
     async def _get_items(self, state):
         domains = state.get_all_domains()
@@ -98,3 +99,11 @@ class Scanner(aioxmpp.service.Service,
         except aioxmpp.errors.ErroneousStanza as exc:
             self.logger.error("received invalid response while scanning %s: %s",
                               address, exc)
+
+    async def _execute(self, state):
+        await super()._execute(state)
+        # now clean up all stale MUCs
+        threshold = datetime.utcnow() - self.expire_after
+        self.logger.debug("expiring domains which haven’t been seen since %s",
+                          threshold)
+        state.expire_domains(threshold)

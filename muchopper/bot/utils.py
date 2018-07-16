@@ -230,7 +230,7 @@ class PeriodicBackgroundTask(MuchopperService,
                     RuntimeError("task got interrupted unexpectedly")
                 )
 
-    async def _collect_and_schedule(self, state):
+    async def _execute(self, state):
         items = await self._get_items(state)
         self.logger.debug("scheduling for %d items", len(items))
         ctr = WaitCounter(len(items))
@@ -248,6 +248,8 @@ class PeriodicBackgroundTask(MuchopperService,
         t1 = time.monotonic()
         dt = timedelta(seconds=t1-t0)
         self.logger.debug("%d items processed in %s", len(items), dt)
+
+    async def _schedule(self, dt):
         sleep = max(self.MIN_INTERVAL - dt,
                     timedelta())
         if sleep > timedelta():
@@ -257,6 +259,13 @@ class PeriodicBackgroundTask(MuchopperService,
                 self.MIN_INTERVAL,
             )
             await asyncio.sleep(sleep.total_seconds())
+
+    async def _collect_and_schedule(self, state):
+        t0 = time.monotonic()
+        await self._execute(state)
+        t1 = time.monotonic()
+        dt = timedelta(seconds=t1-t0)
+        await self._schedule(dt)
 
     async def _background_job(self):
         try:

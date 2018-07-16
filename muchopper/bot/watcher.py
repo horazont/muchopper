@@ -12,7 +12,7 @@ import random
 import sys
 import time
 
-from datetime import timedelta
+from datetime import timedelta, datetime
 
 import aioxmpp
 import aioxmpp.service
@@ -35,6 +35,7 @@ class Watcher(aioxmpp.service.Service,
     def __init__(self, client, **kwargs):
         super().__init__(client, **kwargs)
         self._disco_svc = self.dependencies[aioxmpp.DiscoClient]
+        self.expire_after = timedelta(days=2)
 
     async def _get_items(self, state):
         items = state.get_all_known_inactive_mucs()
@@ -66,6 +67,14 @@ class Watcher(aioxmpp.service.Service,
                           item, info)
         state.update_muc_metadata(item, **info)
         return info
+
+    async def _execute(self, state):
+        await super()._execute(state)
+        # now clean up all stale MUCs
+        threshold = datetime.utcnow() - self.expire_after
+        self.logger.debug("expiring MUCs which haven’t been seen since %s",
+                          threshold)
+        state.expire_mucs(threshold)
 
     async def queue_request(self, address: aioxmpp.JID):
         state = await self._state_future

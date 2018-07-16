@@ -8,6 +8,7 @@
     <p>If rooms from your domain are still not included, ensure that your service actually does list public rooms in a <code>disco#items</code> request as per <a href="https://xmpp.org/extensions/xep-0045.html#disco-rooms">the relevant section in XEP-0045 (Multi User Chat)</a>. If you are sure this is the case and your rooms have not been included in the listing 24 hours after your invitation, please <a href="{{ url_for('contact') }}">get in touch</a>.</p>
     <h3><a name="delisting"></a>Domain delisting</h3>
     <p>If you are the owner of a domain and want it to be <em>completely</em> excluded from the listing, please <a href="{{ url_for('contact') }}">get in touch</a>. Be prepared to provide proof that you are the owner of the domain. A good (zero-roundtrip) way to do so is to contact us from an XMPP address which is listed in your service’s <a href="https://xmpp.org/extensions/xep-0157.html">contact addresses</a>.</p>
+    <p>Domains which have not been reachable for more than seven days will be delisted automatically, including all of their rooms.</p>
     <h3>Traffic</h3>
     <p>We crawl all known domains for public rooms approximately once per hour. In addition, we query all rooms we know for their meta-information in a similar rhythm. We rate-limit our requests and shuffle the list of rooms to spread the load evenly across the time window.</p>
     <p>If you still find that we cause too much traffic on your domain, please get in touch (see above). We can work out to reduce the frequency for your domain or apply other means.</p>
