@@ -15,6 +15,7 @@
     <li>The timestamp of the last message seen in the MUC (if available).</li>
     <li>Whether the MUC can be joined into by everybody (<code>muc_open</code> flag and not <code>muc_passwordprotected</code> flag).</li>
     <li>Whether the MUC shall be publicly listed (<code>muc_public</code> flag)</li>
+    <li>The timestamp of the last time {{ appname() }} successfully made contact with the MUC</li>
 </ul>
 <p>In addition, for publicly listed MUCs, the following data is stored:</p>
 <ul>
@@ -26,7 +27,7 @@
 <p>If a room was delisted at our discretion, as described in the <a href="{{ url_for('owners') }}#delisting">documentation for owners</a>, or due to other reason, we store its address in a blacklist (legitimate interest under Art 6.1f).</p>
 
 <h4>Data associated with domains</h4>
-<p>Only the domain name is stored for domains. All domains which host MUC services or are referenced (via <a href="https://xmpp.org/extensions/xep-0030.html">XEP-0030</a>) are stored.</p>
+<p>Only the domain name and the timestamp of the last successful contact with the domain is stored for domains. All domains which host MUC services or are referenced (via <a href="https://xmpp.org/extensions/xep-0030.html">XEP-0030</a>) are stored.</p>
 <p>If a domain was delisted on our discretion, as described in the <a href="{{ url_for('operators') }}#delisting">documentation for operators</a>, or due to any other reason, we store it in a blacklist (legitimate interest under Art 6.1f).</p>
 
 <h4>Data obtained on the website</h4>

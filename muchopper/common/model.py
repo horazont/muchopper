@@ -106,6 +106,12 @@ class Domain(Base):
         nullable=False,
     )
 
+    last_seen = Column(
+        "last_seen",
+        DateTime(),
+        nullable=True,
+    )
+
 
 class MUC(Base):
     __tablename__ = "muc"
@@ -122,6 +128,12 @@ class MUC(Base):
         Integer(),
         ForeignKey(Domain.id_),
         nullable=False,
+    )
+
+    last_seen = Column(
+        "last_seen",
+        DateTime(),
+        nullable=True,
     )
 
     nusers = Column(

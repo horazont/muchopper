@@ -224,12 +224,14 @@ class State:
             with session.begin_nested():
                 dom = model.Domain()
                 dom.domain = key
+                dom.last_seen = datetime.utcnow()
                 session.add(dom)
                 return dom
 
     def require_domain(self, domain):
         with model.session_scope(self._sessionmaker) as session:
             result = self._require_domain(session, domain)
+            result.last_seen = datetime.utcnow()
             session.commit()
         return result
 
@@ -287,14 +289,16 @@ class State:
         with model.session_scope(self._sessionmaker) as session:
             muc = model.MUC.get(session, address)
             if muc is None:
-                domain_id = self._require_domain(session,
-                                                 address.domain).id_
+                domain = self._require_domain(session,
+                                              address.domain)
+                domain.last_seen = now
                 muc = model.MUC()
-                muc.service_domain_id = domain_id
+                muc.service_domain_id = domain.id_
                 muc.address = address
                 muc.was_kicked = False
                 muc_created = True
                 session.add(muc)
+            muc.last_seen = now
             muc.is_open = (
                 (muc.is_open or False)
                 if is_open is UNCHANGED
