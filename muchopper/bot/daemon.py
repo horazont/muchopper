@@ -36,28 +36,12 @@ class Component(Enum):
     INTERACTION = "interaction"
 
 
-if not hasattr("aioxmpp.Message", "xep0249_invite"):
-    class DirectInvite(aioxmpp.xso.XSO):
-        TAG = ("jabber:x:conference", "x")
-
-        jid = aioxmpp.xso.Attr(
-            "jid",
-            type_=aioxmpp.xso.JID(),
-        )
-
-    aioxmpp.Message.xep0249_invite = aioxmpp.xso.Child([DirectInvite])
-
-
 class InteractionHandler(aioxmpp.service.Service,
                          utils.MuchopperService):
     HELLO_EXPIRE = 3600
     HELLO_EXPIRE_INTERVAL = HELLO_EXPIRE / 4
 
     ORDER_AFTER = [
-        aioxmpp.im.dispatcher.IMDispatcher,
-    ]
-
-    ORDER_BEFORE = [
         aioxmpp.MUCClient,
     ]
 
@@ -131,30 +115,24 @@ class InteractionHandler(aioxmpp.service.Service,
         self.logger.debug("sending reply to direct invite: %s", reply)
         self.client.enqueue(reply)
 
-    @aioxmpp.service.depfilter(
-        aioxmpp.im.dispatcher.IMDispatcher,
-        "message_filter")
-    def _handle_message(self, message, peer, sent, source):
-        if message.type_ == aioxmpp.MessageType.ERROR:
-            return message
+    @aioxmpp.service.depsignal(
+        aioxmpp.MUCClient,
+        "on_muc_invitation")
+    def _handle_invite(self, stanza, muc_address, inviter_address, mode, *,
+                       password=None, reason=None, **kwargs):
+        self._suggester(muc_address)
 
-        if (message.xep0045_muc_user and
-                message.xep0045_muc_user.invites):
-            invite = message.xep0045_muc_user.invites[0]
-            self._handle_mediated_invite(message, invite)
-            return None
+        self.logger.debug("received invite: mode=%r, muc=%r, from=%r",
+                          mode, muc_address, inviter_address)
 
-        if message.xep0249_invite:
-            self._handle_direct_invite(message)
-            return None
+        if mode == aioxmpp.im.InviteMode.DIRECT:
+            self._spoken_to[inviter_address] = time.monotonic()
 
-        if (message.type_ != aioxmpp.MessageType.GROUPCHAT and
-                message.type_ != aioxmpp.MessageType.ERROR):
-            if message.body:
-                self._handle_relevant_message(message)
-                return None
-
-        return message
+            reply = stanza.make_reply()
+            reply.type_ = aioxmpp.MessageType.CHAT
+            reply.body.clear()
+            reply.body.update(ACK_BODY)
+            self.logger.debug("sending reply to direct invite: %s", reply)
 
 
 class MUCHopper:
