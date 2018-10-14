@@ -38,6 +38,15 @@ class Scanner(aioxmpp.service.Service,
         random.shuffle(domains)
         return domains
 
+    def _update_domain(self, state, domain, info):
+        state.update_domain(
+            domain,
+            identities=[
+                (identity.category, identity.type_)
+                for identity in info.identities
+            ]
+        )
+
     async def _process_muc_domain(self, state, domain):
         suggester = await self._suggester_future
         result = await self._disco_svc.query_items(domain)
@@ -85,6 +94,8 @@ class Scanner(aioxmpp.service.Service,
                               address,
                               exc)
             return
+
+        self._update_domain(state, domain, info)
 
         try:
             if "http://jabber.org/protocol/muc" in info.features:

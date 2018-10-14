@@ -11,6 +11,7 @@ from sqlalchemy import (
     ForeignKey,
     Boolean,
     Float,
+    String,
 )
 from sqlalchemy.orm import (
     relationship,
@@ -111,6 +112,52 @@ class Domain(Base):
         DateTime(),
         nullable=True,
     )
+
+
+class DomainIdentity(Base):
+    __tablename__ = "domain_identity"
+
+    domain_id = Column(
+        "domain_id",
+        Integer(),
+        ForeignKey(Domain.id_),
+        primary_key=True,
+        nullable=False,
+    )
+
+    category = Column(
+        "category",
+        String(64),
+        primary_key=True,
+        nullable=False,
+    )
+
+    type_ = Column(
+        "type",
+        String(64),
+        primary_key=True,
+        nullable=False,
+    )
+
+    @classmethod
+    def update_identities(cls, session, domain, identities):
+        to_add = set(identities)
+
+        for existing_item in session.query(cls).filter(
+                cls.domain_id == domain.id_):
+            key = existing_item.category, existing_item.type_
+            try:
+                to_add.remove(key)
+            except KeyError:
+                session.delete(existing_item)
+                continue
+
+        for category, type_ in to_add:
+            item = cls()
+            item.domain_id = domain.id_
+            item.category = category
+            item.type_ = type_
+            session.add(item)
 
 
 class MUC(Base):

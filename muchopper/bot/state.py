@@ -235,6 +235,20 @@ class State:
             session.commit()
         return result
 
+    def update_domain(self, domain,
+                      identities=UNCHANGED):
+        with model.session_scope(self._sessionmaker) as session:
+            domain_object = self._require_domain(session, domain)
+            import sys
+            print(domain_object.id_, file=sys.stderr)
+            if identities is not UNCHANGED:
+                model.DomainIdentity.update_identities(
+                    session,
+                    domain_object,
+                    identities,
+                )
+            session.commit()
+
     def expire_domains(self, threshold):
         with model.session_scope(self._sessionmaker) as session:
             session.query(model.Domain).filter(
