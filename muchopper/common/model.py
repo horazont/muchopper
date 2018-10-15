@@ -112,6 +112,24 @@ class Domain(Base):
         nullable=True,
     )
 
+    software_name = Column(
+        "software_name",
+        Unicode(128),
+        nullable=True,
+    )
+
+    software_version = Column(
+        "software_version",
+        Unicode(128),
+        nullable=True,
+    )
+
+    software_os = Column(
+        "software_os",
+        Unicode(128),
+        nullable=True,
+    )
+
 
 class DomainIdentity(Base):
     __tablename__ = "domain_identity"

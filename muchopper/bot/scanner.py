@@ -38,13 +38,25 @@ class Scanner(aioxmpp.service.Service,
         random.shuffle(domains)
         return domains
 
-    def _update_domain(self, state, domain, info):
+    def _update_domain(self, state, domain, info, version_info):
+        if version_info is None:
+            software_name = None
+            software_version = None
+            software_os = None
+        else:
+            software_name = version_info.name
+            software_version = version_info.version
+            software_os = version_info.os
+
         state.update_domain(
             domain,
             identities=[
                 (identity.category, identity.type_)
                 for identity in info.identities
-            ]
+            ],
+            software_name=software_name,
+            software_version=software_version,
+            software_os=software_os,
         )
 
     async def _process_muc_domain(self, state, domain):
@@ -95,7 +107,25 @@ class Scanner(aioxmpp.service.Service,
                               exc)
             return
 
-        self._update_domain(state, domain, info)
+        try:
+            version_info = await aioxmpp.version.query_version(
+                self.client.stream,
+                address,
+            )
+        except aioxmpp.errors.XMPPError as exc:
+            self.logger.debug(
+                "failed to query software version of %s (%s), ignoring",
+                address,
+                exc
+            )
+            version_info = None
+
+        self._update_domain(
+            state,
+            domain,
+            info,
+            version_info,
+        )
 
         try:
             if "http://jabber.org/protocol/muc" in info.features:
