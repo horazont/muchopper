@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% set title = "Privacy Policy" %}
-{% macro appname() %}<em>{{ config["APPNAME"] }}</em>{% endmacro %}
+{% from "library.tpl" import appname %}
 {% block content %}
 <h3>I don’t want my room to be listed here!</h3>
 <p>Please refer to the <a href="{{ url_for('owners') }}#delisting">documentation for owners</a>.</p>

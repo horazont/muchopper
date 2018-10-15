@@ -263,3 +263,13 @@ section.api-call {
     margin-bottom: 3em;
     margin-top: 3em;
 }
+
+
+.footnote-ref {
+    vertical-align: super;
+    font-size: 85%;
+}
+
+.footnotes > li:target {
+    background: rgba(0, 0, 0, 0.2);
+}
