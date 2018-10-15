@@ -43,6 +43,8 @@ class Watcher(aioxmpp.service.Service,
         return items
 
     async def _process_item(self, state, item, fut):
+        self.logger.debug("looking at %s", item)
+
         try:
             info = await utils.collect_muc_metadata(self._disco_svc,
                                                     item,

@@ -99,6 +99,8 @@ class Scanner(aioxmpp.service.Service,
     async def _process_item(self, state, domain, fut):
         address = aioxmpp.JID(localpart=None, domain=domain, resource=None)
 
+        self.logger.debug("looking at %s", address)
+
         try:
             info = await self._disco_svc.query_info(address)
         except aioxmpp.errors.XMPPError as exc:
