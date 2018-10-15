@@ -29,13 +29,13 @@ def upgrade():
         ),
         sa.Column(
             "category",
-            sa.String(64),
+            sa.Unicode(64),
             primary_key=True,
             nullable=False,
         ),
         sa.Column(
             "type",
-            sa.String(64),
+            sa.Unicode(64),
             primary_key=True,
             nullable=False,
         ),

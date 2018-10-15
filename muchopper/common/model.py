@@ -11,7 +11,6 @@ from sqlalchemy import (
     ForeignKey,
     Boolean,
     Float,
-    String,
 )
 from sqlalchemy.orm import (
     relationship,
@@ -120,21 +119,21 @@ class DomainIdentity(Base):
     domain_id = Column(
         "domain_id",
         Integer(),
-        ForeignKey(Domain.id_),
+        ForeignKey(Domain.id_, ondelete="CASCADE", onupdate="CASCADE"),
         primary_key=True,
         nullable=False,
     )
 
     category = Column(
         "category",
-        String(64),
+        Unicode(64),
         primary_key=True,
         nullable=False,
     )
 
     type_ = Column(
         "type",
-        String(64),
+        Unicode(64),
         primary_key=True,
         nullable=False,
     )
