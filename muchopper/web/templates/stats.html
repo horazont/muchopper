@@ -52,12 +52,24 @@
         </tr>
     </thead>
     {% for name, abs_occ in softwares %}
+    {% if abs_occ >= 3 %}
     <tr>
         <td>{{ name }}{% if name == "Christopher Muclumbus" %} <a href="#footnote-1" class="footnote-ref">(1)</a>{% endif %}</td>
         <td class="numeric">{{ abs_occ }}</td>
         <td class="numeric">{{ "%.0f" | format(abs_occ / total_software_info * 100) }}%</td>
     </tr>
+    {% endif %}
     {% endfor %}
+    <tr>
+        <td><em>Other</em> (less than 3 instances)</td>
+        <td class="numeric">{{ other_software_info }}</td>
+        <td class="numeric">{{ "%.0f" | format(other_software_info / total_software_info * 100) }}%</td>
+    </tr>
+    <tr>
+        <td><em>Unknown</em> (no version info available)</td>
+        <td class="numeric">{{ ndomains - total_software_info }}</td>
+        <td class="numeric">—</td>
+    </tr>
 </table>
 <p>Footnotes:</p>
 <ol class="footnotes">

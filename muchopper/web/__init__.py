@@ -356,6 +356,8 @@ def statistics():
     ))
 
     total_software_info = sum(count for _, count in softwares)
+    other_software_info = sum(count for _, count in softwares
+                              if count < 3)
 
     return render_template(
         "stats.html",
@@ -367,6 +369,7 @@ def statistics():
         ndomains=ndomains,
         softwares=softwares,
         total_software_info=total_software_info,
+        other_software_info=other_software_info,
     )
 
 
