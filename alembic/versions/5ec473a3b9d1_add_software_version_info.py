@@ -42,8 +42,16 @@ def upgrade():
             )
         )
 
+    op.create_index(
+        "domain_ix_software_name",
+        "domain",
+        ["software_name"],
+    )
+
 
 def downgrade():
+    op.drop_index("domain_ix_software_name")
+
     with op.batch_alter_table("domain") as batch_op:
         batch_op.drop_column("software_name")
         batch_op.drop_column("software_version")
