@@ -1,6 +1,14 @@
 {% extends "base.html" %}
 {% set title = "Statistics" %}
 {% macro appname() %}<em>{{ config["APPNAME"] }}</em>{% endmacro %}
+{% macro service_table_entry(label, count, caller=None) %}
+{% if count > 0 %}
+<tr>
+    <td><em>{{ label }}</em><br/>{{ caller() }}</td>
+    <td class="numeric">{{ count }}</td>
+</tr>
+{% endif %}
+{% endmacro %}
 {% block content %}
 <h3 id="network">Network statistics</h3>
 <table>
@@ -75,4 +83,35 @@
 <ol class="footnotes">
     <li id="footnote-1">So some people apparently find it useful to host "echo" services which simply reflect the query back to the sender. They act like a mirror. So when {{ appname() }} asks them for the software they’re running, it effectively asks itself without knowing that it does that. That’s what those "{{ appname() }}" entries are.</li>
 </ol>
+<h3 id="services">Service statistics</h3>
+<table>
+    <thead>
+        <tr>
+            <th>Service type</th>
+            <th>Instances</th>
+        </tr>
+    </thead>
+    {% call service_table_entry("User Server", services["server.im"]) -%}
+Normal user accounts, like you and me
+    {%- endcall %}
+    {% call service_table_entry("Group Chat Server", services["conference.text"]) -%}
+Group chat rooms, as listed by this service
+    {%- endcall %}
+    {% call service_table_entry("IRC Gateway", services["gateway.irc"]) -%}
+Access to IRC networks via Jabber
+    {%- endcall %}
+    {% call service_table_entry("File Storage / Upload Service", services["store.file"]) -%}
+File storage for use with Jabber (e.g. HTTP Upload)
+    {%- endcall %}
+    {% call service_table_entry("Publish-Subscribe Service", services["pubsub.service"]) -%}
+Distribute data in a publish-subscribe manner; e.g. news, weather alerts, etc.
+    {%- endcall %}
+    {% call service_table_entry("File Transfer Proxy", services["proxy.ft"]) -%}
+To facilitate file transfer via "difficult" networks
+    {%- endcall %}
+    <!-- <tr>
+        <td><em>Unknown</em></td>
+        <td class="numeric">{{ unknown_service_types }}</td>
+    </tr> -->
+</table>
 {% endblock %}

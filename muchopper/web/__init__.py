@@ -65,6 +65,15 @@ Page = collections.namedtuple(
 
 DISPLAY_LOCALE = babel.Locale("en_GB")
 
+KNOWN_SERVICE_TYPES = {
+    ("server", "im"): "server.im",
+    ("conference", "text"): "conference.text",
+    ("conference", "irc"): "gateway.irc",
+    ("store", "file"): "store.file",
+    ("pubsub", "service"): "pubsub.service",
+    ("proxy", "bytestreams"): "proxy.ft",
+}
+
 
 @contextlib.contextmanager
 def safe_writer(destpath, mode="wb", extra_paranoia=False):
@@ -359,6 +368,26 @@ def statistics():
     other_software_info = sum(count for _, count in softwares
                               if count < 3)
 
+
+    service_counter = collections.Counter()
+    unknown_service_types = 0
+
+    for category, type_, instances in db.session.query(
+                model.DomainIdentity.category,
+                model.DomainIdentity.type_,
+                f
+            ).group_by(
+                model.DomainIdentity.category,
+                model.DomainIdentity.type_,
+            ):
+        try:
+            mapped_type = KNOWN_SERVICE_TYPES[category, type_]
+        except KeyError:
+            unknown_service_types += instances
+            continue
+
+        service_counter[mapped_type] += instances
+
     return render_template(
         "stats.html",
         nmucs=nmucs,
@@ -370,6 +399,8 @@ def statistics():
         softwares=softwares,
         total_software_info=total_software_info,
         other_software_info=other_software_info,
+        services=service_counter,
+        unknown_service_types=unknown_service_types,
     )
 
 
