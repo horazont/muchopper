@@ -165,8 +165,7 @@ if __name__ == "__main__":
     )
 
     args = parser.parse_args()
-    # password = getpass.getpass("Password for {}:".format(args.local_jid))
-    password = "foobar2342"
+    password = getpass.getpass("Password for {}:".format(args.local_jid))
 
     logging.basicConfig(
         level={
