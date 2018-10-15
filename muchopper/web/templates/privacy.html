@@ -27,7 +27,13 @@
 <p>If a room was delisted at our discretion, as described in the <a href="{{ url_for('owners') }}#delisting">documentation for owners</a>, or due to other reason, we store its address in a blacklist (legitimate interest under Art 6.1f).</p>
 
 <h4>Data associated with domains</h4>
-<p>Only the domain name and the timestamp of the last successful contact with the domain is stored for domains. All domains which host MUC services or are referenced (via <a href="https://xmpp.org/extensions/xep-0030.html">XEP-0030</a>) are stored.</p>
+<p>For domains / services, {{ appname() }} collects and stores:</p>
+<ul>
+    <li>The domain name</li>
+    <li>The timestamp of last successful contact</li>
+    <li>The <a href="https://xmpp.org/extensions/xep-0030.html">XEP-0030</a> identities advertised by the domain</li>
+    <li>The <a href="https://xmpp.org/extensions/xep-0092.html">XEP-0092</a> software version information advertised by the domain</li>
+</ul>
 <p>If a domain was delisted on our discretion, as described in the <a href="{{ url_for('operators') }}#delisting">documentation for operators</a>, or due to any other reason, we store it in a blacklist (legitimate interest under Art 6.1f).</p>
 
 <h4>Data obtained on the website</h4>
