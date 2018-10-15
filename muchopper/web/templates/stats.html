@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 {% set title = "Statistics" %}
 {% block content %}
+<h3>Network statistics</h3>
 <table>
     <thead>
         <tr>
@@ -39,5 +40,22 @@
         <td class="numeric">{{ ndomains }}</td>
         <td>Number of domains known; this includes non-MUC service domains and usually a single XMPP service has multiple domains (e.g. a base domain and a MUC service domain).</td>
     </tr>
+</table>
+<h3>Software statistics</h3>
+<table>
+    <thead>
+        <tr>
+            <th>Software name</th>
+            <th>Absolute occurences</th>
+            <th>Relative occurences</th>
+        </tr>
+    </thead>
+    {% for name, abs_occ in softwares %}
+    <tr>
+        <td>{{ name }}</td>
+        <td class="numeric">{{ abs_occ }}</td>
+        <td class="numeric">{{ "%.0f" | format(abs_occ / total_software_info * 100) }}%</td>
+    </tr>
+    {% endfor %}
 </table>
 {% endblock %}

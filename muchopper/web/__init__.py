@@ -341,6 +341,21 @@ def statistics():
         model.Domain,
     ).one()
 
+    f = sqlalchemy.func.count().label("count")
+
+    softwares = list(db.session.query(
+        model.Domain.software_name,
+        f,
+    ).group_by(
+        model.Domain.software_name,
+    ).filter(
+        model.Domain.software_name != None  # NOQA
+    ).order_by(
+        f.desc()
+    ))
+
+    total_software_info = sum(count for _, count in softwares)
+
     return render_template(
         "stats.html",
         nmucs=nmucs,
@@ -349,6 +364,8 @@ def statistics():
         nhiddenmucs=nhiddenmucs,
         nusers=nusers,
         ndomains=ndomains,
+        softwares=softwares,
+        total_software_info=total_software_info,
     )
 
 
