@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% set title = "Statistics" %}
-{% from "library.tpl" import appname %}
+{% macro appname() %}<em>{{ config["APPNAME"] }}</em>{% endmacro %}
 {% block content %}
 <h3 id="network">Network statistics</h3>
 <table>

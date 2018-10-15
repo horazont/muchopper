@@ -44,5 +44,3 @@
     </tbody>
 </table>
 {% endmacro %}
-
-{% macro appname() %}<em>{{ config["APPNAME"] }}</em>{% endmacro %}
