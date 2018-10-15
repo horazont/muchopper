@@ -351,7 +351,8 @@ def statistics():
     ).filter(
         model.Domain.software_name != None  # NOQA
     ).order_by(
-        f.desc()
+        f.desc(),
+        model.Domain.software_name.asc(),
     ))
 
     total_software_info = sum(count for _, count in softwares)
