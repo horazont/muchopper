@@ -26,7 +26,7 @@ class Watcher(aioxmpp.service.Service,
               utils.PeriodicBackgroundTask):
     WORKER_POOL_SIZE = 8
     MIN_INTERVAL = timedelta(hours=1)
-    MIN_PROCESS_INTERVAL = timedelta(seconds=0.1)
+    MIN_PROCESS_INTERVAL = timedelta(seconds=0.05)
 
     ORDER_AFTER = [
         aioxmpp.DiscoClient,
