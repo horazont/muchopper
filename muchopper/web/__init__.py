@@ -15,11 +15,15 @@ import jinja2
 
 import sqlalchemy
 
+import prometheus_client
+import prometheus_client.core
+import prometheus_client.exposition
+
 import aioxmpp
 
 from flask import (
     Flask, render_template, redirect, url_for, request, abort, jsonify,
-    send_file,
+    send_file, Response,
 )
 from flask_sqlalchemy import SQLAlchemy, Pagination, BaseQuery
 from flask_menu import register_menu, Menu
@@ -75,6 +79,32 @@ KNOWN_SERVICE_TYPES = {
     ("pubsub", "service"): "pubsub.service",
     ("proxy", "bytestreams"): "proxy.ft",
 }
+
+
+PROMETHEUS_METRIC_ROOM_PAGE_HTML = prometheus_client.Summary(
+    "muclumbus_room_page_html_request_seconds",
+    "Time to process a HTML room page request"
+)
+
+PROMETHEUS_METRIC_SEARCH_HTML = prometheus_client.Summary(
+    "muclumbus_search_html_request_seconds",
+    "Time to process a HTML search request"
+)
+
+PROMETHEUS_METRIC_ROOM_PAGE_API = prometheus_client.Summary(
+    "muclumbus_room_page_api_request_seconds",
+    "Time to process an API room page request"
+)
+
+PROMETHEUS_METRIC_ROOM_PAGE_UNSAFE_API = prometheus_client.Summary(
+    "muclumbus_room_page_unsafe_api_request_seconds",
+    "Time to process an unsafe API room page request"
+)
+
+PROMETHEUS_METRIC_STATS_HTML = prometheus_client.Summary(
+    "muclumbus_stats_html_request_seconds",
+    "Time to process a HTML stats request"
+)
 
 
 @contextlib.contextmanager
@@ -241,6 +271,7 @@ def room_page(page, per_page, include_closed=False):
 @app.route("/rooms/")
 @app.route("/rooms/<int:pageno>")
 @register_menu(app, "data.rooms", "All Rooms", order=1)
+@PROMETHEUS_METRIC_ROOM_PAGE_HTML.time()
 def room_list(pageno=1):
     per_page = 25
     page = room_page(pageno, per_page)
@@ -263,6 +294,7 @@ def room_list(pageno=1):
 
 @app.route("/search")
 @register_menu(app, "data.search", "Search", order=2)
+@PROMETHEUS_METRIC_SEARCH_HTML.time()
 def search():
     no_keywords = False
     orig_keywords = ""
@@ -327,9 +359,7 @@ def search():
     )
 
 
-@app.route("/stats")
-@register_menu(app, "data.stats", "Statistics", order=3)
-def statistics():
+def get_metrics():
     q = db.session.query(
         sqlalchemy.func.count(),
         sqlalchemy.func.count(model.PubliclyListedMUC.address),
@@ -361,6 +391,23 @@ def statistics():
     ).select_from(
         model.Domain,
     ).one()
+
+    return dict(
+        nmucs=nmucs,
+        npublicmucs=npublicmucs,
+        nopenmucs=nopenmucs,
+        nhiddenmucs=nhiddenmucs,
+        nusers=nusers,
+        ndomains=ndomains,
+        ndomains_stale=ndomains_stale,
+    )
+
+
+@app.route("/stats")
+@register_menu(app, "data.stats", "Statistics", order=4)
+@PROMETHEUS_METRIC_STATS_HTML.time()
+def statistics():
+    common_metrics = get_metrics()
 
     f = sqlalchemy.func.count().label("count")
 
@@ -402,18 +449,12 @@ def statistics():
 
     return render_template(
         "stats.html",
-        nmucs=nmucs,
-        npublicmucs=npublicmucs,
-        nopenmucs=nopenmucs,
-        nhiddenmucs=nhiddenmucs,
-        nusers=nusers,
-        ndomains=ndomains,
-        ndomains_stale=ndomains_stale,
         softwares=softwares,
         total_software_info=total_software_info,
         other_software_info=other_software_info,
         services=service_counter,
         unknown_service_types=unknown_service_types,
+        **common_metrics,
     )
 
 
@@ -475,6 +516,7 @@ def room_to_json(muc, public_info):
 
 @app.route("/api/1.0/rooms.json")
 @app.route("/api/1.0/rooms/unsafe")
+@PROMETHEUS_METRIC_ROOM_PAGE_UNSAFE_API.time()
 def api_rooms_unsafe():
     try:
         pageno = int(request.args["p"])
@@ -512,6 +554,7 @@ def optional_typecast_argument(args, name, type_):
 
 
 @app.route("/api/1.0/rooms")
+@PROMETHEUS_METRIC_ROOM_PAGE_API.time()
 def api_rooms_safe():
     PAGE_SIZE = 200
 
@@ -548,3 +591,60 @@ def api_rooms_safe():
             for muc, public_info in results
         ],
     })
+
+
+# prometheus export
+
+
+class MetricCollector:
+    def collect(self):
+        metrics = get_metrics()
+
+        yield prometheus_client.core.GaugeMetricFamily(
+            "muclumbus_mucs_total",
+            "Number of MUCs known to Muclumbus",
+            value=metrics["nmucs"],
+        )
+
+        mucs_by_state = prometheus_client.core.GaugeMetricFamily(
+            "muclumbus_mucs_state_total",
+            "Number of MUCs known to Muclumbus, by state",
+            labels=["state"]
+        )
+        mucs_by_state.add_metric(["open"], metrics["nopenmucs"])
+        mucs_by_state.add_metric(["public"], metrics["npublicmucs"])
+        mucs_by_state.add_metric(["hidden"], metrics["nhiddenmucs"])
+
+        yield mucs_by_state
+
+        yield prometheus_client.core.GaugeMetricFamily(
+            "muclumbus_occupants_total",
+            "Number of occupants summed over all MUCs",
+            value=metrics["nusers"],
+        )
+
+        yield prometheus_client.core.GaugeMetricFamily(
+            "muclumbus_domains_total",
+            "Number of domains known to Muclumbus",
+            value=metrics["ndomains"],
+        )
+
+        domains_by_state = prometheus_client.core.GaugeMetricFamily(
+            "muclumbus_domains_state_total",
+            "Number of domains known to Muclumbus, by state",
+            labels=["state"]
+        )
+        domains_by_state.add_metric(["stale"], metrics["ndomains_stale"])
+
+        yield domains_by_state
+
+
+@app.route("/metrics")
+def metrics():
+    return Response(
+        prometheus_client.exposition.generate_latest(),
+        mimetype=prometheus_client.exposition.CONTENT_TYPE_LATEST,
+    )
+
+
+prometheus_client.core.REGISTRY.register(MetricCollector())
