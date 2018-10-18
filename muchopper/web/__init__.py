@@ -9,6 +9,8 @@ import re
 import shlex
 import tempfile
 
+from datetime import datetime, timedelta
+
 import jinja2
 
 import sqlalchemy
@@ -344,8 +346,11 @@ def statistics():
 
     nmucs, npublicmucs, nopenmucs, nhiddenmucs, nusers = q.one()
 
-    ndomains, = db.session.query(
-        sqlalchemy.func.count()
+    stale_threshold = datetime.utcnow() - timedelta(days=1)
+
+    ndomains, ndomains_stale = db.session.query(
+        sqlalchemy.func.count(),
+        sqlalchemy.func.count(model.Domain.last_seen < stale_threshold)
     ).select_from(
         model.Domain,
     ).one()
@@ -396,6 +401,7 @@ def statistics():
         nhiddenmucs=nhiddenmucs,
         nusers=nusers,
         ndomains=ndomains,
+        ndomains_stale=ndomains_stale,
         softwares=softwares,
         total_software_info=total_software_info,
         other_software_info=other_software_info,

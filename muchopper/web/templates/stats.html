@@ -49,6 +49,11 @@
         <td class="numeric">{{ ndomains }}</td>
         <td>Number of domains known; this includes non-MUC service domains and usually a single XMPP service has multiple domains (e.g. a base domain and a MUC service domain).</td>
     </tr>
+    <tr>
+        <th>Stale domains</th>
+        <td class="numeric">{{ ndomains_stale }}</td>
+        <td>Number of domains which haven’t been reachable for more than 24 hours.</td>
+    </tr>
 </table>
 <h3 id="software">Software statistics</h3>
 <table>
