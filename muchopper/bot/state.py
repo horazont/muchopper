@@ -242,6 +242,7 @@ class State:
                       software_os=UNCHANGED):
         with model.session_scope(self._sessionmaker) as session:
             domain_object = self._require_domain(session, domain)
+            domain_object.last_seen = datetime.utcnow()
             if identities is not UNCHANGED:
                 model.DomainIdentity.update_identities(
                     session,
