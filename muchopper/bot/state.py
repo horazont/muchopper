@@ -266,12 +266,14 @@ class State:
             session.query(model.Domain).filter(
                 model.Domain.last_seen <= threshold
             ).delete()
+            session.commit()
 
     def expire_mucs(self, threshold):
         with model.session_scope(self._sessionmaker) as session:
             session.query(model.MUC).filter(
                 model.MUC.last_seen <= threshold
             ).delete()
+            session.commit()
 
     def _prepare_text_update(self, value, max_length):
         if value is UNCHANGED:
