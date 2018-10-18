@@ -82,27 +82,27 @@ KNOWN_SERVICE_TYPES = {
 
 
 PROMETHEUS_METRIC_ROOM_PAGE_HTML = prometheus_client.Summary(
-    "muclumbus_room_page_html_request_seconds",
+    "muclumbus_http_room_page_html_request_seconds",
     "Time to process a HTML room page request"
 )
 
 PROMETHEUS_METRIC_SEARCH_HTML = prometheus_client.Summary(
-    "muclumbus_search_html_request_seconds",
+    "muclumbus_http_search_html_request_seconds",
     "Time to process a HTML search request"
 )
 
 PROMETHEUS_METRIC_ROOM_PAGE_API = prometheus_client.Summary(
-    "muclumbus_room_page_api_request_seconds",
+    "muclumbus_http_room_page_api_request_seconds",
     "Time to process an API room page request"
 )
 
 PROMETHEUS_METRIC_ROOM_PAGE_UNSAFE_API = prometheus_client.Summary(
-    "muclumbus_room_page_unsafe_api_request_seconds",
+    "muclumbus_http_room_page_unsafe_api_request_seconds",
     "Time to process an unsafe API room page request"
 )
 
 PROMETHEUS_METRIC_STATS_HTML = prometheus_client.Summary(
-    "muclumbus_stats_html_request_seconds",
+    "muclumbus_http_stats_html_request_seconds",
     "Time to process a HTML stats request"
 )
 
@@ -601,13 +601,13 @@ class MetricCollector:
         metrics = get_metrics()
 
         yield prometheus_client.core.GaugeMetricFamily(
-            "muclumbus_mucs_total",
+            "muclumbus_http_mucs_total",
             "Number of MUCs known to Muclumbus",
             value=metrics["nmucs"],
         )
 
         mucs_by_state = prometheus_client.core.GaugeMetricFamily(
-            "muclumbus_mucs_state_total",
+            "muclumbus_http_mucs_state_total",
             "Number of MUCs known to Muclumbus, by state",
             labels=["state"]
         )
@@ -618,19 +618,19 @@ class MetricCollector:
         yield mucs_by_state
 
         yield prometheus_client.core.GaugeMetricFamily(
-            "muclumbus_occupants_total",
+            "muclumbus_http_occupants_total",
             "Number of occupants summed over all MUCs",
             value=metrics["nusers"],
         )
 
         yield prometheus_client.core.GaugeMetricFamily(
-            "muclumbus_domains_total",
+            "muclumbus_http_domains_total",
             "Number of domains known to Muclumbus",
             value=metrics["ndomains"],
         )
 
         domains_by_state = prometheus_client.core.GaugeMetricFamily(
-            "muclumbus_domains_state_total",
+            "muclumbus_http_domains_state_total",
             "Number of domains known to Muclumbus, by state",
             labels=["state"]
         )
