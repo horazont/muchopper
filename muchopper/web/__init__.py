@@ -350,7 +350,14 @@ def statistics():
 
     ndomains, ndomains_stale = db.session.query(
         sqlalchemy.func.count(),
-        sqlalchemy.func.count(model.Domain.last_seen < stale_threshold)
+        sqlalchemy.func.sum(
+            sqlalchemy.case(
+                [
+                    (model.Domain.last_seen < stale_threshold, 1),
+                ],
+                else_=0
+            )
+        )
     ).select_from(
         model.Domain,
     ).one()
