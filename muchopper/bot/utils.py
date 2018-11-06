@@ -10,6 +10,8 @@ from datetime import timedelta
 import aioxmpp
 import aioxmpp.service
 
+from muchopper.common.model import AnonymityMode
+
 from . import worker_pool
 
 
@@ -375,6 +377,15 @@ async def collect_muc_metadata(
         "is_saveable": "muc_persistent" in generic_info.features,
         "is_open": is_joinable,
         "is_public": is_public,
+        "anonymity_mode": (
+            AnonymityMode.NONE
+            if "muc_nonanonymous" in generic_info.features
+            else (
+                AnonymityMode.SEMI
+                if "muc_semianonymous" in generic_info.features
+                else None  # unknown
+            )
+        ),
         "nusers": nusers
     }
 

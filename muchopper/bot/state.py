@@ -294,7 +294,8 @@ class State:
                             description=UNCHANGED,
                             language=UNCHANGED,
                             was_kicked=UNCHANGED,
-                            is_saveable=UNCHANGED):
+                            is_saveable=UNCHANGED,
+                            anonymity_mode=UNCHANGED):
         muc_created = False
         now = datetime.utcnow()
 
@@ -343,6 +344,11 @@ class State:
                 (muc.is_open or False)
                 if is_open is UNCHANGED
                 else is_open
+            )
+            muc.anonymity_mode = (
+                muc.anonymity_mode
+                if anonymity_mode is UNCHANGED
+                else anonymity_mode
             )
             muc.was_kicked = muc.was_kicked or was_kicked or False
             muc.nusers = muc.nusers if nusers is UNCHANGED else nusers

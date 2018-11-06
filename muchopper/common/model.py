@@ -1,4 +1,5 @@
 import contextlib
+import enum
 import pathlib
 
 import sqlalchemy
@@ -81,6 +82,33 @@ class JID(sqlalchemy.types.TypeDecorator):
         if value is None:
             return value
         return aioxmpp.JID.fromstr(value)
+
+
+class SimpleEnum(sqlalchemy.types.TypeDecorator):
+    impl = sqlalchemy.types.Unicode
+
+    def __init__(self, enum_type):
+        super().__init__()
+        self.__enum_type = enum_type
+
+    def load_dialect_impl(self, dialect):
+        return sqlalchemy.types.Unicode(32)
+
+    def process_bind_param(self, value, dialect):
+        if value is None:
+            return value
+        return value.value
+
+    def process_result_value(self, value, dialect):
+        if value is None:
+            return value
+        return self.__enum_type(value)
+
+
+class AnonymityMode(enum.Enum):
+    FULL = "full"
+    SEMI = "semi"
+    NONE = "none"
 
 
 class Base(declarative_base()):
@@ -235,6 +263,12 @@ class MUC(Base):
         "was_kicked",
         Boolean(),
         nullable=False,
+    )
+
+    anonymity_mode = Column(
+        "anonymity_mode",
+        SimpleEnum(AnonymityMode),
+        nullable=True,
     )
 
     @classmethod
