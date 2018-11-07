@@ -151,6 +151,8 @@
         <dd>Optional string. The language of the MUC. May be omitted if unknown.</dd>
         <dt><code>&lt;is-open/&gt;</code></dt>
         <dd>Optional. Does not have children or text. Its presence indicates that the MUC is open to join by anyone.</dd>
+        <dt><code>&lt;anonymity-mode/&gt;</code></dt>
+        <dd>Optional string. Anonymity mode of the MUC. Either <code>semi</code> or <code>none</code>. <code>semi</code> indicates that only room moderators can see the occupants real JIDs. <code>none</code> indicates that everyone can see everyones JIDs.</dd>
     </dl>
     <h6>Pagination</h6>
     <p>To paginate through the results, send the same form again and set the &lt;after/&gt; element of the XEP-0059 element to the value given in the &lt;last/&gt; element of the last page your received:</p>
@@ -285,6 +287,7 @@
             "address": &lt;(str) address of the room&gt;,
             "nusers": &lt;(int or null) approximate number of users&gt;,
             "is_open": &lt;(bool) whether it can be joined by anyone&gt;,
+            "anonymity_mode": &lt;(str) "semi" or "none", indicating the level of anonymity ("semi" = room moderators can see occupant JIDs, "none" = everyone can)&gt;,
             "name": &lt;(str or null) name of the room&gt;,
             "description": &lt;(str or null) description of the room&gt;,
             "language": &lt;(str or null) primary language of the room&gt;

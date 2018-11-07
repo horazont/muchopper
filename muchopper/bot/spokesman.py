@@ -196,6 +196,7 @@ class Spokesman(utils.MuchopperService, aioxmpp.service.Service):
                 item_xso.description = public_info.description
                 item_xso.name = public_info.name
                 item_xso.language = public_info.language
+                item_xso.anonymity_mode = muc.anonymity_mode
                 reply.items.append(item_xso)
 
             reply.rsm = aioxmpp.rsm.xso.ResultSetMetadata()

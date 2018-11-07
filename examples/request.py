@@ -11,10 +11,16 @@ import muchopper.bot.xso as xso
 
 
 def print_item(item):
-    print("{:4d} {!r} ({})".format(
+    flags = []
+    if not item.anonymity_mode or item.anonymity_mode.value != "semi":
+        flags.append("non-anon")
+
+    print("{:4d} {!r} ({}){}{}".format(
         item.nusers,
         item.name,
-        item.address
+        item.address,
+        " " if flags else "",
+        " ".join(flags),
     ))
     if item.description or item.language:
         parts = ["     "]

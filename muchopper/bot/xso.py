@@ -5,6 +5,8 @@ import aioxmpp.xso
 
 from aioxmpp.utils import namespaces
 
+from muchopper.common.model import AnonymityMode
+
 
 namespaces.net_zombofant_muclumbus_search = \
     "https://xmlns.zombofant.net/muclumbus/search/1.0"
@@ -111,6 +113,12 @@ class SearchResultItem(aioxmpp.xso.XSO):
 
     is_open = aioxmpp.xso.ChildFlag(
         (namespaces.net_zombofant_muclumbus_search, "is-open"),
+    )
+
+    anonymity_mode = aioxmpp.xso.ChildText(
+        (namespaces.net_zombofant_muclumbus_search, "anonymity-mode"),
+        type_=aioxmpp.xso.EnumCDataType(AnonymityMode),
+        default=None,
     )
 
 
