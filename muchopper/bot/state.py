@@ -98,6 +98,8 @@ class State:
                 domain
                 for domain, in session.query(
                     model.Domain.domain,
+                ).filter(
+                    model.Domain.delisted != True
                 )
             ]
             session.rollback()
@@ -264,7 +266,8 @@ class State:
     def expire_domains(self, threshold):
         with model.session_scope(self._sessionmaker) as session:
             session.query(model.Domain).filter(
-                model.Domain.last_seen <= threshold
+                model.Domain.last_seen <= threshold,
+                model.Domain.delisted != True
             ).delete()
             session.commit()
 

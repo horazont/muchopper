@@ -158,6 +158,13 @@ class Domain(Base):
         nullable=True,
     )
 
+    delisted = Column(
+        "delisted",
+        Boolean(),
+        nullable=False,
+        default=False,
+    )
+
 
 class DomainIdentity(Base):
     __tablename__ = "domain_identity"
