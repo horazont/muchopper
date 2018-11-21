@@ -409,6 +409,8 @@ class WaitCounter:
         self._max = max_
         self._value = 0
         self._event = asyncio.Event(loop=loop)
+        if max_ <= 0:
+            self._event.set()
 
     def submit(self):
         self._value += 1
