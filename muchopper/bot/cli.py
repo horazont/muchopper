@@ -58,6 +58,7 @@ async def amain(loop, args, cfg):
     for addr in cfg["muchopping"].get("seed", []):
         state.require_domain(
             addr,
+            seen=False,
         )
 
     try:

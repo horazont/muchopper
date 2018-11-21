@@ -92,12 +92,26 @@ class State:
 
         return all_jids
 
-    def get_all_domains(self) -> typing.Sequence[str]:
+    def get_scannable_domains(self) -> typing.Sequence[str]:
         with model.session_scope(self._sessionmaker) as session:
             all_domains = [
-                domain
-                for domain, in session.query(
+                (domain, last_seen, type_ is not None and category is not None)
+                for domain, last_seen, type_, category, in session.query(
                     model.Domain.domain,
+                    model.Domain.last_seen,
+                    model.DomainIdentity.type_,
+                    model.DomainIdentity.category
+                ).outerjoin(
+                    # select all domains, but also extract a flag which
+                    # indicates MUCiness of a domain
+                    model.DomainIdentity,
+                    sqlalchemy.sql.and_(
+                        model.Domain.id_ == model.DomainIdentity.domain_id,
+                        sqlalchemy.sql.and_(
+                            model.DomainIdentity.category == "conference",
+                            model.DomainIdentity.type_ == "text",
+                        )
+                    )
                 ).filter(
                     model.Domain.delisted != True
                 )
@@ -212,7 +226,7 @@ class State:
 
         return items
 
-    def _require_domain(self, session, domain):
+    def _require_domain(self, session, domain, seen=True):
         if isinstance(domain, str):
             key = domain
         else:
@@ -226,14 +240,20 @@ class State:
             with session.begin_nested():
                 dom = model.Domain()
                 dom.domain = key
-                dom.last_seen = datetime.utcnow()
+                if seen:
+                    dom.last_seen = datetime.utcnow()
+                else:
+                    dom.last_seen = None
                 session.add(dom)
                 return dom
 
-    def require_domain(self, domain):
+    def require_domain(self, domain, seen=True):
         with model.session_scope(self._sessionmaker) as session:
-            result = self._require_domain(session, domain)
-            result.last_seen = datetime.utcnow()
+            # we pass seen=False because we handle timestamping in any case
+            result = self._require_domain(session, domain, seen=False)
+            if seen:
+                offset = seen if seen is not True else timedelta(0)
+                result.last_seen = datetime.utcnow() + offset
             session.commit()
         return result
 

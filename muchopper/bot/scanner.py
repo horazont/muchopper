@@ -32,9 +32,10 @@ class Scanner(aioxmpp.service.Service,
         super().__init__(client, **kwargs)
         self._disco_svc = self.dependencies[aioxmpp.DiscoClient]
         self.expire_after = timedelta(days=7)
+        self.non_muc_rescan_delay = timedelta(hours=6)
 
     async def _get_items(self, state):
-        domains = state.get_all_domains()
+        domains = state.get_scannable_domains()
         random.shuffle(domains)
         return domains
 
@@ -94,12 +95,32 @@ class Scanner(aioxmpp.service.Service,
                 continue
 
             # add domain to list for future scans
-            state.require_domain(address)
+            state.require_domain(
+                address,
+                seen=-self.non_muc_rescan_delay
+            )
 
-    async def _process_item(self, state, domain, fut):
+    async def _process_item(self, state, item, fut):
+        domain, last_seen, is_muc = item
         address = aioxmpp.JID(localpart=None, domain=domain, resource=None)
 
-        self.logger.debug("looking at %s", address)
+        if not is_muc:
+            threshold = datetime.utcnow() - self.non_muc_rescan_delay
+            if last_seen is not None and last_seen >= threshold:
+                self.logger.debug(
+                    "%s is not a MUC service and was scanned since %s; skipping"
+                    " it in in this round",
+                    domain, threshold
+                )
+                return
+            else:
+                self.logger.debug(
+                    "%s is not a MUC service, but it was not successfully "
+                    "scanned since %s; including it in this round",
+                    domain, threshold,
+                )
+        else:
+            self.logger.debug("%s is a MUC service, forcing scan", domain)
 
         try:
             info = await self._disco_svc.query_info(address)
