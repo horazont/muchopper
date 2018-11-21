@@ -27,12 +27,21 @@ def upgrade():
         )
 
     domain = sa.sql.table(
+        'domain',
         sa.sql.column('delisted')
     )
 
     op.execute(
         domain.update().values({'delisted': False})
     )
+
+    with op.batch_alter_table("domain") as batch_op:
+        batch_op.alter_column(
+            "delisted",
+            nullable=False,
+            exsiting_type=sa.Boolean(),
+            existing_nullable=False,
+        )
 
 
 def downgrade():
