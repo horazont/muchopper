@@ -39,7 +39,7 @@ def upgrade():
         batch_op.alter_column(
             "delisted",
             nullable=False,
-            exsiting_type=sa.Boolean(),
+            existing_type=sa.Boolean(),
             existing_nullable=False,
         )
 
