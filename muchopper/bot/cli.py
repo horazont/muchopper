@@ -53,6 +53,7 @@ async def amain(loop, args, cfg):
         list(map(aioxmpp.JID.fromstr,
                  cfg["muchopping"].get("privileged_entities", []))),
         components,
+        mirror_config=cfg["muchopping"].get("mirror", {})
     )
 
     for addr in cfg["muchopping"].get("seed", []):

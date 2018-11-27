@@ -11,7 +11,9 @@ from enum import Enum
 
 import aioxmpp
 
-from . import worker_pool, state, utils, watcher, scanner, insideman, spokesman
+from . import (
+    worker_pool, state, utils, watcher, scanner, insideman, spokesman, mirror
+)
 
 
 INFO_BODY = {
@@ -34,6 +36,8 @@ class Component(Enum):
     SCANNER = "scanner"
     SPOKESMAN = "spokesman"
     INTERACTION = "interaction"
+    MIRROR_SERVER = "mirror-server"
+    MIRROR_CLIENT = "mirror-client"
 
 
 class InteractionHandler(aioxmpp.service.Service,
@@ -142,7 +146,8 @@ class MUCHopper:
                  default_nickname,
                  state,
                  privileged_entities,
-                 components):
+                 components,
+                 mirror_config):
         self.logger = logging.getLogger("muclogger")
         self._loop = loop
         self._state = state
@@ -155,6 +160,17 @@ class MUCHopper:
         self._client.summon(aioxmpp.DiscoServer)
         self._muc_svc = self._client.summon(aioxmpp.MUCClient)
         self._disco_svc = self._client.summon(aioxmpp.DiscoClient)
+
+        if (Component.MIRROR_CLIENT in components and
+                (Component.WATCHER in components or
+                 Component.SCANNER in components or
+                 Component.INTERACTION in components or
+                 Component.INSIDEMAN in components)):
+            raise Exception(
+                "Invalid configuration: mirror-client can not be used together "
+                "with watcher, scanner, interaction or insideman components, "
+                "since mirror-client needs full control over the database."
+            )
 
         if Component.INTERACTION in components:
             self._interaction = self._client.summon(InteractionHandler)
@@ -184,6 +200,20 @@ class MUCHopper:
             self._spokesman = self._client.summon(spokesman.Spokesman)
             self._spokesman.state = state
             self._spokesman.suggester = self.suggest_new_address
+
+        if Component.MIRROR_SERVER in components:
+            self._mirror_server = self._client.summon(mirror.MirrorServer)
+            self._mirror_server.publish_target = aioxmpp.JID.fromstr(
+                mirror_config["server"]["pubsub_service"],
+            )
+            self._mirror_server.state = state
+
+        if Component.MIRROR_CLIENT in components:
+            self._mirror_client = self._client.summon(mirror.MirrorClient)
+            self._mirror_client.source = aioxmpp.JID.fromstr(
+                mirror_config["client"]["pubsub_service"],
+            )
+            self._mirror_client.state = state
 
         version_svc = self._client.summon(aioxmpp.VersionServer)
         version_svc.name = "Christopher Muclumbus"

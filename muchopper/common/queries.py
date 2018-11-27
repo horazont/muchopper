@@ -5,6 +5,17 @@ import sqlalchemy
 from . import model
 
 
+def base_filter(q, include_closed=False):
+    if not include_closed:
+        q = q.filter(
+            model.MUC.is_open == True  # NOQA
+        )
+
+    return q.filter(
+        model.MUC.is_hidden == False  # NOQA
+    )
+
+
 def base_query(session, *,
                include_closed=False):
     q = session.query(
@@ -14,16 +25,7 @@ def base_query(session, *,
         model.PubliclyListedMUC
     )
 
-    if not include_closed:
-        q = q.filter(
-            model.MUC.is_open == True  # NOQA
-        )
-
-    q = q.filter(
-        model.MUC.is_hidden == False  # NOQA
-    )
-
-    return q
+    return base_filter(q, include_closed=include_closed)
 
 
 def common_query(session, *,

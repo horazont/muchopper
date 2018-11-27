@@ -1,3 +1,5 @@
+import enum
+
 import aioxmpp
 import aioxmpp.forms
 import aioxmpp.rsm.xso
@@ -10,6 +12,18 @@ from muchopper.common.model import AnonymityMode
 
 namespaces.net_zombofant_muclumbus_search = \
     "https://xmlns.zombofant.net/muclumbus/search/1.0"
+
+
+class StateTransferV1_0Namespaces(enum.Enum):
+    MUCS = "https://xmlns.zombofant.net/muclumbus/state-transfer/1.0/mucs"
+    DOMAINS = "https://xmlns.zombofant.net/muclumbus/state-transfer/1.0/domains"
+
+
+namespaces.net_zombofant_muclumbus_state_transfer_1_0_mucs = \
+    StateTransferV1_0Namespaces.MUCS.value
+
+namespaces.net_zombofant_muclumbus_state_transfer_1_0_domains = \
+    StateTransferV1_0Namespaces.DOMAINS.value
 
 
 class SearchForm(aioxmpp.forms.Form):
@@ -134,3 +148,47 @@ class SearchResult(aioxmpp.xso.XSO):
     rsm = aioxmpp.xso.Child([
         aioxmpp.rsm.xso.ResultSetMetadata,
     ])
+
+
+@aioxmpp.pubsub.xso.as_payload_class
+class SyncItemMUC(aioxmpp.xso.XSO):
+    TAG = (
+        StateTransferV1_0Namespaces.MUCS.value,
+        "muc"
+    )
+
+    address = aioxmpp.xso.Attr(
+        "address",
+        type_=aioxmpp.xso.JID(),
+    )
+
+    name = aioxmpp.xso.ChildText(
+        (StateTransferV1_0Namespaces.MUCS.value, "name"),
+        default=None,
+    )
+
+    description = aioxmpp.xso.ChildText(
+        (StateTransferV1_0Namespaces.MUCS.value, "description"),
+        default=None,
+    )
+
+    language = aioxmpp.xso.ChildText(
+        (StateTransferV1_0Namespaces.MUCS.value, "language"),
+        default=None,
+    )
+
+    nusers = aioxmpp.xso.ChildText(
+        (StateTransferV1_0Namespaces.MUCS.value, "nusers"),
+        type_=aioxmpp.xso.Float(),
+        default=None,
+    )
+
+    is_open = aioxmpp.xso.ChildFlag(
+        (StateTransferV1_0Namespaces.MUCS.value, "is-open"),
+    )
+
+    anonymity_mode = aioxmpp.xso.ChildText(
+        (StateTransferV1_0Namespaces.MUCS.value, "anonymity-mode"),
+        type_=aioxmpp.xso.EnumCDataType(AnonymityMode),
+        default=None,
+    )

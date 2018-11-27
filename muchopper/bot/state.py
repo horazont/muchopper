@@ -34,6 +34,15 @@ NUSERS_MOVING_AVERAGE_FACTOR = 0.82
 NUSERS_MOVING_AVERAGE_INTERVAL = timedelta(hours=0.95)
 
 
+def merge(obj, attr, value):
+    if value is UNCHANGED:
+        return False
+    if getattr(obj, attr) == value:
+        return False
+    setattr(obj, attr, value)
+    return True
+
+
 def process_text(text, length_soft_limit, length_hard_limit=None):
     length_hard_limit = length_hard_limit or length_soft_limit*2
 
@@ -48,6 +57,11 @@ def process_text(text, length_soft_limit, length_hard_limit=None):
 
 
 class State:
+    on_muc_changed = aioxmpp.callbacks.Signal()
+    on_muc_deleted = aioxmpp.callbacks.Signal()
+    on_domain_changed = aioxmpp.callbacks.Signal()
+    on_domain_deleted = aioxmpp.callbacks.Signal()
+
     def __init__(self,
                  engine,
                  logfile: pathlib.Path,
@@ -350,6 +364,8 @@ class State:
             if language is not None:
                 language = language[:self._max_language_length]
 
+        has_changes = False
+
         with model.session_scope(self._sessionmaker) as session:
             muc = model.MUC.get(session, address)
             if muc is None:
@@ -361,20 +377,16 @@ class State:
                 muc.address = address
                 muc.was_kicked = False
                 muc_created = True
+                has_changes = True
                 session.add(muc)
+
             muc.last_seen = now
-            muc.is_open = (
-                (muc.is_open or False)
-                if is_open is UNCHANGED
-                else is_open
-            )
-            muc.anonymity_mode = (
-                muc.anonymity_mode
-                if anonymity_mode is UNCHANGED
-                else anonymity_mode
+            has_changes = merge(muc, "is_open", is_open) or has_changes
+            has_changes = (
+                merge(muc, "anonymity_mode", anonymity_mode) or has_changes
             )
             muc.was_kicked = muc.was_kicked or was_kicked or False
-            muc.nusers = muc.nusers if nusers is UNCHANGED else nusers
+            has_changes = merge(muc, "nusers", nusers) or has_changes
             if muc.nusers_moving_average is None:
                 muc.nusers_moving_average = muc.nusers
                 muc.moving_average_last_update = now
@@ -396,25 +408,30 @@ class State:
                     public_muc = model.PubliclyListedMUC()
                     public_muc.address = address
                     session.add(public_muc)
-                public_muc.subject = \
-                    public_muc.subject if subject is UNCHANGED else subject
-                public_muc.name = \
-                    public_muc.name if name is UNCHANGED else name
-                public_muc.description = \
-                    (public_muc.description
-                     if description is UNCHANGED
-                     else description)
-                public_muc.language = \
-                    (public_muc.language
-                     if language is UNCHANGED
-                     else language)
+                    has_changes = True
+
+                has_changes = \
+                    merge(public_muc, "subject", subject) or has_changes
+                has_changes = \
+                    merge(public_muc, "name", name) or has_changes
+                has_changes = \
+                    merge(public_muc, "description", description) or has_changes
+                has_changes = \
+                    merge(public_muc, "language", language) or has_changes
 
             elif is_public is False:
+                public_muc = model.PubliclyListedMUC.get(session, address)
+                if public_muc is not None:
+                    has_changes = True
+
                 session.query(model.PubliclyListedMUC).filter(
                     model.PubliclyListedMUC.address == address
                 ).delete()
 
             session.commit()
+
+        if has_changes:
+            self.on_muc_changed(address)
 
     def store_referral(self, from_address, to_address, *,
                        timestamp=None):
