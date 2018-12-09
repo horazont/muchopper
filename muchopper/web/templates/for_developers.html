@@ -15,20 +15,20 @@
     <h3><a name="xmpp"></a>XMPP API</h3>
     <p>The XMPP API is based on <a href="https://xmpp.org/extensions/xep-0004.html">XEP-0004 (Data Forms)</a> and <a href="https://xmpp.org/extensions/xep-0059.html">XEP-0059 (Result Set Management)</a> (don’t worry: the results are <em>not</em> in a XEP-0004 report!).</p>
     <p>The search parameters are sent via a XEP-0004 form. The results are in a custom wire format which is paginated using XEP-0059 RSM.</p>
-    <p>The XMPP API endpoint is <a href="xmpp:rodrigo.de.mucobedo@dreckshal.de"><code>rodrigo.de.mucobedo@dreckshal.de</code></a>.</p>
+    <p>The XMPP API endpoint is <a href="xmpp:{{ config["APIJID"] }}"><code>{{ config["APIJID"] }}</code></a>.</p>
     <h6>Obtaining the search parameters form</h6>
     <p>To request the search form, send the following request:</p>
-    <pre><code>{% call escape() %}<iq to="rodrigo.de.mucobedo@dreckshal.de" type="get">
+    <pre><code>{% call escape() %}<iq to="{{ config["APIJID"] }}" type="get">
     <search xmlns="https://xmlns.zombofant.net/muclumbus/search/1.0"/>
 </iq>{% endcall %}</code></pre>
     <p class="box">
         <strong>Reminder:</strong> You have to set a unique <code>id</code> attribute on the IQ.
     </p>
     <p class="box">
-        <strong>Note:</strong> You may find it weird that the <code>to</code> address is a bare JID. This is intended and correct. <code>rodrigo.de.mucobedo@dreckshal.de</code> is in fact a proxy service which delegates the query to one of possibly multiple workers.
+        <strong>Note:</strong> You may find it weird that the <code>to</code> address is a bare JID. This is intended and correct. <code>{{ config["APIJID"] }}</code> is in fact a proxy service which delegates the query to one of possibly multiple workers.
     </p>
     <p>The service will respond with the form (<a href="#xmpp-form-type">see below for the full form type specification</a>):</p>
-    <pre><code>{% call escape() %}<iq type='result' from='rodrigo.de.mucobedo@dreckshal.de'>
+    <pre><code>{% call escape() %}<iq type='result' from='{{ config["APIJID"] }}'>
   <search xmlns='https://xmlns.zombofant.net/muclumbus/search/1.0'>
     <x xmlns='jabber:x:data' type='form'>
       <field type='hidden' var='FORM_TYPE'>
@@ -80,7 +80,7 @@
     </dl>
     <h6>Executing the search</h6>
     <p>To execute the search, the filled-out search form must be sent. For example, to search for <code>xmpp.org</code> in ascending order of the address with a page size of 5 and only returning MUCs which have at least one user, use:</p>
-    <pre><code>{% call escape() %}<iq to="rodrigo.de.mucobedo@dreckshal.de" type="get">
+    <pre><code>{% call escape() %}<iq to="{{ config["APIJID"] }}" type="get">
   <search xmlns="https://xmlns.zombofant.net/muclumbus/search/1.0">
     <set xmlns="http://jabber.org/protocol/rsm">
       <max>5</max>
@@ -114,7 +114,7 @@
 </iq>{% endcall %}</code></pre>
     <p>The XEP-0059 element is optional in the initial search request. It MAY be used to configure the page size. Note that the service may override your choice.</p>
     <p>The server will then respond with the first page of the result set:</p>
-  <pre><code>{% call escape() %}<iq type='result' from='rodrigo.de.mucobedo@dreckshal.de'>
+  <pre><code>{% call escape() %}<iq type='result' from='{{ config["APIJID"] }}'>
   <result xmlns='https://xmlns.zombofant.net/muclumbus/search/1.0'>
     <item address='commteam@muc.xmpp.org'>
       <name>commteam</name>
@@ -156,7 +156,7 @@
     </dl>
     <h6>Pagination</h6>
     <p>To paginate through the results, send the same form again and set the &lt;after/&gt; element of the XEP-0059 element to the value given in the &lt;last/&gt; element of the last page your received:</p>
-    <pre><code>{% call escape() %}<iq to="rodrigo.de.mucobedo@dreckshal.de" id="xfdrffYzW2FTxdE2i6+0W" type="get">
+    <pre><code>{% call escape() %}<iq to="{{ config["APIJID"] }}" id="xfdrffYzW2FTxdE2i6+0W" type="get">
     <search xmlns="https://xmlns.zombofant.net/muclumbus/search/1.0">
     <set xmlns="http://jabber.org/protocol/rsm">
       <after>opaque-string-2</after>
