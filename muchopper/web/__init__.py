@@ -504,15 +504,17 @@ def contact():
 
 
 def room_to_json(muc, public_info):
-    return {
+    result = {
         "address": str(muc.address),
         "nusers": round(muc.nusers_moving_average),
         "is_open": muc.is_open,
-        "anonymity_mode": muc.anonymity_mode.value,
         "name": public_info.name,
         "description": public_info.description,
         "language": public_info.language,
     }
+    if muc.anonymity_mode is not None:
+        result["anonymity_mode"] = muc.anonymity_mode.value
+    return result
 
 
 @app.route("/api/1.0/rooms.json")
