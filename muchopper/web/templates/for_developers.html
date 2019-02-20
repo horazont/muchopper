@@ -153,6 +153,8 @@
         <dd>Optional. Does not have children or text. Its presence indicates that the MUC is open to join by anyone.</dd>
         <dt><code>&lt;anonymity-mode/&gt;</code></dt>
         <dd>Optional string. Anonymity mode of the MUC. Either <code>semi</code> or <code>none</code>. <code>semi</code> indicates that only room moderators can see the occupants real JIDs. <code>none</code> indicates that everyone can see everyones JIDs.</dd>
+        <dt><code>&lt;nusers&gt;</code></dt>
+        <dd>Integer. Approximate number of users in the room.</dd>
     </dl>
     <h6>Pagination</h6>
     <p>To paginate through the results, send the same form again and set the &lt;after/&gt; element of the XEP-0059 element to the value given in the &lt;last/&gt; element of the last page your received:</p>
