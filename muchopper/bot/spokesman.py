@@ -127,13 +127,13 @@ class Spokesman(utils.MuchopperService, aioxmpp.service.Service):
                 text="Invalid key value"
             )
 
-        if len(form.query.value) > 1024:
-            raise aioxmpp.errors.XMPPModifyError(
-                (namespaces.stanzas, "policy-violation"),
-                text="Query too long"
-            )
-
         if form.query.value:
+            if len(form.query.value) > 1024:
+                raise aioxmpp.errors.XMPPModifyError(
+                    (namespaces.stanzas, "policy-violation"),
+                    text="Query too long"
+                )
+
             keywords = queries.prepare_keywords(form.query.value)
             search_address = form.search_address.value
             search_description = form.search_description.value
