@@ -147,7 +147,8 @@ class MUCHopper:
                  state,
                  privileged_entities,
                  components,
-                 mirror_config):
+                 mirror_config,
+                 spokesman_config):
         self.logger = logging.getLogger("muclogger")
         self._loop = loop
         self._state = state
@@ -200,6 +201,18 @@ class MUCHopper:
             self._spokesman = self._client.summon(spokesman.Spokesman)
             self._spokesman.state = state
             self._spokesman.suggester = self.suggest_new_address
+            self._spokesman.min_keyword_length = spokesman_config.get(
+                "min_keyword_length",
+                self._spokesman.min_keyword_length
+            )
+            self._spokesman.max_query_length = spokesman_config.get(
+                "max_query_length",
+                self._spokesman.max_query_length
+            )
+            self._spokesman.max_page_size = spokesman_config.get(
+                "max_page_size",
+                self._spokesman.max_page_size
+            )
 
         if Component.MIRROR_SERVER in components:
             self._mirror_server = self._client.summon(mirror.MirrorServer)

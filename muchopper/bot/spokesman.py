@@ -28,6 +28,9 @@ class Spokesman(utils.MuchopperService, aioxmpp.service.Service):
 
     def __init__(self, client, **kwargs):
         super().__init__(client, **kwargs)
+        self.min_keyword_length = 3
+        self.max_query_length = 1024
+        self.max_page_size = 100
         self._helper_funcs = {
             "nusers": (
                 self._base_query_nusers,
@@ -79,7 +82,7 @@ class Spokesman(utils.MuchopperService, aioxmpp.service.Service):
             )
 
         request = request.payload
-        max_ = 100
+        max_ = self.max_page_size
 
         if not request.rsm and not request.form:
             reply = xso.Search()
@@ -128,13 +131,16 @@ class Spokesman(utils.MuchopperService, aioxmpp.service.Service):
             )
 
         if form.query.value:
-            if len(form.query.value) > 1024:
+            if len(form.query.value) > self.max_query_length:
                 raise aioxmpp.errors.XMPPModifyError(
                     (namespaces.stanzas, "policy-violation"),
                     text="Query too long"
                 )
 
-            keywords = queries.prepare_keywords(form.query.value)
+            keywords = queries.prepare_keywords(
+                form.query.value,
+                self.min_keyword_length,
+            )
             search_address = form.search_address.value
             search_description = form.search_description.value
             search_name = form.search_name.value
