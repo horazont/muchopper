@@ -32,6 +32,7 @@ class Spokesman(utils.MuchopperService, aioxmpp.service.Service):
         self.min_keyword_length = 3
         self.max_query_length = 1024
         self.max_page_size = 100
+        self.max_keywords = 5
         self._helper_funcs = {
             "nusers": (
                 self._base_query_nusers,
@@ -160,7 +161,7 @@ class Spokesman(utils.MuchopperService, aioxmpp.service.Service):
                     text="No valid search terms"
                 )
 
-            if len(keywords) > 5:
+            if len(keywords) > self.max_keywords:
                 raise aioxmpp.errors.XMPPModifyError(
                     (namespaces.stanzas, "policy-violation"),
                     text="Too many search terms"

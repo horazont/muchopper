@@ -213,6 +213,10 @@ class MUCHopper:
                 "max_page_size",
                 self._spokesman.max_page_size
             )
+            self._spokesman.max_keywords = spokesman_config.get(
+                "max_keywords",
+                self._spokesman.max_keywords
+            )
 
         if Component.MIRROR_SERVER in components:
             self._mirror_server = self._client.summon(mirror.MirrorServer)
