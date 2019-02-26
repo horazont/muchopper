@@ -349,7 +349,7 @@ class MirrorClient(utils.MuchopperService, aioxmpp.service.Service):
             len(existing_ids)
         )
 
-        batches = list(chop_to_batches(existing_ids, 32))
+        # batches = list(chop_to_batches(existing_ids, 32))
 
         # finish batchification
         async def _download_and_merge_single(id_):
@@ -377,7 +377,7 @@ class MirrorClient(utils.MuchopperService, aioxmpp.service.Service):
                 ctr.submit()
 
         download_workers = worker_pool.WorkerPool(
-            32, _download_and_merge,
+            32, _download_and_merge_single,
             max_queue_size=64,
             delay=timedelta(0),
         )
