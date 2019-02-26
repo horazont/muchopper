@@ -1,4 +1,5 @@
 import asyncio
+import time
 
 import aioxmpp
 import aioxmpp.forms
@@ -188,7 +189,21 @@ class Spokesman(utils.MuchopperService, aioxmpp.service.Service):
                 )
 
             q = q.limit(max_ + 1)
+            t0 = time.monotonic()
             results = list(q)
+            t1 = time.monotonic()
+            self.logger.debug(
+                "query took %.3fs: keywords=%r, search_address=%r, "
+                "search_description=%r, search_name=%r, min_users=%r, "
+                "after=%r",
+                t1 - t0,
+                keywords if not return_all else None,
+                search_address if not return_all else None,
+                search_description if not return_all else None,
+                search_name if not return_all else None,
+                form.min_users.value,
+                after,
+            )
 
             more = len(results) > max_
             del results[max_:]
