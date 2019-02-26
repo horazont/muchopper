@@ -303,7 +303,8 @@ class MirrorClient(utils.MuchopperService, aioxmpp.service.Service):
         aioxmpp.DiscoClient,
     ]
 
-    @aioxmpp.service.depsignal(aioxmpp.Client, "before_stream_established")
+    @aioxmpp.service.depsignal(aioxmpp.Client, "on_stream_established",
+                               defer=True)
     async def _on_stream_established(self):
         pubsub = self.dependencies[aioxmpp.PubSubClient]
         disco = self.dependencies[aioxmpp.DiscoClient]
