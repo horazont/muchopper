@@ -23,8 +23,8 @@ def chop_to_batches(iterable, batch_size):
                 yield num
 
     clock = iter(clock_generator())
-    for _, items in itertools.groupby(iterable, lambda x: next(clock)):
-        yield list(items)
+    for _, items in itertools.group(iterable, lambda x: clock()):
+        yield list(item)
 
 
 class MirrorServer(utils.MuchopperService, aioxmpp.service.Service):
@@ -303,8 +303,7 @@ class MirrorClient(utils.MuchopperService, aioxmpp.service.Service):
         aioxmpp.DiscoClient,
     ]
 
-    @aioxmpp.service.depsignal(aioxmpp.Client, "on_stream_established",
-                               defer=True)
+    @aioxmpp.service.depsignal(aioxmpp.Client, "before_stream_established")
     async def _on_stream_established(self):
         pubsub = self.dependencies[aioxmpp.PubSubClient]
         disco = self.dependencies[aioxmpp.DiscoClient]
@@ -350,17 +349,17 @@ class MirrorClient(utils.MuchopperService, aioxmpp.service.Service):
             len(existing_ids)
         )
 
-        batches = list(chop_to_batches(existing_ids, 32))
+        # batches = list(chop_to_batches(existing_ids, 32))
 
-        async def _download_and_merge(ids):
+        # finish batchification
+        async def _download_and_merge_single(id_):
             try:
-                self.logger.debug("init-sync: fetching %s", ids)
                 try:
-                    raw_items = (await pubsub.get_items_by_id(
+                    item = (await pubsub.get_items_by_id(
                         self.source,
                         xso.StateTransferV1_0Namespaces.MUCS.value,
-                        ids,
-                    )).payload.items
+                        [id_],
+                    )).payload.items[0].registered_payload
                 except aioxmpp.errors.XMPPCancelError as exc:
                     if (exc.condition ==
                             aioxmpp.errors.ErrorCondition.ITEM_NOT_FOUND):
@@ -371,27 +370,21 @@ class MirrorClient(utils.MuchopperService, aioxmpp.service.Service):
                         )
                         return
                     raise
-                except ConnectionError:
-                    self.logger.debug("init-sync: aborted with connection "
-                                      "error")
-                    return
 
-                for raw_item in raw_items:
-                    item = raw_item.registered_payload
-                    self._unwrap_item_into_state(item, self._state)
-                    self.logger.debug("init-sync: updated %s", raw_item.id_)
+                self._unwrap_item_into_state(item, self._state)
+                self.logger.debug("init-sync: updated %s", id_)
             finally:
                 ctr.submit()
 
         download_workers = worker_pool.WorkerPool(
-            32, _download_and_merge,
+            32, _download_and_merge_single,
             max_queue_size=64,
             delay=timedelta(0),
         )
-        ctr = utils.WaitCounter(len(batches))
+        ctr = utils.WaitCounter(len(existing_ids))
         try:
-            for ids in batches:
-                await download_workers.enqueue(ids)
+            for id_ in existing_ids:
+                await download_workers.enqueue(id_)
             await ctr.wait()
         finally:
             download_workers.close()
