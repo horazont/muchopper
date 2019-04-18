@@ -3,6 +3,7 @@ import contextlib
 import collections
 import gzip
 import html
+import numbers
 import os
 import pathlib
 import re
@@ -34,6 +35,12 @@ app = Flask(__name__)
 app.config.from_envvar("MUCHOPPER_WEB_CONFIG")
 db = SQLAlchemy(app, metadata=model.Base.metadata)
 main_menu = Menu(app)
+
+
+def abort_json(status_code, payload):
+    resp = jsonify(payload)
+    resp.status_code = status_code
+    return abort(resp)
 
 
 with app.app_context():
@@ -104,6 +111,11 @@ PROMETHEUS_METRIC_ROOM_PAGE_UNSAFE_API = prometheus_client.Summary(
 PROMETHEUS_METRIC_STATS_HTML = prometheus_client.Summary(
     "muclumbus_http_stats_html_request_seconds",
     "Time to process a HTML stats request"
+)
+
+PROMETHEUS_METRIC_SEARCH_PAGE_API = prometheus_client.Summary(
+    "muclumbus_http_search_api_request_seconds",
+    "Time to process an API search request"
 )
 
 
@@ -594,6 +606,132 @@ def api_rooms_safe():
             for muc, public_info in results
         ],
     })
+
+
+@app.route("/api/1.0/search", methods=["POST"])
+@PROMETHEUS_METRIC_SEARCH_PAGE_API.time()
+def api_search():
+    payload = request.get_json()
+    if payload is None:
+        return abort_json(400, {"error": "must POST JSON"})
+
+    try:
+        keywords = payload["keywords"]
+        search_address = payload.get("sinaddr", True) is True
+        search_description = payload.get("sindescr", True) is True
+        search_name = payload.get("sinname", True) is True
+        min_users = payload.get("min_users", 0)
+        after = payload.get("after", None)
+    except KeyError as e:
+        return abort_json(
+            400,
+            {
+                "error": "key {!s} is required".format(str(e)),
+            }
+        )
+
+    if not isinstance(min_users, numbers.Real):
+        return abort_json(
+            400,
+            {
+                "error": "not a valid numeric value for min_users: {!r}".format(
+                    min_users
+                )
+            }
+        )
+
+    if after is not None and not isinstance(after, float):
+        return abort_json(
+            400,
+            {
+                "error": "invalid value for after: {!r}".format(after),
+            }
+        )
+
+    if not search_address and not search_description and not search_name:
+        return abort(
+            400,
+            {
+                "error": "search scope is empty"
+            }
+        )
+
+    if isinstance(keywords, str):
+        prepped_keywords = queries.prepare_keywords(keywords)
+    elif isinstance(keywords, list):
+        prepped_keywords = queries.filter_keywords(keywords, min_length=3)
+    else:
+        return abort(
+            400,
+            {
+                "error": "keywords must be a string or an array"
+            }
+        )
+
+    if len(prepped_keywords) > 5:
+        return abort(
+            400,
+            {
+                "error": "too many words",
+            }
+        )
+
+    q = queries.common_query(
+        db.session,
+        min_users=0,
+    )
+    if after is not None:
+        q = q.filter(
+            model.MUC.nusers_moving_average < after
+        )
+
+    q = queries.apply_search_conditions(
+        q,
+        keywords,
+        search_address,
+        search_description,
+        search_name,
+    )
+
+    q = q.limit(101)
+    results = list(q)
+
+    more = len(results) > 100
+
+    items = []
+    last_key = None
+    for muc, public_info in results[:100]:
+        anonymity_mode = None
+        if muc.anonymity_mode is not None:
+            anonymity_mode = anonymity_mode.value
+        items.append({
+            "address": str(muc.address),
+            "is_open": muc.is_open,
+            "nusers": round(muc.nusers_moving_average),
+            "description": public_info.description,
+            "name": public_info.name,
+            "language": public_info.language,
+            "anonymity_mode": anonymity_mode,
+        })
+        last_key = muc.nusers_moving_average
+
+    result = {
+        "query": {
+            "keywords": list(prepped_keywords),
+            "sinaddr": search_address,
+            "sindescr": search_description,
+            "sinname": search_name,
+            "min_users": min_users,
+            "after": after,
+        },
+        "result": {
+            "last": last_key,
+            "more": more,
+            "items": items
+        }
+    }
+
+    return jsonify(result)
 
 
 # prometheus export

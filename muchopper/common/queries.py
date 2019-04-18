@@ -50,8 +50,7 @@ def chain_condition(conditional, new):
     return sqlalchemy.or_(conditional, new)
 
 
-def prepare_keywords(query_string, min_length=3):
-    keywords = shlex.split(query_string)
+def filter_keywords(keywords, min_length):
     keywords = set(
         keyword
         for keyword in (
@@ -61,6 +60,11 @@ def prepare_keywords(query_string, min_length=3):
         if len(keyword) >= min_length
     )
     return keywords
+
+
+def prepare_keywords(query_string, min_length=3):
+    keywords = shlex.split(query_string)
+    return filter_keywords(keywords, min_length)
 
 
 def apply_search_conditions(q,

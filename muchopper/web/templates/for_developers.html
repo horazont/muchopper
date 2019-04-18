@@ -215,6 +215,7 @@
     <ul>
         <li><a href="#api-1.0-rooms">Complete room listing</a> (<code>GET /api/1.0/rooms</code>)</li>
         <li><a href="#api-1.0-rooms/unsafe">Quick (unsafe) room listing</a> (<code>GET /api/1.0/rooms/unsafe</code>)</li>
+        <li><a href="#api-1.0-search">Search for rooms</a> (<code>GET /api/1.0/search</code>)</li>
     </ul>
     <section class="api-call">
         <h4><a name="api-1.0-rooms"></a><code>GET /api/1.0/rooms</code></h4>
@@ -301,6 +302,70 @@
         <p>The number of items per page is a service constant.</p>
         <p class="box warning">
             <strong>Warning:</strong> This listing is not safe against insert/reorder/delete race conditions when fetching multiple pages. This means that rooms can be missing or can be duplicated in the result.
+        </p>
+    </section>
+    <section class="api-call">
+        <h4><a name="api-1.0-search"></a><code>POST /api/1.0/search</code></h4>
+        <h6>Description</h6>
+        <p class="box warning"><strong>Warning:</strong> This API is experimental and may change in incompatible ways without notice.</p>
+        <p>Execute a room search like on the website.</p>
+        <h6>Payload</h6>
+        <p>The payload must be JSON-formatted string. It <em>must</em> be sent with <code>Content-Type: application/json</code> and be encoded for the wire using UTF-8.</p>
+        <p>The object can have the following keys:</p>
+        <dl>
+          <dt><code>keywords</code></dt>
+          <dd>Required. Either a string (which will be tokenized in an unspecified way like the web UI tokenizes it) or a list of keywords.</dd>
+          <dt><code>sinaddr</code></dt>
+          <dd>Optional boolean. If true, the search will take the address of the rooms into account. Defaults to true.</dd>
+          <dt><code>sindescr</code></dt>
+          <dd>Optional boolean. If true, the search will take the description of the rooms into account. Defaults to true.</dd>
+          <dt><code>sinname</code></dt>
+          <dd>Optional boolean. If true, the search will take the name of the rooms into account. Defaults to true.</dd>
+          <dt><code>min_users</code></dt>
+          <dd>Optional float. The minimum number of users a room must have to be included in the result. Defaults to 0.</dd>
+          <dt><code>after</code></dt>
+          <dd>Optional. Pagination key. See below for details.</dd>
+        </dl>
+        <h6>Error conditions</h6>
+        <dl>
+            <dt><code>400</code></dt>
+            <dd><ul>
+                <li>Too many keywords in request</li>
+                <li>Invalid type for <code>keywords</code>, <code>min_users</code> or <code>after</code></li>
+                <li>Search scope is empty: none of the boolean flags for where to search evaluated to true.</li>
+                <li><code>keywords</code> is missing.</li>
+            </ul></dd>
+            <dt><code>429</code></dt>
+            <dd>Rate limit exceeded. Please wait at least one minute before issuing the next request.</dd>
+        </dl>
+        <h6>Pagination</h6>
+        <p>The API will only return a limited number of items. This is at least 10 items. The actual number may vary with server load or at the discretion of the service provider.</p>
+        <p>To request the next page of results, the value of the <code>last</code> key in the <code>result</code> key of the response object must be passed as <code>after</code> in the subsequent request.</p>
+        <h6>Response</h6>
+        <p>The response is a JSON object formatted like this:</p>
+        <pre><code>{
+    "query": {
+        &lt;the expanded search request&gt;
+    },
+    "result": {
+        "last": &lt;opaque pagination key (see above)&gt;,
+        "more": &lt;(bool) flag which indicates that there may be more data available on a subsequent page&gt;,
+        "items": [
+            {
+                "address": &lt;(str) address of the room&gt;,
+                "nusers": &lt;(int or null) approximate number of users&gt;,
+                "is_open": &lt;(bool) whether it can be joined by anyone&gt;,
+                "anonymity_mode": &lt;(str or null) "semi" or "none", indicating the level of anonymity ("semi" = room moderators can see occupant JIDs, "none" = everyone can). May be null if the service currently lacks data.&gt;,
+                "name": &lt;(str or null) name of the room&gt;,
+                "description": &lt;(str or null) description of the room&gt;,
+                "language": &lt;(str or null) primary language of the room&gt;
+            },
+            &lt; ... &gt;
+        ]
+    }
+}</code></pre>
+        <p class="box warning">
+          <strong>Warning:</strong> The search result is not safe against insert/reorder/delete race conditions when fetching multiple pages. This means that rooms can be missing or can be duplicated in the result.
         </p>
     </section>
 </article>
