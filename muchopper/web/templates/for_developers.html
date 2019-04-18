@@ -309,6 +309,9 @@
         <h6>Description</h6>
         <p class="box warning"><strong>Warning:</strong> This API is experimental and may change in incompatible ways without notice.</p>
         <p>Execute a room search like on the website.</p>
+        <p class="box warning">
+          <strong>Warning:</strong> The search result is not safe against insert/reorder/delete race conditions when fetching multiple pages. This means that rooms can be missing or can be duplicated in the result.
+        </p>
         <h6>Payload</h6>
         <p>The payload must be JSON-formatted string. It <em>must</em> be sent with <code>Content-Type: application/json</code> and be encoded for the wire using UTF-8.</p>
         <p>The object can have the following keys:</p>
@@ -364,9 +367,65 @@
         ]
     }
 }</code></pre>
-        <p class="box warning">
-          <strong>Warning:</strong> The search result is not safe against insert/reorder/delete race conditions when fetching multiple pages. This means that rooms can be missing or can be duplicated in the result.
-        </p>
+        <h6>Example</h6>
+        <pre><code>$ curl -s \
+    --data '{"keywords": ["xsf"]}' \
+    -H 'Content-Type: application/json; charset=utf-8' \
+    https://search.jabber.network/api/1.0/search | jq -C .
+<span style="font-weight:bold;color:black;">{
+  </span><span style="font-weight:bold;color:blue;">&quot;query&quot;</span><span style="font-weight:bold;color:black;">: </span><span style="font-weight:bold;color:black;">{
+    </span><span style="font-weight:bold;color:blue;">&quot;after&quot;</span><span style="font-weight:bold;color:black;">: </span><span style="font-weight:bold;color:dimgray;">null</span><span style="font-weight:bold;color:black;">,
+    </span><span style="font-weight:bold;color:blue;">&quot;keywords&quot;</span><span style="font-weight:bold;color:black;">: </span><span style="font-weight:bold;color:black;">[
+      </span><span style="color:green;">&quot;xsf&quot;</span><span style="font-weight:bold;color:black;">
+    ]</span><span style="font-weight:bold;color:black;">,
+    </span><span style="font-weight:bold;color:blue;">&quot;min_users&quot;</span><span style="font-weight:bold;color:black;">: </span><span style="color:black;">0</span><span style="font-weight:bold;color:black;">,
+    </span><span style="font-weight:bold;color:blue;">&quot;sinaddr&quot;</span><span style="font-weight:bold;color:black;">: </span><span style="color:black;">true</span><span style="font-weight:bold;color:black;">,
+    </span><span style="font-weight:bold;color:blue;">&quot;sindescr&quot;</span><span style="font-weight:bold;color:black;">: </span><span style="color:black;">true</span><span style="font-weight:bold;color:black;">,
+    </span><span style="font-weight:bold;color:blue;">&quot;sinname&quot;</span><span style="font-weight:bold;color:black;">: </span><span style="color:black;">true</span><span style="font-weight:bold;color:black;">
+  }</span><span style="font-weight:bold;color:black;">,
+  </span><span style="font-weight:bold;color:blue;">&quot;result&quot;</span><span style="font-weight:bold;color:black;">: </span><span style="font-weight:bold;color:black;">{
+    </span><span style="font-weight:bold;color:blue;">&quot;items&quot;</span><span style="font-weight:bold;color:black;">: </span><span style="font-weight:bold;color:black;">[
+      {
+        </span><span style="font-weight:bold;color:blue;">&quot;address&quot;</span><span style="font-weight:bold;color:black;">: </span><span style="color:green;">&quot;xsf@muc.xmpp.org&quot;</span><span style="font-weight:bold;color:black;">,
+        </span><span style="font-weight:bold;color:blue;">&quot;anonymity_mode&quot;</span><span style="font-weight:bold;color:black;">: </span><span style="color:green;">&quot;semi&quot;</span><span style="font-weight:bold;color:black;">,
+        </span><span style="font-weight:bold;color:blue;">&quot;description&quot;</span><span style="font-weight:bold;color:black;">: </span><span style="color:green;">&quot;Discussion room of the XMPP Standards Foundation&quot;</span><span style="font-weight:bold;color:black;">,
+        </span><span style="font-weight:bold;color:blue;">&quot;is_open&quot;</span><span style="font-weight:bold;color:black;">: </span><span style="color:black;">true</span><span style="font-weight:bold;color:black;">,
+        </span><span style="font-weight:bold;color:blue;">&quot;language&quot;</span><span style="font-weight:bold;color:black;">: </span><span style="color:green;">&quot;en&quot;</span><span style="font-weight:bold;color:black;">,
+        </span><span style="font-weight:bold;color:blue;">&quot;name&quot;</span><span style="font-weight:bold;color:black;">: </span><span style="color:green;">&quot;XSF Discussion&quot;</span><span style="font-weight:bold;color:black;">,
+        </span><span style="font-weight:bold;color:blue;">&quot;nusers&quot;</span><span style="font-weight:bold;color:black;">: </span><span style="color:black;">66</span><span style="font-weight:bold;color:black;">
+      }</span><span style="font-weight:bold;color:black;">,
+      {
+        </span><span style="font-weight:bold;color:blue;">&quot;address&quot;</span><span style="font-weight:bold;color:black;">: </span><span style="color:green;">&quot;council@muc.xmpp.org&quot;</span><span style="font-weight:bold;color:black;">,
+        </span><span style="font-weight:bold;color:blue;">&quot;anonymity_mode&quot;</span><span style="font-weight:bold;color:black;">: </span><span style="color:green;">&quot;semi&quot;</span><span style="font-weight:bold;color:black;">,
+        </span><span style="font-weight:bold;color:blue;">&quot;description&quot;</span><span style="font-weight:bold;color:black;">: </span><span style="color:green;">&quot;Room where the XSF XMPP Council holds its meetings&quot;</span><span style="font-weight:bold;color:black;">,
+        </span><span style="font-weight:bold;color:blue;">&quot;is_open&quot;</span><span style="font-weight:bold;color:black;">: </span><span style="color:black;">true</span><span style="font-weight:bold;color:black;">,
+        </span><span style="font-weight:bold;color:blue;">&quot;language&quot;</span><span style="font-weight:bold;color:black;">: </span><span style="color:green;">&quot;en&quot;</span><span style="font-weight:bold;color:black;">,
+        </span><span style="font-weight:bold;color:blue;">&quot;name&quot;</span><span style="font-weight:bold;color:black;">: </span><span style="color:green;">&quot;XMPP Council&quot;</span><span style="font-weight:bold;color:black;">,
+        </span><span style="font-weight:bold;color:blue;">&quot;nusers&quot;</span><span style="font-weight:bold;color:black;">: </span><span style="color:black;">23</span><span style="font-weight:bold;color:black;">
+      }</span><span style="font-weight:bold;color:black;">,
+      {
+        </span><span style="font-weight:bold;color:blue;">&quot;address&quot;</span><span style="font-weight:bold;color:black;">: </span><span style="color:green;">&quot;commteam@muc.xmpp.org&quot;</span><span style="font-weight:bold;color:black;">,
+        </span><span style="font-weight:bold;color:blue;">&quot;anonymity_mode&quot;</span><span style="font-weight:bold;color:black;">: </span><span style="color:green;">&quot;semi&quot;</span><span style="font-weight:bold;color:black;">,
+        </span><span style="font-weight:bold;color:blue;">&quot;description&quot;</span><span style="font-weight:bold;color:black;">: </span><span style="font-weight:bold;color:dimgray;">null</span><span style="font-weight:bold;color:black;">,
+        </span><span style="font-weight:bold;color:blue;">&quot;is_open&quot;</span><span style="font-weight:bold;color:black;">: </span><span style="color:black;">true</span><span style="font-weight:bold;color:black;">,
+        </span><span style="font-weight:bold;color:blue;">&quot;language&quot;</span><span style="font-weight:bold;color:black;">: </span><span style="color:green;">&quot;en&quot;</span><span style="font-weight:bold;color:black;">,
+        </span><span style="font-weight:bold;color:blue;">&quot;name&quot;</span><span style="font-weight:bold;color:black;">: </span><span style="color:green;">&quot;XSF Communications Team&quot;</span><span style="font-weight:bold;color:black;">,
+        </span><span style="font-weight:bold;color:blue;">&quot;nusers&quot;</span><span style="font-weight:bold;color:black;">: </span><span style="color:black;">14</span><span style="font-weight:bold;color:black;">
+      }</span><span style="font-weight:bold;color:black;">,
+      {
+        </span><span style="font-weight:bold;color:blue;">&quot;address&quot;</span><span style="font-weight:bold;color:black;">: </span><span style="color:green;">&quot;editor@muc.xmpp.org&quot;</span><span style="font-weight:bold;color:black;">,
+        </span><span style="font-weight:bold;color:blue;">&quot;anonymity_mode&quot;</span><span style="font-weight:bold;color:black;">: </span><span style="color:green;">&quot;semi&quot;</span><span style="font-weight:bold;color:black;">,
+        </span><span style="font-weight:bold;color:blue;">&quot;description&quot;</span><span style="font-weight:bold;color:black;">: </span><span style="color:green;">&quot;Discussion room for the XSF Editor Team&quot;</span><span style="font-weight:bold;color:black;">,
+        </span><span style="font-weight:bold;color:blue;">&quot;is_open&quot;</span><span style="font-weight:bold;color:black;">: </span><span style="color:black;">true</span><span style="font-weight:bold;color:black;">,
+        </span><span style="font-weight:bold;color:blue;">&quot;language&quot;</span><span style="font-weight:bold;color:black;">: </span><span style="color:green;">&quot;en&quot;</span><span style="font-weight:bold;color:black;">,
+        </span><span style="font-weight:bold;color:blue;">&quot;name&quot;</span><span style="font-weight:bold;color:black;">: </span><span style="color:green;">&quot;XSF Editor Team&quot;</span><span style="font-weight:bold;color:black;">,
+        </span><span style="font-weight:bold;color:blue;">&quot;nusers&quot;</span><span style="font-weight:bold;color:black;">: </span><span style="color:black;">12</span><span style="font-weight:bold;color:black;">
+      }</span><span style="font-weight:bold;color:black;">
+    ]</span><span style="font-weight:bold;color:black;">,
+    </span><span style="font-weight:bold;color:blue;">&quot;last&quot;</span><span style="font-weight:bold;color:black;">: </span><span style="color:black;">12.1112915471192</span><span style="font-weight:bold;color:black;">,
+    </span><span style="font-weight:bold;color:blue;">&quot;more&quot;</span><span style="font-weight:bold;color:black;">: </span><span style="color:black;">false</span><span style="font-weight:bold;color:black;">
+  }</span><span style="font-weight:bold;color:black;">
+}</span></pre></code>
     </section>
 </article>
 {% endblock %}
