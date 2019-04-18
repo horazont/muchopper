@@ -113,7 +113,7 @@ PROMETHEUS_METRIC_STATS_HTML = prometheus_client.Summary(
     "Time to process a HTML stats request"
 )
 
-PROMETHEUS_METRIC_SEARCH_PAGE_API = prometheus_client.Summary(
+PROMETHEUS_METRIC_SEARCH_API = prometheus_client.Summary(
     "muclumbus_http_search_api_request_seconds",
     "Time to process an API search request"
 )
@@ -609,7 +609,7 @@ def api_rooms_safe():
 
 
 @app.route("/api/1.0/search", methods=["POST"])
-@PROMETHEUS_METRIC_SEARCH_PAGE_API.time()
+@PROMETHEUS_METRIC_SEARCH_API.time()
 def api_search():
     payload = request.get_json()
     if payload is None:
@@ -703,7 +703,7 @@ def api_search():
     for muc, public_info in results[:100]:
         anonymity_mode = None
         if muc.anonymity_mode is not None:
-            anonymity_mode = anonymity_mode.value
+            anonymity_mode = muc.anonymity_mode.value
         items.append({
             "address": str(muc.address),
             "is_open": muc.is_open,
