@@ -1,0 +1,22 @@
+{# I believe the origins of this template to be in the public domain as per https://github.com/badges/shields/blob/master/LICENSE.md -#}
+<?xml version="1.0"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="{{ width }}" height="20">
+  <linearGradient id="b" x2="0" y2="100%">
+    <stop offset="0" stop-color="#bbb" stop-opacity=".1"/>
+    <stop offset="1" stop-opacity=".1"/>
+  </linearGradient>
+  <clipPath id="a">
+    <rect width="{{ width }}" height="20" rx="3" fill="#fff"/>
+  </clipPath>
+  <g clip-path="url(#a)">
+    <path fill="#555" d="M0 0h{{ labelwidth }}v20H0z"/>
+    <path fill="#fe7d37" d="M{{ labelwidth }} 0h{{ countwidth }}v20H{{ labelwidth }}z"/>
+    <path fill="url(#b)" d="M0 0h{{ width }}v20H0z"/>
+  </g>
+  <g fill="#fff" font-family="DejaVu Sans,Verdana,Geneva,sans-serif" font-size="11" xml:space="preserve">
+    <text fill="#010101" fill-opacity=".3" y="14" x="0" textLength="{{ labelwidth }}">{{ label }}</text>
+    <text y="13" x="0" textLength="{{ labelwidth }}">{{ label }}</text>
+    <text fill="#010101" fill-opacity=".3" y="14" x="{{ labelwidth }}" textLength="{{ countwidth }}">{{ number }}</text>
+    <text y="13" x="{{ labelwidth }}" textLength="{{ countwidth }}">{{ number }}</text>
+  </g>
+</svg>

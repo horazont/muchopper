@@ -118,6 +118,11 @@ PROMETHEUS_METRIC_SEARCH_API = prometheus_client.Summary(
     "Time to process an API search request"
 )
 
+PROMETHEUS_METRIC_BADGE_API = prometheus_client.Summary(
+    "muclumbus_http_badge_api_request_seconds",
+    "Time to process an API badge request"
+)
+
 
 @contextlib.contextmanager
 def safe_writer(destpath, mode="wb", extra_paranoia=False):
@@ -732,6 +737,47 @@ def api_search():
     }
 
     return jsonify(result)
+
+
+@app.route("/api/1.0/badge")
+@PROMETHEUS_METRIC_BADGE_API.time()
+def api_badge():
+    CHARWIDTH = 7
+
+    try:
+        room_jid = request.args["address"]
+    except KeyError:
+        return abort(400, "missing address argument")
+
+    room_info = db.session.query(
+        model.MUC,
+        model.PubliclyListedMUC,
+    ).join(
+        model.PubliclyListedMUC,
+    ).filter(
+        model.MUC.address == room_jid,
+    ).one_or_none()
+
+    if room_info is None or room_info[1] is None:
+        return abort(404, "no such room")
+
+    muc, public_info = room_info
+    label = " {} ".format(public_info.name or muc.address)
+    nusers = " {:.0f} ".format(muc.nusers_moving_average)
+
+    labelwidth = len(label) * CHARWIDTH
+    countwidth = len(nusers) * CHARWIDTH
+    width = labelwidth + countwidth
+
+    rendered = render_template(
+        "badge.svg",
+        width=width,
+        label=label,
+        labelwidth=labelwidth,
+        number=nusers,
+        countwidth=countwidth,
+    )
+    return Response(rendered, mimetype="image/svg+xml")
 
 
 # prometheus export

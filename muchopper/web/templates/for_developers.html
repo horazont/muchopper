@@ -216,6 +216,7 @@
         <li><a href="#api-1.0-rooms">Complete room listing</a> (<code>GET /api/1.0/rooms</code>)</li>
         <li><a href="#api-1.0-rooms/unsafe">Quick (unsafe) room listing</a> (<code>GET /api/1.0/rooms/unsafe</code>)</li>
         <li><a href="#api-1.0-search">Search for rooms</a> (<code>POST /api/1.0/search</code>)</li>
+        <li><a href="#api-1.0-badge">SVG "badges" for rooms</a> (<code>GET /api/1.0/badge</code>)</li>
     </ul>
     <section class="api-call">
         <h4><a name="api-1.0-rooms"></a><code>GET /api/1.0/rooms</code></h4>
@@ -426,6 +427,30 @@
     </span><span style="font-weight:bold;color:blue;">&quot;more&quot;</span><span style="font-weight:bold;color:black;">: </span><span style="color:black;">false</span><span style="font-weight:bold;color:black;">
   }</span><span style="font-weight:bold;color:black;">
 }</span></pre></code>
+    </section>
+    <section class="api-call">
+        <h4><a name="api-1.0-badge"></a><code>GET /api/1.0/badge</code></h4>
+        <h6>Description</h6>
+        <p>Return an SVG image with the room name (or address, if the name is unavailable) and the number of users as shown on the listing.</p>
+        <h6>Parameters</h6>
+        <dl>
+            <dt><code>address</code></dt>
+            <dd>Required. The address of the room.</p>
+        </dl>
+        <h6>Error conditions</h6>
+        <dl>
+            <dt><code>400</code></dt>
+            <dd>The address was not given.</dd>
+            <dt><code>404</code></dt>
+            <dd>No room with the given address found.</dd>
+            <dt><code>429</code></dt>
+            <dd>Rate limit exceeded. Please wait at least one minute before issuing the next request.</dd>
+        </dl>
+        <h6>Response</h6>
+        <p>The response is an SVG image.</p>
+        <h6>Example</h6>
+        <pre><code>&lt;img src="https://search.jabber.network/api/1.0/badge?address=xsf@muc.xmpp.org"/&gt;</code></pre>
+        <p><img src="/api/1.0/badge?address=xsf@muc.xmpp.org"/></p>
     </section>
 </article>
 {% endblock %}
