@@ -5,6 +5,10 @@
 {{ '  ' }}<abbr title="This room is not anonymous; other occupants may be able to see your address.">⏿</abbr>
 {% endmacro %}
 
+{% macro room_name(muc, public_info, caller=None) -%}
+{%- if public_info.name %}{{ public_info.name }}{% else %}{{ muc.address }}{% endif -%}
+{%- endmacro %}
+
 {% macro room_label(muc, public_info, keywords=[]) -%}
 {%- if public_info.name and public_info.description and public_info.name != public_info.description and public_info.name != muc.address.localpart -%}
 <span class="name">{{ public_info.name | highlight(keywords) }}</span><span class="address-suffix"> ({{ muc.address | highlight(keywords) }})</span>
@@ -16,6 +20,10 @@
 {%- endif -%}
 {%- endif -%}
 {%- endmacro %}
+
+{% macro logs_url(url, caller=None) %}
+<a href="{{ url }}" rel="nofollow"><abbr title="View history of {{ caller() }} in your browser">📜</abbr></a>
+{% endmacro%}
 
 {% macro room_table(items, keywords=[], caller=None) %}
 <table class="roomlist">
@@ -34,7 +42,7 @@
         <tr>
             <td class="nusers numeric">{{ "%.0f" | format((muc.nusers_moving_average or muc.nusers) | round) }}</td>
             <td class="addr-descr">
-                <div class="addr"><a href="xmpp:{{ muc.address }}?join">{{ room_label(muc, public_info, keywords) }}</a>{% if not muc.is_open %}{{ closed_marker() }}{% endif %}{% if not muc.anonymity_mode or muc.anonymity_mode.value == "none" %}{{ nonanon_marker() }}{% endif %}</div>
+                <div class="addr"><a href="xmpp:{{ muc.address }}?join">{{ room_label(muc, public_info, keywords) }}</a>{% if not muc.is_open %}{{ closed_marker() }}{% endif %}{% if not muc.anonymity_mode or muc.anonymity_mode.value == "none" %}{{ nonanon_marker() }}{% endif %}{% if public_info.http_logs_url %}{% call logs_url(public_info.http_logs_url) %}{% call room_name(muc, public_info) %}{% endcall %}{% endcall %}{% endif %}</div>
                 {% set descr = public_info.description or public_info.name or public_info.subject %}
                 {% set show_descr = descr and descr != muc.address.localpart %}
                 {% set show_lang = public_info.language %}
