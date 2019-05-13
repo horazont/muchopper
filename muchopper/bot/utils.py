@@ -67,6 +67,10 @@ class InfoForm(aioxmpp.forms.Form):
         var='muc#roominfo_lang',
     )
 
+    logs = aioxmpp.forms.TextSingle(
+        var='muc#roominfo_logs',
+    )
+
 
 def get_roominfo(exts) -> InfoForm:
     for ext in exts:
@@ -399,6 +403,10 @@ async def collect_muc_metadata(
             kwargs["description"] = room_info.description_alt.value or None
         if room_info.language.value is not None:
             kwargs["language"] = room_info.language.value or None
+        if room_info.logs.value is not None:
+            url = room_info.logs.value
+            if url.startswith("http://") or url.startswith("https://"):
+                kwargs["http_logs_url"] = url
 
     return kwargs
 

@@ -323,6 +323,12 @@ class PubliclyListedMUC(Base):
         nullable=True,
     )
 
+    http_logs_url = Column(
+        "http_logs_url",
+        Unicode(255),
+        nullable=True,
+    )
+
     muc = relationship(MUC)
 
     @classmethod
