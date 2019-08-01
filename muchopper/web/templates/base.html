@@ -12,12 +12,14 @@
     <head>
         <title>{{ title }} - {{ config["APPNAME"] }}</title>
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        {% block head_includes %}
         <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/core/base.min.css') }}">
         <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/screen/screen-PAGE-layout.css') }}">
         <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/screen/typography.css') }}">
         <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/navigation/hlist.css') }}">
         <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/forms/gray-theme.css') }}">
         <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/app.css') }}">
+        {% endblock %}
     </head>
     <body><div class="ym-wrapper"><div class="ym-wbox">
         <header>

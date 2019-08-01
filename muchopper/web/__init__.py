@@ -31,6 +31,8 @@ from flask_menu import register_menu, Menu
 
 from ..common import model, queries
 
+from . import colour
+
 app = Flask(__name__)
 app.config.from_envvar("MUCHOPPER_WEB_CONFIG")
 db = SQLAlchemy(app, metadata=model.Base.metadata)
@@ -444,7 +446,6 @@ def statistics():
     other_software_info = sum(count for _, count in softwares
                               if count < 3)
 
-
     service_counter = collections.Counter()
     unknown_service_types = 0
 
@@ -464,6 +465,34 @@ def statistics():
 
         service_counter[mapped_type] += instances
 
+    pruned_softwares = [
+        (name, occ, colour.text_to_colour(name))
+        for name, occ in softwares
+        if occ >= 3
+    ]
+    pruned_softwares.append(("Other", other_software_info, (0.8, 0.8, 0.8)))
+
+    software_version_chart_cfg = {
+        "labels": [name for name, _, _ in pruned_softwares],
+        "datasets": [{
+            "label": "Occurences",
+            "data": [occ for _, occ, _ in pruned_softwares],
+            "backgroundColor": [
+                "rgba({:.0f}, {:.0f}, {:.0f}, 0.8)".format(
+                    r*255, g*255, b*255
+                )
+                for _, _, (r, g, b) in pruned_softwares
+            ],
+            "borderColor": [
+                "rgba({:.0f}, {:.0f}, {:.0f}, 1.0)".format(
+                    r*255, g*255, b*255
+                )
+                for _, _, (r, g, b) in pruned_softwares
+            ],
+            "borderWidth": 1
+        }]
+    }
+
     return render_template(
         "stats.html",
         softwares=softwares,
@@ -471,6 +500,7 @@ def statistics():
         other_software_info=other_software_info,
         services=service_counter,
         unknown_service_types=unknown_service_types,
+        software_version_chart_cfg=software_version_chart_cfg,
         **common_metrics,
     )
 

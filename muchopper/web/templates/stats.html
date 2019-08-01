@@ -9,6 +9,11 @@
 </tr>
 {% endif %}
 {% endmacro %}
+{% block head_includes %}
+{{ super() }}
+<link rel='stylesheet' type='text/css' href='{{ url_for('static', filename='css/chart/chart.css') }}'>
+<script type='text/javascript' src='{{ url_for('static', filename='js/chart.js') }}'></script>
+{% endblock %}
 {% block content %}
 <h3 id="network">Network statistics</h3>
 <table>
@@ -56,34 +61,48 @@
     </tr>
 </table>
 <h3 id="software">Software statistics</h3>
-<table>
-    <thead>
-        <tr>
-            <th>Software name</th>
-            <th>Absolute occurences</th>
-            <th>Relative occurences</th>
-        </tr>
-    </thead>
-    {% for name, abs_occ in softwares %}
-    {% if abs_occ >= 3 %}
-    <tr>
-        <td>{{ name }}{% if name == "Christopher Muclumbus" %} <a href="#footnote-1" class="footnote-ref">(1)</a>{% endif %}</td>
-        <td class="numeric">{{ abs_occ }}</td>
-        <td class="numeric">{{ "%.0f" | format(abs_occ / total_software_info * 100) }}%</td>
-    </tr>
-    {% endif %}
-    {% endfor %}
-    <tr>
-        <td><em>Other</em> (less than 3 instances)</td>
-        <td class="numeric">{{ other_software_info }}</td>
-        <td class="numeric">{{ "%.0f" | format(other_software_info / total_software_info * 100) }}%</td>
-    </tr>
-    <tr>
-        <td><em>Unknown</em> (no version info available)</td>
-        <td class="numeric">{{ ndomains - total_software_info }}</td>
-        <td class="numeric">—</td>
-    </tr>
-</table>
+<div class="ym-grid">
+    <div class="ym-g66 ym-gl"><div class="ym-gbox">
+        <table>
+            <thead>
+                <tr>
+                    <th>Software name</th>
+                    <th>Absolute occurences</th>
+                    <th>Relative occurences</th>
+                </tr>
+            </thead>
+            {% for name, abs_occ in softwares %}
+            {% if abs_occ >= 3 %}
+            <tr>
+                <td>{{ name }}{% if name == "Christopher Muclumbus" %} <a href="#footnote-1" class="footnote-ref">(1)</a>{% endif %}</td>
+                <td class="numeric">{{ abs_occ }}</td>
+                <td class="numeric">{{ "%.0f" | format(abs_occ / total_software_info * 100) }}%</td>
+            </tr>
+            {% endif %}
+            {% endfor %}
+            <tr>
+                <td><em>Other</em> (less than 3 instances)</td>
+                <td class="numeric">{{ other_software_info }}</td>
+                <td class="numeric">{{ "%.0f" | format(other_software_info / total_software_info * 100) }}%</td>
+            </tr>
+            <tr>
+                <td><em>Unknown</em> (no version info available)</td>
+                <td class="numeric">{{ ndomains - total_software_info }}</td>
+                <td class="numeric">—</td>
+            </tr>
+        </table>
+    </div></div>
+    <div class="ym-g33 ym-gr"><div class="ym-gbox">
+        <canvas id="software-version-chart" width="100%" height="100%"></canvas>
+        <script>
+var ctx = document.getElementById('software-version-chart').getContext('2d');
+var chart = new Chart(ctx, {
+  type: 'pie',
+  data: {{ software_version_chart_cfg | tojson }}
+});
+        </script>
+    </div></div>
+</div></div>
 <p>Footnotes:</p>
 <ol class="footnotes">
     <li id="footnote-1">So some people apparently find it useful to host "echo" services which simply reflect the query back to the sender. They act like a mirror. So when {{ appname() }} asks them for the software they’re running, it effectively asks itself without knowing that it does that. That’s what those "{{ appname() }}" entries are.</li>
