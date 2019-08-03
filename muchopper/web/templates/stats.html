@@ -61,7 +61,7 @@
     </tr>
 </table>
 <h3 id="software">Software statistics</h3>
-<div class="ym-grid">
+<div class="ym-grid linearize-960">
     <div class="ym-g66 ym-gl"><div class="ym-gbox">
         <table>
             <thead>
@@ -93,7 +93,9 @@
         </table>
     </div></div>
     <div class="ym-g33 ym-gr"><div class="ym-gbox">
-        <canvas id="software-version-chart" width="100%" height="100%"></canvas>
+        <div class="stats-canvas-limit">
+          <canvas id="software-version-chart" width="100%" height="100%"></canvas>
+        </div>
         <script>
 var ctx = document.getElementById('software-version-chart').getContext('2d');
 var chart = new Chart(ctx, {

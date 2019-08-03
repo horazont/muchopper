@@ -273,3 +273,27 @@ section.api-call {
 .footnotes > li:target {
     background: rgba(0, 0, 0, 0.2);
 }
+
+
+@media screen and ( max-width: 960px )  {
+    /* linearization for grid module */
+    .linearize-960, .linearize-960 > [class*="ym-g"] {
+        display: block;
+        float: none;
+        padding: 0;
+        margin: 0;
+        width: 100% !important;
+    }
+    /* reset defined gutter values */
+    .linearize-960 > [class*="ym-g"] > [class*="ym-gbox"] {
+        overflow: hidden; /* optional for containing floats */
+        padding: 0;
+        margin: 0;
+    }
+}
+
+.stats-canvas-limit {
+    max-width: 480px;
+    margin-left: auto;
+    margin-right: auto;
+}
