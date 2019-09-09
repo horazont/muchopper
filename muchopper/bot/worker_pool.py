@@ -7,6 +7,7 @@ class WorkerPool:
                  max_queue_size=0,
                  delay=None,
                  loop=None,
+                 timeout=timedelta(seconds=15.0),
                  logger=None):
         if nworkers <= 0:
             raise ValueError("need at least one worker")
@@ -19,6 +20,7 @@ class WorkerPool:
         self._stop_event = asyncio.Event(loop=loop)
         self._delay = delay
         self._queue = asyncio.Queue(max_queue_size, loop=loop)
+        self._timeout = timeout
         self._workers = [
             asyncio.ensure_future(self._worker(i), loop=loop)
             for i in range(nworkers)
@@ -53,7 +55,15 @@ class WorkerPool:
             if item_future in done:
                 item = item_future.result()
                 try:
-                    await self._processor(item)
+                    await asyncio.wait_for(
+                        self._processor(item),
+                        timeout=self._timeout.total_seconds(),
+                    )
+                except asyncio.TimeoutError as exc:
+                    logger.error(
+                        "item processor %s timed out",
+                        item,
+                    )
                 except Exception:  # NOQA
                     logger.error(
                         "item processor failed",
