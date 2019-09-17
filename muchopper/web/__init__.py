@@ -471,6 +471,7 @@ def statistics():
         if occ >= 3
     ]
     pruned_softwares.append(("Other", other_software_info, (0.8, 0.8, 0.8)))
+    software_version_chart_sum = sum(occ for _, occ, *_ in pruned_softwares)
 
     software_version_chart_cfg = {
         "labels": [name for name, _, _ in pruned_softwares],
@@ -501,6 +502,7 @@ def statistics():
         services=service_counter,
         unknown_service_types=unknown_service_types,
         software_version_chart_cfg=software_version_chart_cfg,
+        software_version_chart_sum=software_version_chart_sum,
         **common_metrics,
     )
 

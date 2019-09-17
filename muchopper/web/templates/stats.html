@@ -100,7 +100,24 @@
 var ctx = document.getElementById('software-version-chart').getContext('2d');
 var chart = new Chart(ctx, {
   type: 'pie',
-  data: {{ software_version_chart_cfg | tojson }}
+  data: {{ software_version_chart_cfg | tojson }},
+  options: {
+    tooltips: {
+      callbacks: {
+        label: function(tooltipItem, data) {
+          var label = data.labels[tooltipItem.index] || '';
+          var value = data.datasets[tooltipItem.datasetIndex].data[tooltipItem.index];
+
+          if (label) {
+            label += ': ';
+          }
+
+          label += value + ' (' + Math.round(value / {{ software_version_chart_sum }} * 100) + '%)';
+          return label;
+        }
+      }
+    }
+  }
 });
         </script>
     </div></div>
