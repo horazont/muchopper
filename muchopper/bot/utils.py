@@ -71,6 +71,10 @@ class InfoForm(aioxmpp.forms.Form):
         var='muc#roominfo_logs',
     )
 
+    web_chat = aioxmpp.forms.TextSingle(
+        var='muc#roominfo_webchat_url'
+    )
+
 
 def get_roominfo(exts) -> InfoForm:
     for ext in exts:
@@ -407,6 +411,14 @@ async def collect_muc_metadata(
             url = room_info.logs.value
             if url.startswith("http://") or url.startswith("https://"):
                 kwargs["http_logs_url"] = url
+        if room_info.web_chat.value is not None:
+            url = room_info.web_chat.value
+            if url.startswith("http://") or url.startswith("https://"):
+                kwargs["web_chat_url"] = url
+
+        # for those fields, absence means it should be dropped
+        kwargs.setdefault("http_logs_url", None)
+        kwargs.setdefault("web_chat_url", None)
 
     return kwargs
 

@@ -333,7 +333,8 @@ class State:
                             was_kicked=UNCHANGED,
                             is_saveable=UNCHANGED,
                             anonymity_mode=UNCHANGED,
-                            http_logs_url=UNCHANGED):
+                            http_logs_url=UNCHANGED,
+                            web_chat_url=UNCHANGED):
         muc_created = False
         now = datetime.utcnow()
 
@@ -423,6 +424,10 @@ class State:
                     merge(public_muc,
                           "http_logs_url",
                           http_logs_url) or has_changes
+                has_changes = \
+                    merge(public_muc,
+                          "web_chat_url",
+                          web_chat_url) or has_changes
 
             elif is_public is False:
                 public_muc = model.PubliclyListedMUC.get(session, address)

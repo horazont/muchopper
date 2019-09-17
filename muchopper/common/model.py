@@ -329,6 +329,12 @@ class PubliclyListedMUC(Base):
         nullable=True,
     )
 
+    web_chat_url = Column(
+        "web_chat_url",
+        Unicode(2047),
+        nullable=True,
+    )
+
     muc = relationship(MUC)
 
     @classmethod
