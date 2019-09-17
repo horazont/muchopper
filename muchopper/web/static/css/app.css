@@ -280,11 +280,9 @@ section.api-call {
 }
 
 div.dummy-avatar {
-    width: 2.8em;
-    height: 2.8em;
-    margin: 0.1em;
-    border-radius: 1.4em;
     display: flex;
+    width: 100%;
+    height: 100%;
     justify-content: center;
     align-items: center;
     font-family: "Droid Sans", Arial, Helvetica, sans-serif;
@@ -296,6 +294,12 @@ div.dummy-avatar span::before {
     display: inline;
     color: white;
     font-size: 150%;
+}
+
+div.real-avatar {
+    width: 100%;
+    height: 100%;
+    background-size: contain;
 }
 
 div.flush {
@@ -323,6 +327,20 @@ ol.roomlist > li.roomcard:hover {
     break-before: avoid;
     break-after: avoid;
     margin-right: 0.5em;
+}
+
+div.avatar {
+    width: 2.8em;
+    height: 2.8em;
+    margin: 0.1em;
+    /* border-radius: 1.4em; */
+    border-radius: 0.2em;
+    overflow: hidden;
+}
+
+div.avatar > img {
+    max-width: 100%;
+    max-height: 100%;
 }
 
 .roomcard > div.main > div.avatar {

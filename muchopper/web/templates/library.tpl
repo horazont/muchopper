@@ -10,6 +10,15 @@
 <div class="dummy-avatar" style="background-color: rgba({{ address | ccg_rgb_triplet }}, 1.0);"><span data-avatar-content="{{ text[0] }}"/></div>
 {% endmacro %}
 
+{% macro avatar(has_avatar, address, caller=None) %}
+{% if has_avatar %}
+<div class="real-avatar" style="background-image: url('{{ url_for('avatar_v1', address=address) }}'); "></div>
+{% else %}
+{% set content = caller() %}
+{% call dummy_avatar(address) %}{{ content }}{% endcall %}
+{% endif %}
+{% endmacro %}
+
 {% macro room_name(muc, public_info, caller=None) -%}
 {%- if public_info.name and public_info.name != muc.address.localpart %}{{ public_info.name }}{% else %}{{ muc.address }}{% endif -%}
 {%- endmacro %}
@@ -36,15 +45,15 @@
 
 {% macro room_table(items, keywords=[], caller=None) %}
 <ol class="roomlist">
-    {% for muc, public_info in items %}
+    {% for muc, public_info, has_avatar in items %}
     {% set nusers = (muc.nusers_moving_average or muc.nusers) | round %}
     {% set descr = public_info.description or public_info.name or public_info.subject %}
     {% set show_descr = descr and descr != muc.address.localpart %}
     {% set show_lang = public_info.language %}
     <li class="roomcard">
-        <div class="avatar">{%- call dummy_avatar(muc.address) %}{% call room_name(muc, public_info) %}{% endcall %}{% endcall -%}</div>
+        <div class="avatar">{%- call avatar(has_avatar, muc.address) %}{% call room_name(muc, public_info) %}{% endcall %}{% endcall -%}</div>
         <div class="main">
-            <div class="avatar">{%- call dummy_avatar(muc.address) %}{% call room_name(muc, public_info) %}{% endcall %}{% endcall -%}</div>
+            <div class="avatar">{%- call avatar(has_avatar, muc.address) %}{% call room_name(muc, public_info) %}{% endcall %}{% endcall -%}</div>
             <div class="addr">{#- -#}
                 <a href="xmpp:{{ muc.address }}?join">{{ room_label(muc, public_info, keywords) }}</a>
             </div>

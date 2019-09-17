@@ -31,6 +31,8 @@
         <li>Description</li>
         <li>Primary language</li>
         <li>Subject/topic (if available; currently not shown)</li>
+        <li>Web chat and logs URLs (if available)</li>
+        <li>Avatar (if white-listed)</li>
     </ul>
     <p>The <em>name</em>, <em>description</em> and <em>primary language</em> can be configured using the standard room configuration options offered by your Jabber client.</p>
     <p class="box">
@@ -38,6 +40,9 @@
     </p>
     <p class="box">
         <strong>Note:</strong> The room language option, albeit specified years ago, has only recently been added to servers. If the option is not offered to you while name and description are offered, please get in touch with your server operator. Point them at the <a href="{{ url_for('operators') }}">documentation for service operators</a>.
+    </p>
+    <p class="box">
+        <strong>Note:</strong> Due to the complexity of handling avatars on the server side, your room or domain needs to be white-listed to be allowed to use avatars. The white listing happens at the discretion of the service provider. Please <a href="{{ url_for('contact') }}">contact us</a> to have your room white listed for avatar use.
     </p>
     <h3>Update frequency</h3>
     <p>As there is no way for our service to be notified of changes to your room metadata, updates can take a while. It may thus take a few hours for your update to be applied to the public listing.</p>

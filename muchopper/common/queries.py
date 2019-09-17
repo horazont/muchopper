@@ -17,21 +17,33 @@ def base_filter(q, include_closed=False):
 
 
 def base_query(session, *,
-               include_closed=False):
-    q = session.query(
-        model.MUC,
-        model.PubliclyListedMUC
-    ).join(
-        model.PubliclyListedMUC
-    )
+               include_closed=False,
+               with_avatar_flag=False):
+    if with_avatar_flag:
+        q = session.query(
+            model.MUC,
+            model.PubliclyListedMUC,
+            model.Avatar.address != None,  # NOQA
+        ).join(
+            model.PubliclyListedMUC,
+        ).outerjoin(
+            model.Avatar,
+        )
+    else:
+        q = session.query(
+            model.MUC,
+            model.PubliclyListedMUC
+        ).join(
+            model.PubliclyListedMUC
+        )
 
     return base_filter(q, include_closed=include_closed)
 
 
 def common_query(session, *,
                  min_users=1,
-                 include_closed=False):
-    q = base_query(session, include_closed=include_closed)
+                 **kwargs):
+    q = base_query(session, **kwargs)
 
     if min_users > 0:
         q = q.filter(

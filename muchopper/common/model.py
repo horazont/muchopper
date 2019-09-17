@@ -12,6 +12,7 @@ from sqlalchemy import (
     ForeignKey,
     Boolean,
     Float,
+    LargeBinary,
 )
 from sqlalchemy.orm import (
     relationship,
@@ -336,6 +337,53 @@ class PubliclyListedMUC(Base):
     )
 
     muc = relationship(MUC)
+
+    @classmethod
+    def get(cls, session, address):
+        try:
+            return session.query(cls).filter(cls.address == address).one()
+        except sqlalchemy.orm.exc.NoResultFound:
+            return None
+
+
+class Avatar(Base):
+    __tablename__ = "avatar"
+
+    address = Column(
+        "address",
+        JID(),
+        ForeignKey(PubliclyListedMUC.address,
+                   ondelete="CASCADE",
+                   onupdate="CASCADE"),
+        primary_key=True,
+        nullable=False,
+    )
+
+    last_updated = Column(
+        "last_updated",
+        DateTime(),
+        nullable=False,
+    )
+
+    mime_type = Column(
+        "mime_type",
+        Unicode(128),
+        nullable=False,
+    )
+
+    data = Column(
+        "data",
+        LargeBinary(),
+        nullable=False,
+    )
+
+    hash_ = Column(
+        "hash",
+        Unicode(64),
+        nullable=False,
+    )
+
+    public_muc = relationship(PubliclyListedMUC)
 
     @classmethod
     def get(cls, session, address):

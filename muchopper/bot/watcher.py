@@ -15,6 +15,7 @@ import time
 from datetime import timedelta, datetime
 
 import aioxmpp
+import aioxmpp.vcard
 import aioxmpp.service
 
 from aioxmpp.utils import namespaces
@@ -30,12 +31,15 @@ class Watcher(aioxmpp.service.Service,
 
     ORDER_AFTER = [
         aioxmpp.DiscoClient,
+        aioxmpp.vcard.VCardService,
     ]
 
     def __init__(self, client, **kwargs):
         super().__init__(client, **kwargs)
         self._disco_svc = self.dependencies[aioxmpp.DiscoClient]
+        self._vcard_client = self.dependencies[aioxmpp.vcard.VCardService]
         self.expire_after = timedelta(days=2)
+        self.avatar_whitelist = []
 
     async def _get_items(self, state):
         items = state.get_all_known_inactive_mucs()
@@ -65,12 +69,24 @@ class Watcher(aioxmpp.service.Service,
                 return
             raise
 
+        if info.get("is_public") and (
+                item in self.avatar_whitelist or
+                item.replace(localpart=None) in self.avatar_whitelist):
+            try:
+                avatar = await utils.fetch_avatar(self._vcard_client, item)
+            except aioxmpp.errors.XMPPError as e:
+                self.logger.info("failed to fetch avatar of MUC %s", item)
+                avatar = None, None
+        else:
+            avatar = None, None
+
         if fut is not None and not fut.done():
             fut.set_result(info)
 
         self.logger.debug("jid %s: updating metadata: %r",
                           item, info)
         state.update_muc_metadata(item, **info)
+        await state.update_muc_avatar(item, *avatar)
         return info
 
     async def _execute(self, state):

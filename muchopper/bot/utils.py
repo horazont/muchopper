@@ -423,6 +423,13 @@ async def collect_muc_metadata(
     return kwargs
 
 
+async def fetch_avatar(vcard_client, address):
+    vcard = await vcard_client.get_vcard(address)
+    mime_type = vcard.get_photo_mime_type()
+    avatar = vcard.get_photo_data()
+    return mime_type, avatar
+
+
 class WaitCounter:
     def __init__(self, max_, loop=None):
         super().__init__()

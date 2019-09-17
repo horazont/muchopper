@@ -55,6 +55,10 @@ async def amain(loop, args, cfg):
         components,
         mirror_config=cfg["muchopping"].get("mirror", {}),
         spokesman_config=cfg["muchopping"].get("spokesman", {}),
+        avatar_whitelist=list(
+            map(aioxmpp.JID.fromstr,
+                cfg["muchopping"].get("avatar_whitelist", []))
+        ),
     )
 
     for addr in cfg["muchopping"].get("seed", []):

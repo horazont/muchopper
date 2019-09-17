@@ -1,5 +1,7 @@
 import asyncio
 import collections
+import hashlib
+import io
 import logging
 import pathlib
 import time
@@ -54,6 +56,54 @@ def process_text(text, length_soft_limit, length_hard_limit=None):
         text = text[:length_soft_limit-1] + "…"
 
     return text
+
+
+def _scale_avatar(indata: bytes, mimetype: str) -> bytes:
+    if len(indata) >= 1024*1024:
+        # refuse to process images >= 1 MiB
+        return None
+
+    try:
+        import PIL.Image
+        import PIL.PngImagePlugin
+        import PIL.JpegImagePlugin
+    except ImportError:
+        return None
+
+    plugin = {
+        "image/png": PIL.PngImagePlugin.Image,
+        "image/jpeg": PIL.PngImagePlugin.Image,
+    }.get(mimetype)
+
+    if plugin is None:
+        return None
+
+    infile = io.BytesIO(indata)
+    img = plugin.open(infile)
+    if img.width > 64 or img.height > 64:
+        img = img.resize((64, 64), PIL.Image.LANCZOS)
+
+    out = io.BytesIO()
+    img.save(out, format="png", optimize=True)
+    return out.getvalue()
+
+
+async def scale_avatar(indata, mimetype, loop=None):
+    if loop is None:
+        loop = asyncio.get_event_loop()
+
+    return await loop.run_in_executor(
+        None,
+        _scale_avatar,
+        indata,
+        mimetype,
+    )
+
+
+def hash_avatar(indata):
+    hash_ = hashlib.sha256()
+    hash_.update(indata)
+    return hash_.hexdigest()
 
 
 class State:
@@ -442,6 +492,79 @@ class State:
 
         if has_changes:
             self.on_muc_changed(address)
+
+    async def update_muc_avatar(self, muc_address,
+                                mimetype: str,
+                                data: bytes):
+        # We need to tread carefully here, because we cannot keep the session
+        # when yielding. At the same time, we don’t want to waste time on
+        # re-sizing the avatar if it is already in the database.
+        #
+        # So we risk the inconsistency here and fetch the hash of the avatar
+        # first, do the resize only if necessary and then perform the update.
+
+        if data is not None and mimetype is not None:
+            new_hash = hash_avatar(data)
+            existing_hash = None
+            with model.session_scope(self._sessionmaker) as session:
+                public_muc = model.PubliclyListedMUC.get(session, muc_address)
+                if public_muc is None:
+                    return
+
+                avatar = model.Avatar.get(session, muc_address)
+                if avatar is not None:
+                    existing_hash = avatar.hash_
+                session.rollback()
+
+            if existing_hash == new_hash:
+                # skip update
+                self.logger.info(
+                    "skipping update of avatar for %s because it has not "
+                    " changed",
+                    muc_address,
+                )
+                return
+
+            data = await scale_avatar(data, mimetype)
+            if data is None:
+                self.logger.warning(
+                    "failed to downscale/process avatar for %s; deleting",
+                    muc_address,
+                )
+
+        with model.session_scope(self._sessionmaker) as session:
+            if data is None or mimetype is None:
+                session.query(model.Avatar).filter(
+                    model.Avatar.address == muc_address,
+                ).delete()
+                session.commit()
+                return
+
+            public_muc = model.PubliclyListedMUC.get(session, muc_address)
+            if public_muc is None:
+                # drop update, the MUC is not publicly listed
+                return
+
+            avatar = model.Avatar.get(session, muc_address)
+            if avatar is None:
+                self.logger.debug(
+                    "creating avatar for %s",
+                    muc_address,
+                )
+                avatar = model.Avatar()
+                avatar.address = muc_address
+            else:
+                self.logger.debug(
+                    "updating avatar for %s",
+                    muc_address,
+                )
+
+            avatar.last_updated = datetime.utcnow().replace(microsecond=0)
+            avatar.data = data
+            avatar.mime_type = "image/png"
+            avatar.hash_ = new_hash
+            session.add(avatar)
+            session.commit()
 
     def store_referral(self, from_address, to_address, *,
                        timestamp=None):

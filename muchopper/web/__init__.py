@@ -281,7 +281,9 @@ def index():
 
 
 def room_page(page, per_page, include_closed=False):
-    q = queries.common_query(db.session, include_closed=include_closed)
+    q = queries.common_query(db.session,
+                             include_closed=include_closed,
+                             with_avatar_flag=True)
     total = q.count()
     pages = (total+per_page-1) // per_page
     page = Page(
@@ -320,6 +322,42 @@ def room_list(pageno=1):
                            visible_pages=visible_pages)
 
 
+@app.route("/avatar/v1/<address>")
+def avatar_v1(address):
+    try:
+        address = aioxmpp.JID.fromstr(address)
+    except (ValueError, TypeError):
+        return abort(400, "bad address")
+
+    if request.if_modified_since is not None:
+        # quick check if we can early-out
+        not_modified = db.session.query(
+            model.Avatar.address,
+        ).filter(
+            model.Avatar.address == address
+        ).filter(
+            model.Avatar.last_updated <= request.if_modified_since
+        ).one_or_none()
+        if not_modified:
+            return "", 304
+
+    q = db.session.query(
+        model.Avatar,
+    ).filter(
+        model.Avatar.address == address
+    )
+    avatar = q.one_or_none()
+    if avatar is None:
+        return abort(404, "no avatar stored")
+
+    response = Response(
+        avatar.data,
+        mimetype=avatar.mime_type,
+    )
+    response.last_modified = avatar.last_updated
+    return response
+
+
 @app.route("/search")
 @register_menu(app, "data.search", "Search", order=2)
 @PROMETHEUS_METRIC_SEARCH_HTML.time()
@@ -354,6 +392,7 @@ def search():
             q = queries.common_query(
                 db.session,
                 min_users=0,
+                with_avatar_flag=True,
             )
 
             q = queries.apply_search_conditions(

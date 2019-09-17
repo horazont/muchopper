@@ -148,7 +148,8 @@ class MUCHopper:
                  privileged_entities,
                  components,
                  mirror_config,
-                 spokesman_config):
+                 spokesman_config,
+                 avatar_whitelist):
         self.logger = logging.getLogger("muclogger")
         self._loop = loop
         self._state = state
@@ -183,6 +184,7 @@ class MUCHopper:
             self._watcher = self._client.summon(watcher.Watcher)
             self._watcher.state = state
             self._watcher.suggester = self.suggest_new_address
+            self._watcher.avatar_whitelist = avatar_whitelist
         else:
             self._watcher = None
 
