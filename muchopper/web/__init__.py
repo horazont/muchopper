@@ -266,6 +266,15 @@ def prettify_lang(s):
     return s
 
 
+@app.template_filter("ccg_rgb_triplet")
+def ccg_rgb_triplet(s):
+    r, g, b = colour.text_to_colour(str(s))
+    r *= 255
+    g *= 255
+    b *= 255
+    return ", ".join("{:.0f}".format(v) for v in (r, g, b))
+
+
 @app.route("/")
 def index():
     return redirect(url_for("room_list", pageno=1))

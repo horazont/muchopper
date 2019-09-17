@@ -297,3 +297,24 @@ section.api-call {
     margin-left: auto;
     margin-right: auto;
 }
+
+div.dummy-avatar {
+    width: 2.8em;
+    height: 2.8em;
+    margin: 0.1em;
+    margin-right: 0.5em;
+    border-radius: 1.4em;
+    float: left;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+div.dummy-avatar span::before {
+    content: attr(data-avatar-content);
+    flex: 0 0 auto;
+    display: inline;
+    color: white;
+    font-family: "Droid Sans", Arial, Helvetica, sans-serif;
+    font-size: 150%;
+}

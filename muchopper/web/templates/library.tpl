@@ -5,6 +5,11 @@
 {{ '  ' }}<abbr title="This room is not anonymous; other occupants may be able to see your address.">⏿</abbr>
 {% endmacro %}
 
+{% macro dummy_avatar(address, caller=None) %}
+{% set text = caller() %}
+<div class="dummy-avatar" style="background-color: rgba({{ address | ccg_rgb_triplet }}, 1.0);"><span data-avatar-content="{{ text[0] }}"/></div>
+{% endmacro %}
+
 {% macro room_name(muc, public_info, caller=None) -%}
 {%- if public_info.name %}{{ public_info.name }}{% else %}{{ muc.address }}{% endif -%}
 {%- endmacro %}
@@ -42,7 +47,7 @@
         <tr>
             <td class="nusers numeric">{{ "%.0f" | format((muc.nusers_moving_average or muc.nusers) | round) }}</td>
             <td class="addr-descr">
-                <div class="addr"><a href="xmpp:{{ muc.address }}?join">{{ room_label(muc, public_info, keywords) }}</a>{% if not muc.is_open %}{{ closed_marker() }}{% endif %}{% if not muc.anonymity_mode or muc.anonymity_mode.value == "none" %}{{ nonanon_marker() }}{% endif %}{% if public_info.http_logs_url %}{% call logs_url(public_info.http_logs_url) %}{% call room_name(muc, public_info) %}{% endcall %}{% endcall %}{% endif %}</div>
+                {% call dummy_avatar(muc.address) %}{% call room_name(muc, public_info) %}{% endcall %}{% endcall %}<div class="addr"><a href="xmpp:{{ muc.address }}?join">{{ room_label(muc, public_info, keywords) }}</a>{% if not muc.is_open %}{{ closed_marker() }}{% endif %}{% if not muc.anonymity_mode or muc.anonymity_mode.value == "none" %}{{ nonanon_marker() }}{% endif %}{% if public_info.http_logs_url %}{% call logs_url(public_info.http_logs_url) %}{% call room_name(muc, public_info) %}{% endcall %}{% endcall %}{% endif %}</div>
                 {% set descr = public_info.description or public_info.name or public_info.subject %}
                 {% set show_descr = descr and descr != muc.address.localpart %}
                 {% set show_lang = public_info.language %}

@@ -14,7 +14,7 @@ def clip_rgb(r, g, b):
     )
 
 
-@functools.lru_cache()
+@functools.lru_cache(128)
 def text_to_colour(text):
     MASK = 0xffff
     h = hashlib.sha1()
@@ -23,8 +23,5 @@ def text_to_colour(text):
     r, g, b = hsluv.hsluv_to_rgb((hue * 360, 75, 60))
     # print(text, cb, cr, r, g, b)
     r, g, b = clip_rgb(r, g, b)
-    r *= 0.8
-    g *= 0.8
-    b *= 0.8
     return r, g, b
 
