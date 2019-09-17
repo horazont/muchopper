@@ -1,6 +1,8 @@
 import asyncio
 import logging
 
+from datetime import timedelta
+
 
 class WorkerPool:
     def __init__(self, nworkers, processor, *,
