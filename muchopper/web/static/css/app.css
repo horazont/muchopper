@@ -171,15 +171,6 @@ table.roomlist th.addr-descr {
     td.nusers {
         width: auto;
     }
-
-    span.name {
-        display: block;
-    }
-
-    span.address-suffix,
-    span.address {
-        display: block;
-    }
 }
 
 span.search-match {
@@ -201,16 +192,6 @@ span.search-match {
 .searchbox > input[type="submit"] {
     flex: 0 0 auto;
 }
-
-/* span.language:before {
-    content: '[';
-    font-style: normal;
-}
-
-span.language:after {
-    content: ']';
-    font-style: normal;
-} */
 
 span.language {
     margin-left: 1ex;
@@ -302,12 +283,11 @@ div.dummy-avatar {
     width: 2.8em;
     height: 2.8em;
     margin: 0.1em;
-    margin-right: 0.5em;
     border-radius: 1.4em;
-    float: left;
     display: flex;
     justify-content: center;
     align-items: center;
+    font-family: "Droid Sans", Arial, Helvetica, sans-serif;
 }
 
 div.dummy-avatar span::before {
@@ -315,6 +295,74 @@ div.dummy-avatar span::before {
     flex: 0 0 auto;
     display: inline;
     color: white;
-    font-family: "Droid Sans", Arial, Helvetica, sans-serif;
     font-size: 150%;
+}
+
+div.flush {
+    clear: both;
+}
+
+ol.roomlist {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+}
+
+ol.roomlist > li.roomcard {
+    padding: 0.75em;
+    margin: 0;
+    display: flex;
+}
+
+ol.roomlist > li.roomcard:hover {
+    background: rgba(0, 0, 0, 0.1);
+}
+
+.roomcard > div.avatar {
+    flex: 0 0 auto;
+    break-before: avoid;
+    break-after: avoid;
+    margin-right: 0.5em;
+}
+
+.roomcard > div.main > div.avatar {
+    float: left;
+    display: none;
+}
+
+.roomcard > div.main {
+    flex: 1 1 auto;
+}
+
+.roomcard > div.meta {
+    flex: 0 0 content;
+    font-family: "Droid Sans", Arial, Helvetica, sans-serif;
+    margin-left: 1.5em;
+}
+
+
+@media screen and ( max-width: 640px )  {
+    ol.roomlist > li.roomcard {
+        padding-left: 0;
+        padding-right: 0;
+        display: block;
+    }
+
+    .roomcard > div.avatar {
+        display: none;
+    }
+
+    .roomcard > div.main {
+        padding-left: 3.5em;
+    }
+
+    .roomcard > div.main > div.avatar {
+        display: block;
+        margin-left: -3.5em;
+    }
+
+    .roomcard > div.meta {
+        padding-left: 3.5em;
+        margin-left: 0;
+    }
 }

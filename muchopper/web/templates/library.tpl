@@ -2,7 +2,7 @@
 {{ '  ' }}<span class="closed-marker" title="This room requires a password or invitation.">🔒</span>
 {% endmacro %}
 {% macro nonanon_marker() %}
-{{ '  ' }}<abbr title="This room is not anonymous; other occupants may be able to see your address.">⏿</abbr>
+<div><abbr title="This room is not anonymous; other occupants may be able to see your address.">⏿ Non-pseudonymous</abbr></div>
 {% endmacro %}
 
 {% macro dummy_avatar(address, caller=None) %}
@@ -11,7 +11,7 @@
 {% endmacro %}
 
 {% macro room_name(muc, public_info, caller=None) -%}
-{%- if public_info.name %}{{ public_info.name }}{% else %}{{ muc.address }}{% endif -%}
+{%- if public_info.name and public_info.name != muc.address.localpart %}{{ public_info.name }}{% else %}{{ muc.address }}{% endif -%}
 {%- endmacro %}
 
 {% macro room_label(muc, public_info, keywords=[]) -%}
@@ -26,41 +26,48 @@
 {%- endif -%}
 {%- endmacro %}
 
-{% macro logs_url(url, caller=None) %}
-<a href="{{ url }}" rel="nofollow"><abbr title="View history of {{ caller() }} in your browser">📜</abbr></a>
-{% endmacro%}
+{% macro logs_url(url, caller=None) -%}
+<div><a href="{{ url }}" rel="nofollow"><abbr title="View history of {{ caller() }} in your browser">📜 View logs</abbr></a></div>
+{%- endmacro %}
 
-{% macro join_url(url, caller=None) %}
-<a href="{{ url }}" rel="nofollow"><abbr title="Join {{ caller() }} in your browser">💬</abbr></a>
-{% endmacro%}
+{% macro join_url(url, caller=None) -%}
+<div><a href="{{ url }}" rel="nofollow"><abbr title="Join {{ caller() }} in your browser">💬 Join using browser</abbr></a></div>
+{%- endmacro%}
 
 {% macro room_table(items, keywords=[], caller=None) %}
-<table class="roomlist">
-    <colgroup>
-        <col class="nusers"/>
-        <col class="label"/>
-    </colgroup>
-    <thead>
-        <tr>
-            <th class="nusers"><abbr title="Number of online users">#users<abbr></th>
-            <th class="addr-descr">Address &amp; Description</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for muc, public_info in items %}
-        <tr>
-            <td class="nusers numeric">{{ "%.0f" | format((muc.nusers_moving_average or muc.nusers) | round) }}</td>
-            <td class="addr-descr">
-                {% call dummy_avatar(muc.address) %}{% call room_name(muc, public_info) %}{% endcall %}{% endcall %}<div class="addr"><a href="xmpp:{{ muc.address }}?join">{{ room_label(muc, public_info, keywords) }}</a>{% if not muc.is_open %}{{ closed_marker() }}{% endif %}{% if not muc.anonymity_mode or muc.anonymity_mode.value == "none" %}{{ nonanon_marker() }}{% endif %}{% if public_info.web_chat_url %}{% call join_url(public_info.web_chat_url) %}{% call room_name(muc, public_info) %}{% endcall %}{% endcall %}{% endif %}{% if public_info.http_logs_url %}{% call logs_url(public_info.http_logs_url) %}{% call room_name(muc, public_info) %}{% endcall %}{% endcall %}{% endif %}</div>
-                {% set descr = public_info.description or public_info.name or public_info.subject %}
-                {% set show_descr = descr and descr != muc.address.localpart %}
-                {% set show_lang = public_info.language %}
-                {% if show_descr or show_lang %}
-                <div class="descr">{% if show_descr %}<span class="descr">{{ descr | highlight(keywords) }}</span>{% endif %}{% if show_lang %}{% if show_descr %} {% endif %}<span class="language">{% if show_descr %}({% endif %}Primary language: {{ public_info.language | prettify_lang }}{% if show_descr %}){% endif %}</span>{% endif %}</div>
-                {% endif %}
-            </td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
+<ol class="roomlist">
+    {% for muc, public_info in items %}
+    {% set nusers = (muc.nusers_moving_average or muc.nusers) | round %}
+    {% set descr = public_info.description or public_info.name or public_info.subject %}
+    {% set show_descr = descr and descr != muc.address.localpart %}
+    {% set show_lang = public_info.language %}
+    <li class="roomcard">
+        <div class="avatar">{%- call dummy_avatar(muc.address) %}{% call room_name(muc, public_info) %}{% endcall %}{% endcall -%}</div>
+        <div class="main">
+            <div class="avatar">{%- call dummy_avatar(muc.address) %}{% call room_name(muc, public_info) %}{% endcall %}{% endcall -%}</div>
+            <div class="addr">{#- -#}
+                <a href="xmpp:{{ muc.address }}?join">{{ room_label(muc, public_info, keywords) }}</a>
+            </div>
+            {%- if show_descr -%}
+            <div class="descr">
+                <span class="descr">{{ descr | highlight(keywords) }}</span>
+            </div>
+            {%- endif -%}
+            <ul class="inline">
+            <li>{{ "%.0f" | format(nusers) }} user{{ 's' if nusers != 1 else '' }} online</li>{#- -#}
+            {%- if show_lang %}
+            <li>Primary language: {{ public_info.language | prettify_lang }}</li>
+            {%- endif -%}
+            </ul>
+        </div>
+        <div class="meta">
+            {%- if not muc.is_open %}{{ closed_marker() }}{% endif -%}
+            {%- if not muc.anonymity_mode or muc.anonymity_mode.value == "none" %}{{ nonanon_marker() }}{% endif -%}
+            {%- if public_info.web_chat_url %}{% call join_url(public_info.web_chat_url) %}{% call room_name(muc, public_info) %}{% endcall %}{% endcall %}{% endif -%}
+            {%- if public_info.http_logs_url %}{% call logs_url(public_info.http_logs_url) %}{% call room_name(muc, public_info) %}{% endcall %}{% endcall %}{% endif -%}
+        </div>
+        <div class="flush"/>
+    </li>
+    {% endfor %}
+</ol>
 {% endmacro %}
