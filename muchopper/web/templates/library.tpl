@@ -1,8 +1,8 @@
 {% macro closed_marker() %}
-{{ '  ' }}<span class="closed-marker" title="This room requires a password or invitation.">🔒</span>
+<div><span class="icon-closed"></span> Requires invitation or password</div>
 {% endmacro %}
 {% macro nonanon_marker() %}
-<div><abbr title="This room is not anonymous; other occupants may be able to see your address.">⏿ Non-pseudonymous</abbr></div>
+<div title="Other occupants see your Jabber/XMPP address." class="with-tooltip"><span class="icon-nonanon"></span> Non-pseudonymous</div>
 {% endmacro %}
 
 {% macro dummy_avatar(address, caller=None) %}
@@ -36,11 +36,11 @@
 {%- endmacro %}
 
 {% macro logs_url(url, caller=None) -%}
-<div><a href="{{ url }}" rel="nofollow"><abbr title="View history of {{ caller() }} in your browser">📜 View logs</abbr></a></div>
+<div><a href="{{ url }}" rel="nofollow"><span class="icon-history"></span> View logs<span class="a11y-text"> of {{ caller() }} in your browser</span></a></div>
 {%- endmacro %}
 
 {% macro join_url(url, caller=None) -%}
-<div><a href="{{ url }}" rel="nofollow"><abbr title="Join {{ caller() }} in your browser">💬 Join using browser</abbr></a></div>
+<div><a href="{{ url }}" rel="nofollow"><span class="icon-join"></span> Join <span class="a11y-text">{{ caller() }} </span>using browser</a></div>
 {%- endmacro%}
 
 {% macro room_table(items, keywords=[], caller=None) %}
@@ -55,7 +55,7 @@
         <div class="main">
             <div class="avatar">{%- call avatar(has_avatar, muc.address) %}{% call room_name(muc, public_info) %}{% endcall %}{% endcall -%}</div>
             <div class="addr">{#- -#}
-                <a href="xmpp:{{ muc.address }}?join">{{ room_label(muc, public_info, keywords) }}</a><a title="Copy address to clipboard" class="copy-to-clipboard" onclick="copy_to_clipboard(this); return false;" data-cliptext="{{ muc.address }}" href="#">📋</a>
+                <a href="xmpp:{{ muc.address }}?join">{{ room_label(muc, public_info, keywords) }}</a><a title="Copy &quot;{{ muc.address}}&quot; to clipboard" class="copy-to-clipboard" onclick="copy_to_clipboard(this); return false;" data-cliptext="{{ muc.address }}" href="#"><span class="icon-copy"></span></a>
             </div>
             {%- if show_descr -%}
             <div class="descr">

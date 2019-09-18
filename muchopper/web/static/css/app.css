@@ -399,3 +399,35 @@ a:focus + .copy-to-clipboard,
     display: inline;
     visibility: visible;
 }
+
+.a11y-text {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    top: -100px;
+}
+
+.icon-history::after {
+    content: '📜';
+}
+
+.icon-join::after {
+    content: '💬';
+}
+
+.icon-copy::after {
+    content: '📋';
+}
+
+.icon-nonanon::after {
+    content: '⏿';
+}
+
+.icon-closed::after {
+    content: '🔒';
+}
+
+.with-tooltip {
+    cursor: help;
+}
