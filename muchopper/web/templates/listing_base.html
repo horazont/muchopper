@@ -55,7 +55,6 @@ var copy_to_clipboard = function(el) {
     if (success) {
       result_el.classList.add("success");
       result_el.innerText = "Copied!";
-      el.blur();
     } else {
       result_el.classList.add("error");
       result_el.innerText = "Clipboard operation failed!";
@@ -63,6 +62,7 @@ var copy_to_clipboard = function(el) {
     el.appendChild(result_el);
     setTimeout(function() {
       el.removeChild(result_el);
+      el.blur();
     }, 1500);
   });
 };
