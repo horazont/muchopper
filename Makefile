@@ -4,4 +4,4 @@ compressed_files = $(addsuffix .gz,$(static_files))
 compress: $(compressed_files)
 
 $(compressed_files): %.gz: %
-	gzip -9k "$<"
+	gzip -f9k "$<"
