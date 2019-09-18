@@ -43,6 +43,16 @@
 <div><a href="{{ url }}" rel="nofollow"><span class="icon-join"></span> Join <span class="a11y-text">{{ caller() }} </span>using browser</a></div>
 {%- endmacro%}
 
+{% macro clipboard_button(caller=None) %}
+{% set text = caller() %}
+<a title="Copy &quot;{{ text }}&quot; to clipboard" class="copy-to-clipboard" onclick="copy_to_clipboard(this); return false;" data-cliptext="{{ text }}" href="#"><span class="icon-copy"></span></a>
+{% endmacro %}
+
+{% macro copyable_thing() %}
+{% set text = caller() %}
+<em>{{ text }}{% call clipboard_button() %}{{ text }}{% endcall %}</em>
+{% endmacro %}
+
 {% macro room_table(items, keywords=[], caller=None) %}
 <ol class="roomlist">
     {% for muc, public_info, has_avatar in items %}
@@ -55,7 +65,8 @@
         <div class="main">
             <div class="avatar">{%- call avatar(has_avatar, muc.address) %}{% call room_name(muc, public_info) %}{% endcall %}{% endcall -%}</div>
             <div class="addr">{#- -#}
-                <a href="xmpp:{{ muc.address }}?join">{{ room_label(muc, public_info, keywords) }}</a><a title="Copy &quot;{{ muc.address}}&quot; to clipboard" class="copy-to-clipboard" onclick="copy_to_clipboard(this); return false;" data-cliptext="{{ muc.address }}" href="#"><span class="icon-copy"></span></a>
+                <a href="xmpp:{{ muc.address }}?join">{{ room_label(muc, public_info, keywords) }}</a>
+                {%- call clipboard_button() %}{{ muc.address }}{% endcall -%}
             </div>
             {%- if show_descr -%}
             <div class="descr">

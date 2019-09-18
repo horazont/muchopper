@@ -552,20 +552,26 @@ def statistics():
     )
 
 
+@app.route("/docs/faq")
+@register_menu(app, "docs.faq", "Frequent Questions (FAQ)", order=1)
+def faq():
+    return render_static_template("faq.html")
+
+
 @app.route("/docs/owners")
-@register_menu(app, "docs.owners", "For room owners", order=1)
+@register_menu(app, "docs.owners", "For room owners", order=2)
 def owners():
     return render_static_template("for_owners.html")
 
 
 @app.route("/docs/operators")
-@register_menu(app, "docs.operators", "For service operators", order=2)
+@register_menu(app, "docs.operators", "For service operators", order=3)
 def operators():
     return render_static_template("for_operators.html")
 
 
 @app.route("/docs/api")
-@register_menu(app, "docs.developers", "For developers", order=3)
+@register_menu(app, "docs.developers", "For developers", order=4)
 def developers():
     return render_static_template("for_developers.html")
 

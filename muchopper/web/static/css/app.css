@@ -424,10 +424,14 @@ div.avatar > img {
 }
 
 .copy-to-clipboard {
-    display: inline;
-    visibility: hidden;
     cursor: pointer;
     margin-left: 0.5em;
+    font-style: normal;
+}
+
+.roomcard .copy-to-clipboard {
+    display: inline;
+    visibility: hidden;
 }
 
 .roomcard:hover .copy-to-clipboard,
