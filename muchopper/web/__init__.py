@@ -280,10 +280,8 @@ def index():
     return redirect(url_for("room_list", pageno=1))
 
 
-def room_page(page, per_page, include_closed=False):
-    q = queries.common_query(db.session,
-                             include_closed=include_closed,
-                             with_avatar_flag=True)
+def room_page(page, per_page, **kwargs):
+    q = queries.common_query(db.session, **kwargs)
     total = q.count()
     pages = (total+per_page-1) // per_page
     page = Page(
@@ -304,7 +302,7 @@ def room_page(page, per_page, include_closed=False):
 @PROMETHEUS_METRIC_ROOM_PAGE_HTML.time()
 def room_list(pageno=1):
     per_page = 25
-    page = room_page(pageno, per_page)
+    page = room_page(pageno, per_page, with_avatar_flag=True)
 
     pages = page.pages
     visible_pages = \
