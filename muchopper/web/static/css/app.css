@@ -384,3 +384,13 @@ div.avatar > img {
         margin-left: 0;
     }
 }
+
+abbr.copy-to-clipboard {
+    display: none;
+    cursor: pointer;
+    margin-left: 0.5em;
+}
+
+.roomcard:hover abbr.copy-to-clipboard {
+    display: inline;
+}
