@@ -199,6 +199,7 @@ span.search-match {
     margin-right: 0.5em;
     /* workaround for wonky dark themes */
     background-color: #ffffff;
+    border: 1px solid #ddd;
 }
 
 .searchbox input[type="submit"] {
