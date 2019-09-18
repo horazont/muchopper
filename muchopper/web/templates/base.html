@@ -27,10 +27,12 @@
             <div class="subtitle">{{ config["APPNAME"] }}: A listing of public XMPP/Jabber chat rooms/groups.</div>
         </header>
         <nav id="nav-search" class="ym-hlist">
+            {% block searchbox %}
             <form class="searchbox" name="searchbox" method="GET" action="{{ url_for('search') }}">
                 <input type="text" name="q" placeholder="Search for a room..."/>
                 <input type="submit" value="Go"/>
             </form>
+            {% endblock %}
         </nav>
         <main>{% block body %}
             <h2>{{ title }}</h2>

@@ -184,13 +184,49 @@ span.search-match {
     display: flex;
 }
 
-.searchbox > input[type="text"] {
+.searchbox-full {
+    flex-direction: column;
+}
+
+.searchbox-full > div {
+    display: flex;
+    margin-top: 0.5em;
+    margin-bottom: 0.5em;
+}
+
+.searchbox input[type="text"] {
     flex: 1 0 auto;
     margin-right: 0.5em;
 }
 
-.searchbox > input[type="submit"] {
+.searchbox input[type="submit"] {
     flex: 0 0 auto;
+}
+
+.searchbox input[type="checkbox"] {
+    color: #ddd;
+}
+
+.searchbox label {
+    color: #ddd;
+    margin-left: 0.5em;
+}
+
+.searchbox-full div.ym-fbox-check {
+    margin-left: 1.5em;
+    margin-right: 1.5em;
+}
+
+@media screen and ( max-width: 640px )  {
+    .searchbox-full > div.search-scope {
+        flex-direction: column;
+    }
+
+    .searchbox-full div.ym-fbox-check {
+        margin: 0;
+        margin-top: 0.5em;
+        margin-bottom: 0.5em;
+    }
 }
 
 span.language {
