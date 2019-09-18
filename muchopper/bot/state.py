@@ -81,7 +81,14 @@ def _scale_avatar(indata: bytes, mimetype: str) -> bytes:
     infile = io.BytesIO(indata)
     img = plugin.open(infile)
     if img.width > 64 or img.height > 64:
-        img = img.resize((64, 64), PIL.Image.LANCZOS)
+        aspect_ratio = img.width / img.height
+        if aspect_ratio > 1:
+            new_width = 64
+            new_height = round(new_width / aspect_ratio)
+        else:
+            new_height = 64
+            new_width = round(aspect_ratio * new_height)
+        img = img.resize((new_width, new_height), PIL.Image.LANCZOS)
 
     out = io.BytesIO()
     img.save(out, format="png", optimize=True)
