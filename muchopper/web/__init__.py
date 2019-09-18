@@ -352,6 +352,8 @@ def avatar_v1(address):
         mimetype=avatar.mime_type,
     )
     response.last_modified = avatar.last_updated
+    response.headers["Content-Security-Policy"] = \
+        "frame-ancestors 'none'; default-src 'none'; style-src 'unsafe-inline'"
     return response
 
 

@@ -33,9 +33,9 @@
   to protect the service against abuse. To get on the white list, please {% call get_in_touch() %}{% endcall %}.</p>
 
   <h3>My room is on the white list, but the avatar is still not shown.</h3>
-  <p>At the moment, we only support JPEG and PNG avatars (no SVG or webp).
-  Avatars may not be more than 1 MiB in size. All avatars which do not match
-  those criteria will be silently ignored.</p>
+  <p>Please ensure that you are following the restrictions on avatars as
+  described in <a href="{{ url_for('owners') }}">the documentation for room
+  owners.</a></p>
   <p>Avatars must be published via the <a href="https://xmpp.org/extensions/xep-0054.html">vcard-temp</a> protocol (yeah... I know).</p>
   <p>If you think that your avatar fulfills these criteria, {% call get_in_touch() %}{% endcall %} to hunt down the issue.</p>
 </article>

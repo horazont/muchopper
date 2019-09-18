@@ -59,10 +59,6 @@ def process_text(text, length_soft_limit, length_hard_limit=None):
 
 
 def _scale_avatar(indata: bytes, mimetype: str) -> bytes:
-    if len(indata) >= 1024*1024:
-        # refuse to process images >= 1 MiB
-        return None
-
     try:
         import PIL.Image
         import PIL.PngImagePlugin
@@ -92,7 +88,7 @@ def _scale_avatar(indata: bytes, mimetype: str) -> bytes:
 
     out = io.BytesIO()
     img.save(out, format="png", optimize=True)
-    return out.getvalue()
+    return out.getvalue(), "image/png"
 
 
 async def scale_avatar(indata, mimetype, loop=None):
@@ -510,6 +506,14 @@ class State:
         # So we risk the inconsistency here and fetch the hash of the avatar
         # first, do the resize only if necessary and then perform the update.
 
+        if data is not None and len(data) > 1024*1024:
+            self.logger.warning(
+                "avatar for %s is larger than 1 MiB. dropping",
+                muc_address,
+            )
+            data = None
+            mimetype = None
+
         if data is not None and mimetype is not None:
             new_hash = hash_avatar(data)
             existing_hash = None
@@ -532,12 +536,19 @@ class State:
                 )
                 return
 
-            data = await scale_avatar(data, mimetype)
-            if data is None:
+            if mimetype != "image/svg+xml":
+                data, mimetype = await scale_avatar(data, mimetype)
+                if data is None:
+                    self.logger.warning(
+                        "failed to downscale/process avatar for %s; deleting",
+                        muc_address,
+                    )
+            elif len(data) > 65535:
                 self.logger.warning(
-                    "failed to downscale/process avatar for %s; deleting",
-                    muc_address,
+                    "SVG avatar for %s is larger than 64 kiB. dropping",
+                    muc_address
                 )
+                data, mimetype = None, None
 
         with model.session_scope(self._sessionmaker) as session:
             if data is None or mimetype is None:
@@ -568,7 +579,7 @@ class State:
 
             avatar.last_updated = datetime.utcnow().replace(microsecond=0)
             avatar.data = data
-            avatar.mime_type = "image/png"
+            avatar.mime_type = mimetype
             avatar.hash_ = new_hash
             session.add(avatar)
             session.commit()
