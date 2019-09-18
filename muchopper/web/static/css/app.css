@@ -197,6 +197,8 @@ span.search-match {
 .searchbox input[type="text"] {
     flex: 1 0 auto;
     margin-right: 0.5em;
+    /* workaround for wonky dark themes */
+    background-color: #ffffff;
 }
 
 .searchbox input[type="submit"] {
