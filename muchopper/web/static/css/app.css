@@ -385,12 +385,17 @@ div.avatar > img {
     }
 }
 
-abbr.copy-to-clipboard {
-    display: none;
+.copy-to-clipboard {
+    display: inline;
+    visibility: hidden;
     cursor: pointer;
     margin-left: 0.5em;
 }
 
-.roomcard:hover abbr.copy-to-clipboard {
+.roomcard:hover .copy-to-clipboard,
+.roomcard:focus-within .copy-to-clipboard,
+a:focus + .copy-to-clipboard,
+.copy-to-clipboard:focus {
     display: inline;
+    visibility: visible;
 }

@@ -55,7 +55,7 @@
         <div class="main">
             <div class="avatar">{%- call avatar(has_avatar, muc.address) %}{% call room_name(muc, public_info) %}{% endcall %}{% endcall -%}</div>
             <div class="addr">{#- -#}
-                <a href="xmpp:{{ muc.address }}?join">{{ room_label(muc, public_info, keywords) }}</a><abbr title="Copy address to clipboard" class="copy-to-clipboard" onclick="copy_to_clipboard(this); return false;" data-cliptext="{{ muc.address }}">📋</abbr>
+                <a href="xmpp:{{ muc.address }}?join">{{ room_label(muc, public_info, keywords) }}</a><a title="Copy address to clipboard" class="copy-to-clipboard" onclick="copy_to_clipboard(this); return false;" data-cliptext="{{ muc.address }}" href="#">📋</a>
             </div>
             {%- if show_descr -%}
             <div class="descr">
