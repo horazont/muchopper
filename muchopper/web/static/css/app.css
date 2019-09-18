@@ -391,6 +391,11 @@ div.avatar > img {
 
 .roomcard > div.main {
     flex: 1 1 auto;
+    max-width: 590px;
+}
+
+.roomcard > div.main > ul.inline {
+    font-family: "Droid Sans", Arial, Helvetica, sans-serif;
 }
 
 .roomcard > div.meta {
