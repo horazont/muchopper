@@ -225,7 +225,6 @@ def highlight(s, keywords):
     prev_end = 0
     parts = []
     for match in keyword_re.finditer(s):
-        print(match)
         start, end = match.span()
         parts.append(html.escape(s[prev_end:start]))
         parts.append("<span class='search-match'>")
