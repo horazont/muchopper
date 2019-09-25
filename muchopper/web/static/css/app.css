@@ -357,6 +357,7 @@ ol.roomlist > li.roomcard {
     padding: 0.75em;
     margin: 0;
     display: flex;
+    width: 45.5em; /* 42 em main content + 3 em avatar + 0.5em avatar margin */
 }
 
 ol.roomlist > li.roomcard:hover {
@@ -391,7 +392,6 @@ div.avatar > img {
 
 .roomcard > div.main {
     flex: 1 1 auto;
-    max-width: 590px;
 }
 
 .roomcard > div.main > ul.inline {
@@ -409,25 +409,7 @@ div.avatar > img {
     ol.roomlist > li.roomcard {
         padding-left: 0;
         padding-right: 0;
-        display: block;
-    }
-
-    .roomcard > div.avatar {
-        display: none;
-    }
-
-    .roomcard > div.main {
-        padding-left: 3.5em;
-    }
-
-    .roomcard > div.main > div.avatar {
-        display: block;
-        margin-left: -3.5em;
-    }
-
-    .roomcard > div.meta {
-        padding-left: 3.5em;
-        margin-left: 0;
+        display: flex;
     }
 }
 

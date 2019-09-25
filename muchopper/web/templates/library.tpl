@@ -1,8 +1,8 @@
 {% macro closed_marker() %}
-<div><span class="icon-closed"></span> Requires invitation or password</div>
+<li><span class="icon-closed"></span> Requires invitation or password</li>
 {% endmacro %}
 {% macro nonanon_marker() %}
-<div title="Other occupants see your Jabber/XMPP address." class="with-tooltip"><span class="icon-nonanon"></span> Non-pseudonymous</div>
+<li title="Other occupants see your Jabber/XMPP address." class="with-tooltip"><span class="icon-nonanon"></span> Non-pseudonymous</li>
 {% endmacro %}
 
 {% macro dummy_avatar(address, caller=None) %}
@@ -36,11 +36,11 @@
 {%- endmacro %}
 
 {% macro logs_url(url, caller=None) -%}
-<div><a href="{{ url }}" rel="nofollow"><span class="icon-history"></span> View logs<span class="a11y-text"> of {{ caller() }} in your browser</span></a></div>
+<li><a href="{{ url }}" rel="nofollow"><span class="icon-history"></span> View logs<span class="a11y-text"> of {{ caller() }} in your browser</span></a></li>
 {%- endmacro %}
 
 {% macro join_url(url, caller=None) -%}
-<div><a href="{{ url }}" rel="nofollow"><span class="icon-join"></span> Join <span class="a11y-text">{{ caller() }} </span>using browser</a></div>
+<li><a href="{{ url }}" rel="nofollow"><span class="icon-join"></span> Join <span class="a11y-text">{{ caller() }} </span>using browser</a></li>
 {%- endmacro%}
 
 {% macro clipboard_button(caller=None) %}
@@ -60,10 +60,13 @@
     {% set descr = public_info.description or public_info.name or public_info.subject %}
     {% set show_descr = descr and descr != muc.address.localpart %}
     {% set show_lang = public_info.language %}
+    {% set is_nonanon = not muc.anonymity_mode or muc.anonymity_mode.value == "none" %}
+    {% set is_closed = not muc.is_open %}
+    {% set web_chat_url = public_info.web_chat_url %}
+    {% set http_logs_url = public_info.http_logs_url %}
     <li class="roomcard">
         <div class="avatar">{%- call avatar(has_avatar, muc.address) %}{% call room_name(muc, public_info) %}{% endcall %}{% endcall -%}</div>
         <div class="main">
-            <div class="avatar">{%- call avatar(has_avatar, muc.address) %}{% call room_name(muc, public_info) %}{% endcall %}{% endcall -%}</div>
             <div class="addr">{#- -#}
                 <a href="xmpp:{{ muc.address }}?join">{{ room_label(muc, public_info, keywords) }}</a>
                 {%- call clipboard_button() %}{{ muc.address }}{% endcall -%}
@@ -73,20 +76,21 @@
                 <span class="descr">{{ descr | highlight(keywords) }}</span>
             </div>
             {%- endif -%}
-            <ul class="inline">
+            <div><ul class="inline">
             <li>{{ "%.0f" | format(nusers) }} user{{ 's' if nusers != 1 else '' }} online</li>{#- -#}
             {%- if show_lang %}
             <li>Primary language: {{ public_info.language | prettify_lang }}</li>
-            {%- endif -%}
-            </ul>
+            {% endif %}
+            {%- if is_nonanon %}{{ nonanon_marker() }}{% endif -%}
+            {%- if is_closed %}{{ closed_marker() }}{% endif -%}
+            </ul></div>
+            {% if web_chat_url or http_logs_url %}
+            <div><ul class="inline">
+            {%- if web_chat_url %}{% call join_url(web_chat_url) %}{% call room_name(muc, public_info) %}{% endcall %}{% endcall %}{% endif -%}
+            {%- if http_logs_url %}{% call logs_url(http_logs_url) %}{% call room_name(muc, public_info) %}{% endcall %}{% endcall %}{% endif -%}
+            </ul></div>
+            {% endif %}
         </div>
-        <div class="meta">
-            {%- if not muc.is_open %}{{ closed_marker() }}{% endif -%}
-            {%- if not muc.anonymity_mode or muc.anonymity_mode.value == "none" %}{{ nonanon_marker() }}{% endif -%}
-            {%- if public_info.web_chat_url %}{% call join_url(public_info.web_chat_url) %}{% call room_name(muc, public_info) %}{% endcall %}{% endcall %}{% endif -%}
-            {%- if public_info.http_logs_url %}{% call logs_url(public_info.http_logs_url) %}{% call room_name(muc, public_info) %}{% endcall %}{% endcall %}{% endif -%}
-        </div>
-        <div class="flush"/>
     </li>
     {% endfor %}
 </ol>
