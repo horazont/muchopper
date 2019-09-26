@@ -3,6 +3,7 @@ import contextlib
 import collections
 import gzip
 import html
+import math
 import numbers
 import os
 import pathlib
@@ -240,6 +241,68 @@ def highlight(s, keywords):
 def force_escape(s):
     s = str(s)
     return jinja2.Markup(html.escape(s))
+
+
+@app.template_filter("pretty_number_info")
+def pretty_number_info(n):
+    if n < 0.5:
+        return "0"
+
+    order_of_magnitude = math.floor(math.log(n, 10))
+    scale_info = [
+        ("", "{}", 1, ".0", 10**0),
+        ("", "{}", 2, ".0", 10**0),
+        ("", "{}", 3, ".0", 10**0),
+        ("k", "{} thousand", 1, ".0", 10**-3),
+
+        # the below are an alternative for longer numbers, but they break
+        # the layout. for now, we replace anything beyond 9999 with ∞.
+        # ("k", "{} thousand", 2, ".1", 10**-3),
+        # ("k", "{} thousand", 2, ".0", 10**-3),
+        # ("k", "{} thousand", 3, ".0", 10**-3),
+        # ("M", "{} million", 2, ".1", 10**-6),
+        # ("M", "{} million", 2, ".0", 10**-6),
+        # ("M", "{} million", 3, ".0", 10**-6),
+    ]
+
+    try:
+        (suffix, a11y_format, significant_digits,
+         float_format, display_factor) = scale_info[order_of_magnitude]
+    except IndexError:
+        # ?! That’s a friggin’ large number (>= 1 billion)
+        # sorry, Ge0rG
+        return {
+            "short": "∞",
+            "accessible": "a very large number of",
+        }
+
+    rounding_factor = 10**order_of_magnitude
+    rounded_number = round(
+        n / rounding_factor, significant_digits - 1
+    ) * rounding_factor
+
+    formatted_number = "{{:{}f}}".format(float_format).format(
+        rounded_number * display_factor
+    )
+    short_text = "{}{}".format(formatted_number, suffix)
+    a11y_text = a11y_format.format(formatted_number)
+
+    return {
+        "short": short_text,
+        "accessible": a11y_text,
+    }
+
+
+@app.template_filter("prettify_number")
+def prettify_number(n):
+    info = pretty_number_info(n)
+    return jinja2.Markup(
+        "<span aria-hidden='true'>{}</span>"
+        "<span class='a11y-text'>{}</span>".format(
+            html.escape(info["short"]),
+            html.escape(info["accessible"]),
+        )
+    )
 
 
 @app.template_filter('prettify_lang')

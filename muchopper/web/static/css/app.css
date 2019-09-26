@@ -126,6 +126,7 @@ nav.pagination > ul > li.current > a {
 
 div.addr {
     font-size: 110%;
+    line-height: 1.363636em;
     font-family: "Droid Sans", Arial, Helvetica, sans-serif;
 }
 
@@ -364,11 +365,17 @@ ol.roomlist > li.roomcard:hover {
     background: rgba(0, 0, 0, 0.1);
 }
 
-.roomcard > div.avatar {
+.roomcard > div.avatar-column {
     flex: 0 0 auto;
     break-before: avoid;
     break-after: avoid;
     margin-right: 0.5em;
+}
+
+div.nusers {
+    font-family: "Droid Sans", Arial, Helvetica, sans-serif;
+    font-weight: bolder;
+    text-align: center;
 }
 
 div.avatar {
@@ -458,6 +465,10 @@ a:focus + .copy-to-clipboard,
 
 .icon-closed::after {
     content: '🔒';
+}
+
+.icon-users::after {
+    content: '👥';
 }
 
 .with-tooltip {

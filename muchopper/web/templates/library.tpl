@@ -65,7 +65,11 @@
     {% set web_chat_url = public_info.web_chat_url %}
     {% set http_logs_url = public_info.http_logs_url %}
     <li class="roomcard">
-        <div class="avatar">{%- call avatar(has_avatar, muc.address) %}{% call room_name(muc, public_info) %}{% endcall %}{% endcall -%}</div>
+        <div class="avatar-column">
+            <div class="avatar">{%- call avatar(has_avatar, muc.address) %}{% call
+ room_name(muc, public_info) %}{% endcall %}{% endcall -%}</div>
+            <div class="nusers" title="Number of users online"><span class="icon-users"></span>{{ nusers | prettify_number }}<span class="a11y-text">&nbsp;user{{ 's' if nusers != 1 else '' }} online</span></div>
+        </div>
         <div class="main">
             <div class="addr">{#- -#}
                 <a href="xmpp:{{ muc.address }}?join">{{ room_label(muc, public_info, keywords) }}</a>
@@ -76,14 +80,15 @@
                 <span class="descr">{{ descr | highlight(keywords) }}</span>
             </div>
             {%- endif -%}
+            {%- if show_lang or is_nonanon or is_closed -%}
             <div><ul class="inline">
-            <li>{{ "%.0f" | format(nusers) }} user{{ 's' if nusers != 1 else '' }} online</li>{#- -#}
             {%- if show_lang %}
             <li>Primary language: {{ public_info.language | prettify_lang }}</li>
-            {% endif %}
+            {%- endif -%}
             {%- if is_nonanon %}{{ nonanon_marker() }}{% endif -%}
             {%- if is_closed %}{{ closed_marker() }}{% endif -%}
             </ul></div>
+            {%- endif -%}
             {% if web_chat_url or http_logs_url %}
             <div><ul class="inline">
             {%- if web_chat_url %}{% call join_url(web_chat_url) %}{% call room_name(muc, public_info) %}{% endcall %}{% endcall %}{% endif -%}
