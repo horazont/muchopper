@@ -474,6 +474,10 @@ svg.icon {
     fill: currentColor;
 }
 
+svg.icon-users {
+    vertical-align: -0.18em;
+}
+
 .with-tooltip {
     cursor: help;
 }
