@@ -72,8 +72,11 @@ async def amain(args, password):
             for item in reply.items:
                 print_item(item)
 
+            if not reply.items:
+                break
+
             nresults += len(reply.items)
-            if len(reply.items) < reply.rsm.max_:
+            if reply.rsm.max_ and len(reply.items) < reply.rsm.max_:
                 break
 
             request.rsm.after = aioxmpp.rsm.xso.After()
