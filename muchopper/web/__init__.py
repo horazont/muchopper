@@ -585,6 +585,8 @@ def statistics():
     ]
     pruned_softwares.append(("Other", other_software_info, (0.8, 0.8, 0.8)))
     software_version_chart_sum = sum(occ for _, occ, *_ in pruned_softwares)
+    if software_version_chart_sum <= 0:
+        software_version_chart_sum = 1
 
     software_version_chart_cfg = {
         "labels": [name for name, _, _ in pruned_softwares],
