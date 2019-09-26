@@ -479,3 +479,27 @@ ul.slim {
 ul.slim.inline > li:before {
     content: '';
 }
+
+td.supp-yes {
+    background-color: rgba(0, 255, 0, 0.2);
+}
+
+td.supp-ext {
+    background-color: rgba(255, 191, 0, 0.2);
+}
+
+td.supp-no {
+    background-color: rgba(255, 0, 0, 0.2);
+}
+
+tbody tr:hover td.supp-yes {
+    background-color: rgba(0, 255, 0, 0.3);
+}
+
+tbody tr:hover td.supp-ext {
+    background-color: rgba(255, 191, 0, 0.3);
+}
+
+tbody tr:hover td.supp-no {
+    background-color: rgba(255, 0, 0, 0.3);
+}
