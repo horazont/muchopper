@@ -246,7 +246,10 @@ def force_escape(s):
 @app.template_filter("pretty_number_info")
 def pretty_number_info(n):
     if n < 0.5:
-        return "0"
+        return {
+            "short": "0",
+            "accessible": "0",
+        }
 
     order_of_magnitude = math.floor(math.log(n, 10))
     scale_info = [
