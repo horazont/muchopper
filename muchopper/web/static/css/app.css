@@ -274,6 +274,7 @@ ul.inline > li:before {
 
 ul.inline > li:after {
     content: ', ';
+    padding-right: 0.2em;
 }
 
 ul.inline > li:last-child:after {
@@ -469,4 +470,12 @@ svg.icon {
 
 .with-tooltip {
     cursor: help;
+}
+
+ul.slim {
+    list-style-type: none;
+}
+
+ul.slim.inline > li:before {
+    content: '';
 }

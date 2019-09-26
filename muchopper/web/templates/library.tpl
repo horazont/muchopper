@@ -87,7 +87,7 @@
             </div>
             {%- endif -%}
             {%- if show_lang or is_nonanon or is_closed -%}
-            <div><ul class="inline">
+            <div><ul class="inline slim">
             {%- if show_lang %}
             <li>{% call icon("lang1") %}{% endcall %} Primary language: {{ public_info.language | prettify_lang }}</li>
             {%- endif -%}
@@ -96,7 +96,7 @@
             </ul></div>
             {%- endif -%}
             {% if web_chat_url or http_logs_url %}
-            <div><ul class="inline">
+            <div><ul class="inline slim">
             {%- if web_chat_url %}{% call join_url(web_chat_url) %}{% call room_name(muc, public_info) %}{% endcall %}{% endcall %}{% endif -%}
             {%- if http_logs_url %}{% call logs_url(http_logs_url) %}{% call room_name(muc, public_info) %}{% endcall %}{% endcall %}{% endif -%}
             </ul></div>
