@@ -362,6 +362,12 @@ ol.roomlist > li.roomcard {
     width: 45.5em; /* 42 em main content + 3 em avatar + 0.5em avatar margin */
 }
 
+@media screen and ( max-width: 50rem )  {
+    ol.roomlist > li.roomcard {
+        width: auto;
+    }
+}
+
 ol.roomlist > li.roomcard:hover {
     background: rgba(0, 0, 0, 0.1);
 }
