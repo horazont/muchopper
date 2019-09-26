@@ -1,8 +1,12 @@
+{% macro icon(name, caller=None) %}
+<svg class="icon icon-{{ name }}"><use xlink:href="#icon-{{ name }}"></use></svg>
+{% endmacro %}
+
 {% macro closed_marker() %}
-<li><span class="icon-closed"></span> Requires invitation or password</li>
+<li>{% call icon("closed") %}{% endcall %} Requires invitation or password</li>
 {% endmacro %}
 {% macro nonanon_marker() %}
-<li title="Other occupants see your Jabber/XMPP address." class="with-tooltip"><span class="icon-nonanon"></span> Non-pseudonymous</li>
+<li title="Other occupants see your Jabber/XMPP address." class="with-tooltip">{% call icon("nonanon") %}{% endcall %} Non-pseudonymous</li>
 {% endmacro %}
 
 {% macro dummy_avatar(address, caller=None) %}
@@ -36,16 +40,16 @@
 {%- endmacro %}
 
 {% macro logs_url(url, caller=None) -%}
-<li><a href="{{ url }}" rel="nofollow"><span class="icon-history"></span> View logs<span class="a11y-text"> of {{ caller() }} in your browser</span></a></li>
+<li><a href="{{ url }}" rel="nofollow">{% call icon("history") %}{% endcall %} View logs<span class="a11y-text"> of {{ caller() }} in your browser</span></a></li>
 {%- endmacro %}
 
 {% macro join_url(url, caller=None) -%}
-<li><a href="{{ url }}" rel="nofollow"><span class="icon-join"></span> Join <span class="a11y-text">{{ caller() }} </span>using browser</a></li>
+<li><a href="{{ url }}" rel="nofollow">{% call icon("join") %}{% endcall %} Join <span class="a11y-text">{{ caller() }} </span>using browser</a></li>
 {%- endmacro%}
 
 {% macro clipboard_button(caller=None) %}
 {% set text = caller() %}
-<a title="Copy &quot;{{ text }}&quot; to clipboard" class="copy-to-clipboard" onclick="copy_to_clipboard(this); return false;" data-cliptext="{{ text }}" href="#"><span class="icon-copy"></span></a>
+<a title="Copy &quot;{{ text }}&quot; to clipboard" class="copy-to-clipboard" onclick="copy_to_clipboard(this); return false;" data-cliptext="{{ text }}" href="#">{% call icon("copy") %}{% endcall %}</a>
 {% endmacro %}
 
 {% macro copyable_thing() %}
@@ -69,7 +73,7 @@
             <div class="avatar">{%- call avatar(has_avatar, muc.address) %}{% call
  room_name(muc, public_info) %}{% endcall %}{% endcall -%}</div>
             <div class="expand"></div>
-            <div class="nusers" title="Number of users online"><span class="icon-users"></span>{{ nusers | prettify_number }}<span class="a11y-text">&nbsp;user{{ 's' if nusers != 1 else '' }} online</span></div>
+            <div class="nusers" title="Number of users online">{% call icon("users") %}{% endcall %}{{ nusers | prettify_number }}<span class="a11y-text">&nbsp;user{{ 's' if nusers != 1 else '' }} online</span></div>
             <div class="expand"></div>
         </div>
         <div class="main">
@@ -85,7 +89,7 @@
             {%- if show_lang or is_nonanon or is_closed -%}
             <div><ul class="inline">
             {%- if show_lang %}
-            <li>Primary language: {{ public_info.language | prettify_lang }}</li>
+            <li>{% call icon("lang1") %}{% endcall %} Primary language: {{ public_info.language | prettify_lang }}</li>
             {%- endif -%}
             {%- if is_nonanon %}{{ nonanon_marker() }}{% endif -%}
             {%- if is_closed %}{{ closed_marker() }}{% endif -%}

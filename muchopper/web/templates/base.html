@@ -21,7 +21,7 @@
         <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/app.css') }}">
         {% endblock %}
     </head>
-    <body><div class="ym-wrapper"><div class="ym-wbox">
+    <body>{% include "icons.html" %}<div class="ym-wrapper"><div class="ym-wbox">
         <header>
             <h1><a href="{{ url_for('index') }}">Public Jabber Chat rooms</a></h1>
             <div class="subtitle">{{ config["APPNAME"] }}: A listing of public XMPP/Jabber chat rooms/groups.</div>
