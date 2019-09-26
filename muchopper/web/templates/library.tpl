@@ -1,6 +1,6 @@
-{% macro icon(name, caller=None) %}
+{% macro icon(name, caller=None) -%}
 <svg class="icon icon-{{ name }}"><use xlink:href="#icon-{{ name }}"></use></svg>
-{% endmacro %}
+{%- endmacro %}
 
 {% macro closed_marker() %}
 <li>{% call icon("closed") %}{% endcall %} Requires invitation or password</li>
