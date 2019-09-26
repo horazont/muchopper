@@ -370,12 +370,22 @@ ol.roomlist > li.roomcard:hover {
     break-before: avoid;
     break-after: avoid;
     margin-right: 0.5em;
+    height: 6em;
+    display: flex;
+    flex-direction: column;
 }
 
 div.nusers {
+    flex: 0 0 auto;
     font-family: "Droid Sans", Arial, Helvetica, sans-serif;
     font-weight: bolder;
     text-align: center;
+}
+
+div.expand {
+    flex: 1 1 auto;
+    height: 0px;
+    width: 0px;
 }
 
 div.avatar {

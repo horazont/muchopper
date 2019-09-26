@@ -68,7 +68,9 @@
         <div class="avatar-column">
             <div class="avatar">{%- call avatar(has_avatar, muc.address) %}{% call
  room_name(muc, public_info) %}{% endcall %}{% endcall -%}</div>
+            <div class="expand"></div>
             <div class="nusers" title="Number of users online"><span class="icon-users"></span>{{ nusers | prettify_number }}<span class="a11y-text">&nbsp;user{{ 's' if nusers != 1 else '' }} online</span></div>
+            <div class="expand"></div>
         </div>
         <div class="main">
             <div class="addr">{#- -#}
