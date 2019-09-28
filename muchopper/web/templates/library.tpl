@@ -70,7 +70,7 @@
     {% set http_logs_url = public_info.http_logs_url %}
     <li class="roomcard">
         <div class="avatar-column">
-            <div class="avatar">{%- call avatar(has_avatar, muc.address) %}{% call
+            <div class="avatar" aria-hidden="true">{%- call avatar(has_avatar, muc.address) %}{% call
  room_name(muc, public_info) %}{% endcall %}{% endcall -%}</div>
             <div class="expand"></div>
             <div class="nusers" title="Number of users online">{% call icon("users") %}{% endcall %}{{ nusers | prettify_number }}<span class="a11y-text">&nbsp;user{{ 's' if nusers != 1 else '' }} online</span></div>
