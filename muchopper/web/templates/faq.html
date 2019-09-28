@@ -1,5 +1,9 @@
-{% extends "listing_base.html" %}
+{% extends "base.html" %}
 {% from "library.tpl" import copyable_thing %}
+{% block head_includes %}
+{{ super() }}
+{% include "copy-snippet.html" %}
+{% endblock %}
 {% set title = "Frequently Asked Questions" %}
 {% macro get_in_touch(caller=None) %}<a href="{{ url_for('contact') }}">get in touch</a>{% endmacro %}
 {% block content %}

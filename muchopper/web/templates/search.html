@@ -5,19 +5,16 @@
 {% else %}
 {% set title = "Search" %}
 {% endif %}
-{% block searchbox %}
-<form method="GET" class="searchbox searchbox-full" id="searchbox">
-	<div>
-		<input id="keywords" type="text" name="q" value="{{ orig_keywords }}" required="required"/>
-		<input type="hidden" name="f" value="y"/>
-		<button class="ym-button ym-primary ym-search" type="submit">Search</button>
-	</div>
+{% block searchbox_ext %}
+<div class="listing-wrap">{#- -#}
+	<h6>Further search options</h6>{#- -#}
+	<input type="hidden" name="f" value="y"/>{#- -#}
 	<div class="search-scope">
 		<div class="ym-fbox-check"><input type="checkbox" id="search_address" name="sinaddr" {{ 'checked' if search_address else '' }}/><label for="search_address">Search in addresses</label></div>
 		<div class="ym-fbox-check"><input type="checkbox" id="search_description" name="sindescr" {{ 'checked' if search_description else '' }}/><label for="search_description">Search in description</label></div>
 		<div class="ym-fbox-check"><input type="checkbox" id="search_name" name="sinname" {{ 'checked' if search_name else '' }}/><label for="search_name">Search in name</label></div>
 	</div>
-</form>
+</div>
 {% endblock %}
 {% block content %}
 {% if no_keywords %}

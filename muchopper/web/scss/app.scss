@@ -1,15 +1,151 @@
-header > h1 > a {
+$primary-900: #024157;
+$primary-800: #055b78;
+$primary-700: #0b7396;
+$primary-600: #1593be;
+$primary-500: #00B8F5;
+$primary-400: #48c2ed;
+$primary-300: #7cd7f6;
+$primary-200: #a3e4fa;
+$primary-100: #cdf2ff;
+
+$accent-900: #0a4b02;
+$accent-800: #24701c;
+$accent-700: #2d8124;
+$accent-600: #27931a;
+$accent-500: #30a722;
+$accent-400: #4ac23b;
+$accent-300: #7de072;
+$accent-200: #acf5a4;
+$accent-100: #d7f9d3;
+
+$neutral-900: #1a140e;
+$neutral-800: #312925;
+$neutral-700: #4d4643;
+$neutral-600: #68605c;
+$neutral-500: #8a837e;
+$neutral-400: #b0a8a2;
+$neutral-300: #c6c0bb;
+$neutral-200: #e6e0db;
+$neutral-100: #f9f6f6;
+
+/* those are em scaled by 0.875 for mapping to rem */
+$header-width: 20rem;
+$header-margin: 0.65625rem;
+$margin-left-full-scale: $header-width + $header-margin;
+$content-width-full-scale: 52.5rem;
+$listing-width-inner: 39.8125rem;
+$listing-width-text: $listing-width-inner - 2.625rem;
+$listing-width-full-scale: 41.125rem;
+$content-width-with-margin: $margin-left-full-scale + $content-width-full-scale;
+$listing-width-with-margin: $margin-left-full-scale + $listing-width-full-scale;
+$content-width-with-both-margins: $margin-left-full-scale + $content-width-full-scale + $margin-left-full-scale;
+$listing-width-with-both-margins: $margin-left-full-scale + $listing-width-full-scale + $margin-left-full-scale;
+
+body {
+    color: $neutral-800;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    color: $neutral-900;
+}
+
+a {
+    color: $primary-600;
+}
+
+a:hover, a:focus, a:active {
+    color: $neutral-100;
+    background-color: $primary-600;
+}
+
+/* slim header */
+
+header#main.slim {
+    display: flex;
+    padding: $header-margin;
+    background-color: $neutral-100;
+    align-items: baseline;
+    margin-bottom: 1.5em;
+    box-shadow: 0px 1px 1px $neutral-200;
+}
+
+header#main.slim a {
+    display: block;
     color: inherit;
 }
 
-header > h1 > a:hover,
-header > h1 > a:focus,
-header > h1 > a:active {
-    background-color: transparent;
+header#main.slim a:hover,
+header#main.slim a:focus,
+header#main.slim a:active {
+    background: transparent;
+    color: inherit;
 }
+
+header#main.slim a:focus,
+header#main.slim a:active {
+    text-decoration: underline;
+}
+
+header#main.slim > h1 {
+    flex: 0 0 auto;
+    font-size: 150%;
+    letter-spacing: -0.05em;
+    width: $header-width;
+}
+
+header#main.slim > h1 svg {
+    width: 3em;
+    vertical-align: middle;
+}
+
+header#main.slim > .searchbox {
+    flex: 1 1 auto;
+    font-size: 128.57143%;
+    line-height: 1.16667;
+    border: 1px solid $neutral-300;
+    border-radius: 0.1em;
+    box-shadow:
+        0px 1px 2px rgba(0, 0, 0, 0.1),
+        0px 2px 4px rgba(0, 0, 0, 0.05);
+    max-width: $listing-width-full-scale;
+    display: flex;
+}
+
+form:focus-within header#main.slim > .searchbox {
+    border-color: $neutral-400;
+}
+
+header#main.slim > .searchbox > input,
+header#main.slim > .searchbox > button {
+    flex: 1 1 auto;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    border-radius: 0;
+}
+
+header#main.slim > .searchbox > input {
+    padding: 0.375em;
+}
+
+header#main.slim > .searchbox > button {
+    flex: 0 0 auto;
+    padding: 0.375em;
+}
+
+header#main.slim > .searchbox > input:focus + button,
+header#main.slim > .searchbox:hover > button {
+    background-color: $accent-300;
+}
+
+/* footer */
 
 footer#footer-main {
     text-align: center;
+    padding: 1.5em;
+    background-color: $neutral-100;
+    color: $neutral-600;
 }
 
 footer#footer-main > ul {
@@ -27,9 +163,11 @@ footer#footer-main > ul > li {
 }
 
 nav#nav-footer {
+    padding-left: $margin-left-full-scale;
     font-family: "Droid Sans", Arial, Helvetica, sans-serif;
-    background-color: #ddd;
-    color: #333;
+    background-color: $neutral-200;
+    color: $neutral-700;
+    box-shadow: inset 0px 1px 1px $neutral-300;
 }
 
 nav#nav-footer ul {
@@ -69,7 +207,7 @@ nav#nav-footer > ul > li > ul > li.active {
 }
 
 nav#nav-footer h6 {
-    color: #111;
+    color: $neutral-700;
 }
 
 nav.pagination {
@@ -81,7 +219,7 @@ nav.pagination > ul {
     list-style-type: none;
     margin: 0;
     padding: 0;
-    text-align: right;
+    text-align: center;
 }
 
 nav.pagination > ul > li {
@@ -122,59 +260,6 @@ span.search-match {
     text-decoration: underline;
     color: #800;
     font-weight: bold;
-}
-
-.searchbox {
-    padding: 0.5em;
-    display: flex;
-}
-
-.searchbox-full {
-    flex-direction: column;
-}
-
-.searchbox-full > div {
-    display: flex;
-    margin-top: 0.5em;
-    margin-bottom: 0.5em;
-}
-
-.searchbox input[type="text"] {
-    flex: 1 0 auto;
-    margin-right: 0.5em;
-    /* workaround for wonky dark themes */
-    background-color: #ffffff;
-    border: 1px solid #ddd;
-}
-
-.searchbox input[type="submit"] {
-    flex: 0 0 auto;
-}
-
-.searchbox input[type="checkbox"] {
-    color: #ddd;
-}
-
-.searchbox label {
-    color: #ddd;
-    margin-left: 0.5em;
-}
-
-.searchbox-full div.ym-fbox-check {
-    margin-left: 1.5em;
-    margin-right: 1.5em;
-}
-
-@media screen and ( max-width: 640px )  {
-    .searchbox-full > div.search-scope {
-        flex-direction: column;
-    }
-
-    .searchbox-full div.ym-fbox-check {
-        margin: 0;
-        margin-top: 0.5em;
-        margin-bottom: 0.5em;
-    }
 }
 
 @media screen and ( max-width: 960px )  {
@@ -236,11 +321,11 @@ ol.roomlist > li.roomcard {
     padding: 0.75em;
     margin-bottom: 1.5em;
     font-family: "Droid Sans", Arial, Helvetica, sans-serif;
-    max-width: 45.5em; /* 42 em main content + 3 em avatar + 0.5em avatar margin */
+    max-width: $listing-width-inner;
 }
 
 ol.roomlist > li.roomcard:hover {
-    background: rgba(127, 88, 64, 0.1);
+    background: $neutral-200;
 }
 
 .roomcard .copy-to-clipboard {
@@ -299,6 +384,18 @@ span.dummy-avatar > span:before {
     font-size: 150%;
 }
 
+.roomcard div.main {
+    max-width: calc(100% - 3.5em);
+}
+
+.roomcard h6.title,
+.roomcard .addr {
+    max-width: 100%;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    overflow-wrap: anywhere;
+}
+
 div.nusers {
     text-align: center;
     font-weight: bolder;
@@ -313,7 +410,7 @@ div.nusers > span:before {
     margin-bottom: 0;
     font-size: 128.57143%;
     line-height: 1.16667;
-    color: #006b8e;
+    color: $primary-700;
 }
 
 .roomcard .title a,
@@ -330,11 +427,16 @@ div.nusers > span:before {
 .roomcard div.addr {
     font-size: 95%;
     line-height: 1.5789473684210527;
-    color: #439639;
+    color: $accent-700;
 }
 
 span.scheme {
     opacity: 0.5;
+}
+
+div.listing-wrap {
+    margin-left: $margin-left-full-scale;
+    width: 47em;
 }
 
 /* common things */
@@ -418,6 +520,11 @@ abbr {
     flex: 1 1 0px;
 }
 
+div.content-wrap {
+    margin-left: $margin-left-full-scale;
+    max-width: $content-width-full-scale;
+}
+
 /* API reference */
 
 section.api-call {
@@ -473,4 +580,64 @@ tbody tr:hover td.supp-ext {
 
 tbody tr:hover td.supp-no {
     background-color: rgba(255, 0, 0, 0.3);
+}
+
+/* search */
+
+div.search-scope {
+    display: flex;
+}
+
+div.ym-fbox-check {
+    margin-bottom: 1.5em;
+    margin-right: 1.5em;
+}
+
+div.search-scope input[type="checkbox"] + label {
+    margin-left: 0.5em;
+}
+
+
+/* global layout responsiveness */
+
+/* stage 1: make left and right margin equal */
+
+@media screen and ( max-width: $listing-width-with-both-margins ) {
+    div.listing-wrap {
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    header#main.slim > .expand {
+        width: 0;
+        flex: 0 0 auto;
+    }
+}
+
+@media screen and ( max-width: $listing-width-with-margin ) {
+    nav#nav-footer {
+        padding-left: 0;
+    }
+}
+
+@media screen and ( max-width: $content-width-with-both-margins ) {
+    div.content-wrap {
+        margin-left: auto;
+        margin-right: auto;
+    }
+}
+
+/* stage 2: collapse header */
+
+@media screen and ( max-width: $content-width-full-scale ) {
+    header#main.slim {
+        display: block;
+    }
+
+    div.content-wrap,
+    div.listing-wrap {
+        margin-left: 10px;
+        margin-right: 10px;
+        width: auto;
+    }
 }

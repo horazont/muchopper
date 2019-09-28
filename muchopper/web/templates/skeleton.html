@@ -1,0 +1,54 @@
+{% from "library.tpl" import icon %}
+{%- macro menu_item(item, caller=None) -%}
+<li class="{{ 'active' if item.active else ''}}">
+	{%- if item.active -%}
+	<span>{{ item.text }}</span>
+	{%- else -%}
+	<a href="{{ item.url }}">{{ item.text }}</a>
+	{%- endif -%}
+</li>
+{%- endmacro -%}
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>{{ title }} - {{ config["APPNAME"] }}</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		{% block head_includes %}
+		<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/core/base.min.css') }}">
+		<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/screen/typography.css') }}">
+		<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/app.css') }}">
+		{% endblock %}
+	</head>
+	<body>{% include "icons.html" %}<div class="ym-wrapper"><div class="ym-wbox">
+		{% block header %}
+		<form name="search" method="GET" action="{{ url_for('search') }}"><header id="main" class="slim">
+			<h1><a href="{{ url_for('index') }}">{% include "icon.svg" %}{{ config["APPNAME"] }}</a></h1>
+			<div class="searchbox" id="searchbox">
+				<input type="text" name="q" placeholder="Search rooms" value="{{ orig_keywords | default('') }}">{#- -#}
+				<button type="submit">{% call icon('search', alt='Search') %}{% endcall %}</button>
+			</div>
+			<div class="expand"></div>
+		</header>{% block searchbox_ext %}{% endblock %}</form>
+		{% endblock %}
+		<main>{% block body %}{% endblock %}</main>
+		<nav id="nav-footer">
+			<ul>
+				{%- for submenu in current_menu.children -%}
+				<li>{{ '' -}}
+					<h6>{{ submenu.text }}</h6>
+					<ul>
+						{%- for item in submenu.children -%}
+						{% call menu_item(item) %}{% endcall %}
+						{%- endfor -%}
+					</ul>{{ '' -}}
+				</li>
+				{%- endfor -%}
+			</ul>
+		</nav>
+		<footer id="footer-main">
+			<p>
+				Made with <a href="http://yaml.de">the award-winning YAML CSS Framework</a>, <a href="http://flask.pocoo.org/">Flask</a> and <a href="https://github.com/horazont/aioxmpp">aioxmpp</a>. Licensed under <a href="https://www.gnu.org/licenses/agpl.html">AGPLv3+</a>. <a href="https://github.com/horazont/muchopper">View the source</a> on GitHub.
+			</p>
+		</footer>
+	</div></div></body>
+</html>
