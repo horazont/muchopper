@@ -98,6 +98,18 @@ header#main.slim > h1 svg {
     vertical-align: middle;
 }
 
+header#main.slim > h1 > a {
+    display: block;
+}
+
+header#main.slim > h1 > div {
+    color: $neutral-800;
+    font-weight: light;
+    font-size: 75%;
+    text-align: center;
+    letter-spacing: 0;
+}
+
 header#main.slim > .searchbox {
     flex: 1 1 auto;
     font-size: 128.57143%;
@@ -302,12 +314,6 @@ span.at {
 
 span.domain {
     opacity: 0.95;
-}
-
-div.subtitle {
-    font-style: italic;
-    font-size: 110%;
-    color: #dfdfdf;
 }
 
 ol.roomlist {

@@ -22,9 +22,9 @@
 	<body>{% include "icons.html" %}<div class="ym-wrapper"><div class="ym-wbox">
 		{% block header %}
 		<form name="search" method="GET" action="{{ url_for('search') }}"><header id="main" class="slim">
-			<h1><a href="{{ url_for('index') }}">{% include "icon.svg" %}{{ config["APPNAME"] }}</a></h1>
+			<h1><a href="{{ url_for('index') }}">{% include "icon.svg" %}{{ config["APPNAME"] }}</a><div class="subtitle">Chat Room Search Engine</h1>
 			<div class="searchbox" id="searchbox">
-				<input type="text" name="q" placeholder="Search rooms" value="{{ orig_keywords | default('') }}">{#- -#}
+				<input type="text" name="q" placeholder="Search rooms">{#- -#}
 				<button type="submit">{% call icon('search', alt='Search') %}{% endcall %}</button>
 			</div>
 			<div class="expand"></div>
