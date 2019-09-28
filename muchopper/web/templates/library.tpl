@@ -59,50 +59,50 @@
 
 {% macro room_table(items, keywords=[], caller=None) %}
 <ol class="roomlist">
-    {% for muc, public_info, has_avatar in items %}
-    {% set nusers = (muc.nusers_moving_average or muc.nusers) | round %}
-    {% set descr = public_info.description or public_info.name or public_info.subject %}
-    {% set show_descr = descr and descr != muc.address.localpart %}
-    {% set show_lang = public_info.language %}
-    {% set is_nonanon = not muc.anonymity_mode or muc.anonymity_mode.value == "none" %}
-    {% set is_closed = not muc.is_open %}
-    {% set web_chat_url = public_info.web_chat_url %}
-    {% set http_logs_url = public_info.http_logs_url %}
-    <li class="roomcard">
-        <div class="avatar-column">
-            <div class="avatar" aria-hidden="true">{%- call avatar(has_avatar, muc.address) %}{% call
+	{% for muc, public_info, has_avatar in items %}
+	{% set nusers = (muc.nusers_moving_average or muc.nusers) | round %}
+	{% set descr = public_info.description or public_info.name or public_info.subject %}
+	{% set show_descr = descr and descr != muc.address.localpart %}
+	{% set show_lang = public_info.language %}
+	{% set is_nonanon = not muc.anonymity_mode or muc.anonymity_mode.value == "none" %}
+	{% set is_closed = not muc.is_open %}
+	{% set web_chat_url = public_info.web_chat_url %}
+	{% set http_logs_url = public_info.http_logs_url %}
+	<li class="roomcard">
+		<div class="avatar-column">
+			<div class="avatar" aria-hidden="true">{%- call avatar(has_avatar, muc.address) %}{% call
  room_name(muc, public_info) %}{% endcall %}{% endcall -%}</div>
-            <div class="expand"></div>
-            <div class="nusers" title="Number of users online">{% call icon("users") %}{% endcall %}{{ nusers | prettify_number }}<span class="a11y-text">&nbsp;user{{ 's' if nusers != 1 else '' }} online</span></div>
-            <div class="expand"></div>
-        </div>
-        <div class="main">
-            <div class="addr">{#- -#}
-                <a href="xmpp:{{ muc.address }}?join">{{ room_label(muc, public_info, keywords) }}</a>
-                {%- call clipboard_button() %}{{ muc.address }}{% endcall -%}
-            </div>
-            {%- if show_descr -%}
-            <div class="descr">
-                <span class="descr">{{ descr | highlight(keywords) }}</span>
-            </div>
-            {%- endif -%}
-            {%- if show_lang or is_nonanon or is_closed -%}
-            <div><ul class="inline slim">
-            {%- if show_lang %}
-            <li>{% call icon("lang1") %}{% endcall %} Primary language: {{ public_info.language | prettify_lang }}</li>
-            {%- endif -%}
-            {%- if is_nonanon %}{{ nonanon_marker() }}{% endif -%}
-            {%- if is_closed %}{{ closed_marker() }}{% endif -%}
-            </ul></div>
-            {%- endif -%}
-            {% if web_chat_url or http_logs_url %}
-            <div><ul class="inline slim">
-            {%- if web_chat_url %}{% call join_url(web_chat_url) %}{% call room_name(muc, public_info) %}{% endcall %}{% endcall %}{% endif -%}
-            {%- if http_logs_url %}{% call logs_url(http_logs_url) %}{% call room_name(muc, public_info) %}{% endcall %}{% endcall %}{% endif -%}
-            </ul></div>
-            {% endif %}
-        </div>
-    </li>
-    {% endfor %}
+			<div class="expand"></div>
+			<div class="nusers" title="Number of users online">{% call icon("users") %}{% endcall %}{{ nusers | prettify_number }}<span class="a11y-text">&nbsp;user{{ 's' if nusers != 1 else '' }} online</span></div>
+			<div class="expand"></div>
+		</div>
+		<div class="main">
+			<div class="addr">{#- -#}
+				<a href="xmpp:{{ muc.address }}?join">{{ room_label(muc, public_info, keywords) }}</a>
+				{%- call clipboard_button() %}{{ muc.address }}{% endcall -%}
+			</div>
+			{%- if show_descr -%}
+			<div class="descr">
+				<span class="descr">{{ descr | highlight(keywords) }}</span>
+			</div>
+			{%- endif -%}
+			{%- if show_lang or is_nonanon or is_closed -%}
+			<div><ul class="inline slim">
+			{%- if show_lang %}
+			<li>{% call icon("lang1") %}{% endcall %} Primary language: {{ public_info.language | prettify_lang }}</li>
+			{%- endif -%}
+			{%- if is_nonanon %}{{ nonanon_marker() }}{% endif -%}
+			{%- if is_closed %}{{ closed_marker() }}{% endif -%}
+			</ul></div>
+			{%- endif -%}
+			{% if web_chat_url or http_logs_url %}
+			<div><ul class="inline slim">
+			{%- if web_chat_url %}{% call join_url(web_chat_url) %}{% call room_name(muc, public_info) %}{% endcall %}{% endcall %}{% endif -%}
+			{%- if http_logs_url %}{% call logs_url(http_logs_url) %}{% call room_name(muc, public_info) %}{% endcall %}{% endcall %}{% endif -%}
+			</ul></div>
+			{% endif %}
+		</div>
+	</li>
+	{% endfor %}
 </ol>
 {% endmacro %}

@@ -3,67 +3,67 @@
 {% macro appname() %}<em>{{ config["APPNAME"] }}</em>{% endmacro %}
 {% block content %}
 <article>
-    <h3>Room listing criteria</h3>
-    <p>{{ appname() }} applies the following criteria when deciding whether
-    to include a room in the public listing. All criteria must be met:</p>
-    <ol>
-        <li>The room must be set to <strong>be persistent</strong>, that is, to continue existing even if nobody is currently in it. Temporary rooms are often used for ad-hoc purposes and it does not make sense to list them publicly.</li>
-        <li>The room must be set to <strong>allow public listing</strong>.</li>
-        <li>The room must <strong>not have a password</strong> set.</li>
-        <li>The room must be <strong>open to the general public</strong>, that is, the "Members only" option must not be set.</li>
-    </ol>
-    <p>To even be able to consider a room, it must be known to the service. Rooms are discovered by the following means:</p>
-    <ul>
-        <li>when <a href="xmpp:{{ config['APPJID'] }}">{{ config['APPJID'] }}</a> receives an invitation to a room, and</li>
-        <li>by listing public rooms on domains already known.</li>
-    </ul>
-    <p>When inviting the service to your room, note that it <em>will not join the room</em>. Your room will be considered at latest during the next crawl (see below for update frequencies).</p>
-    <h4>Avatar criteria</h4>
-    <p>Avatars are only shown if the room is on a service-maintained
-    white list. The white list is managed fully at the discretion of the
-    service provider. There is no transparency whatsoever about list
-    membership. The reason for that is the potential for abuse and the
-    complexity of image processing and the load it may cause on the
-    server.</p>
-    <p>If you want your room to get on the list, please <a href="{{ url_for('contact') }}">get in touch</a>.</p>
-    <p>In addition to requiring a white list entry, avatars must also fulfill
-    the following criteria:</p>
-    <ul>
-      <li>They must be PNG, JPEG or SVG images.</li>
-      <li>Raster images (PNG or JPEG) must not exceed 1 MiB in size.</li>
-      <li>Vector images (SVG) must not exceed 64 kiB in size.</li>
-      <li>They must be published using the <a href="https://xmpp.org/extensions/xep-0054.html">vcard-temp</a> protocol (yeah... I know).</li>
-    </ul>
-    <h3><a name="delisting"></a>Room delisting</h3>
-    <p>Note that if your room is listed here, it <em>has been configured to be listed publicly</em> (see above). The preferred way to remove your room from the list would be to disable that configuration option (and wait for the crawler to pick up on it, see below for the update frequency).</p>
-    <p>If the crawler does not seem to pick up on your configuration change or you want your room to be excluded <em>from this listing only but want it included in other listings</em>, please <a href="{{ url_for('contact') }}">get in touch</a>.</p>
-    <p>Rooms which have been unreachable for more than two days will be delisted automatically.</p>
-    <h3>Meta-information about rooms</h3>
-    <p>{{ appname() }} collects the following meta-information about rooms:</p>
-    <ul>
-        <li>Address (obviously)</li>
-        <li>(Average) number of users</li>
-        <li>Name</li>
-        <li>Description</li>
-        <li>Primary language</li>
-        <li>Subject/topic (if available; currently not shown)</li>
-        <li>Web chat and logs URLs (if available)</li>
-        <li>Avatar (if white-listed)</li>
-    </ul>
-    <p>The <em>name</em>, <em>description</em> and <em>primary language</em> can be configured using the standard room configuration options offered by your Jabber client.</p>
-    <p class="box">
-        <strong>Note:</strong> Not all clients offer (all) configuration options. In general, mobile clients offer fewer options than desktop clients. Gajim is an example of a desktop client which offers all room options.
-    </p>
-    <p class="box">
-        <strong>Note:</strong> The room language option, albeit specified years ago, has only recently been added to servers. If the option is not offered to you while name and description are offered, please get in touch with your server operator. Point them at the <a href="{{ url_for('operators') }}">documentation for service operators</a>.
-    </p>
-    <p class="box">
-        <strong>Note:</strong> Due to the complexity of handling avatars on the server side, your room or domain needs to be white-listed to be allowed to use avatars. The white listing happens at the discretion of the service provider. Please <a href="{{ url_for('contact') }}">contact us</a> to have your room white listed for avatar use.
-    </p>
-    <h3>Update frequency</h3>
-    <p>As there is no way for our service to be notified of changes to your room metadata, updates can take a while. It may thus take a few hours for your update to be applied to the public listing.</p>
-    <p>You may or may not be able to speed up the update process by re-inviting the service (see above) to your room.</p>
-    <p>Like all other room stats, the number of occupants is queried in a dynamic interval depending on the load (unless {{ appname() }} is joined in a room). In addition, we perform a moving average on (up to, again, depending on the load) hourly samples. This helps to avoid having the listing fluctuate too much due to the usual in and out flux of occupants.</p>
-    <p>In any case, the number of occupants should at most be used as a rough hint to the popularity of the room. It is used as the primary sorting criterium because we don’t have any better.</p>
+	<h3>Room listing criteria</h3>
+	<p>{{ appname() }} applies the following criteria when deciding whether
+	to include a room in the public listing. All criteria must be met:</p>
+	<ol>
+		<li>The room must be set to <strong>be persistent</strong>, that is, to continue existing even if nobody is currently in it. Temporary rooms are often used for ad-hoc purposes and it does not make sense to list them publicly.</li>
+		<li>The room must be set to <strong>allow public listing</strong>.</li>
+		<li>The room must <strong>not have a password</strong> set.</li>
+		<li>The room must be <strong>open to the general public</strong>, that is, the "Members only" option must not be set.</li>
+	</ol>
+	<p>To even be able to consider a room, it must be known to the service. Rooms are discovered by the following means:</p>
+	<ul>
+		<li>when <a href="xmpp:{{ config['APPJID'] }}">{{ config['APPJID'] }}</a> receives an invitation to a room, and</li>
+		<li>by listing public rooms on domains already known.</li>
+	</ul>
+	<p>When inviting the service to your room, note that it <em>will not join the room</em>. Your room will be considered at latest during the next crawl (see below for update frequencies).</p>
+	<h4>Avatar criteria</h4>
+	<p>Avatars are only shown if the room is on a service-maintained
+	white list. The white list is managed fully at the discretion of the
+	service provider. There is no transparency whatsoever about list
+	membership. The reason for that is the potential for abuse and the
+	complexity of image processing and the load it may cause on the
+	server.</p>
+	<p>If you want your room to get on the list, please <a href="{{ url_for('contact') }}">get in touch</a>.</p>
+	<p>In addition to requiring a white list entry, avatars must also fulfill
+	the following criteria:</p>
+	<ul>
+	  <li>They must be PNG, JPEG or SVG images.</li>
+	  <li>Raster images (PNG or JPEG) must not exceed 1 MiB in size.</li>
+	  <li>Vector images (SVG) must not exceed 64 kiB in size.</li>
+	  <li>They must be published using the <a href="https://xmpp.org/extensions/xep-0054.html">vcard-temp</a> protocol (yeah... I know).</li>
+	</ul>
+	<h3><a name="delisting"></a>Room delisting</h3>
+	<p>Note that if your room is listed here, it <em>has been configured to be listed publicly</em> (see above). The preferred way to remove your room from the list would be to disable that configuration option (and wait for the crawler to pick up on it, see below for the update frequency).</p>
+	<p>If the crawler does not seem to pick up on your configuration change or you want your room to be excluded <em>from this listing only but want it included in other listings</em>, please <a href="{{ url_for('contact') }}">get in touch</a>.</p>
+	<p>Rooms which have been unreachable for more than two days will be delisted automatically.</p>
+	<h3>Meta-information about rooms</h3>
+	<p>{{ appname() }} collects the following meta-information about rooms:</p>
+	<ul>
+		<li>Address (obviously)</li>
+		<li>(Average) number of users</li>
+		<li>Name</li>
+		<li>Description</li>
+		<li>Primary language</li>
+		<li>Subject/topic (if available; currently not shown)</li>
+		<li>Web chat and logs URLs (if available)</li>
+		<li>Avatar (if white-listed)</li>
+	</ul>
+	<p>The <em>name</em>, <em>description</em> and <em>primary language</em> can be configured using the standard room configuration options offered by your Jabber client.</p>
+	<p class="box">
+		<strong>Note:</strong> Not all clients offer (all) configuration options. In general, mobile clients offer fewer options than desktop clients. Gajim is an example of a desktop client which offers all room options.
+	</p>
+	<p class="box">
+		<strong>Note:</strong> The room language option, albeit specified years ago, has only recently been added to servers. If the option is not offered to you while name and description are offered, please get in touch with your server operator. Point them at the <a href="{{ url_for('operators') }}">documentation for service operators</a>.
+	</p>
+	<p class="box">
+		<strong>Note:</strong> Due to the complexity of handling avatars on the server side, your room or domain needs to be white-listed to be allowed to use avatars. The white listing happens at the discretion of the service provider. Please <a href="{{ url_for('contact') }}">contact us</a> to have your room white listed for avatar use.
+	</p>
+	<h3>Update frequency</h3>
+	<p>As there is no way for our service to be notified of changes to your room metadata, updates can take a while. It may thus take a few hours for your update to be applied to the public listing.</p>
+	<p>You may or may not be able to speed up the update process by re-inviting the service (see above) to your room.</p>
+	<p>Like all other room stats, the number of occupants is queried in a dynamic interval depending on the load (unless {{ appname() }} is joined in a room). In addition, we perform a moving average on (up to, again, depending on the load) hourly samples. This helps to avoid having the listing fluctuate too much due to the usual in and out flux of occupants.</p>
+	<p>In any case, the number of occupants should at most be used as a rough hint to the popularity of the room. It is used as the primary sorting criterium because we don’t have any better.</p>
 </article>
 {% endblock %}
