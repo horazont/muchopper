@@ -240,7 +240,7 @@ ol.roomlist > li.roomcard {
 }
 
 ol.roomlist > li.roomcard:hover {
-    background: rgba(127, 88, 64, 0.05);
+    background: rgba(127, 88, 64, 0.1);
 }
 
 .roomcard .copy-to-clipboard {
