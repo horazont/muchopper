@@ -6,14 +6,12 @@
 {% set title = "Search" %}
 {% endif %}
 {% block searchbox_ext %}
-<div class="listing-wrap">{#- -#}
-	<h6>Further search options</h6>{#- -#}
-	<input type="hidden" name="f" value="y"/>{#- -#}
-	<div class="search-scope">
-		<div class="ym-fbox-check"><input type="checkbox" id="search_address" name="sinaddr" {{ 'checked' if search_address else '' }}/><label for="search_address">Search in addresses</label></div>
-		<div class="ym-fbox-check"><input type="checkbox" id="search_description" name="sindescr" {{ 'checked' if search_description else '' }}/><label for="search_description">Search in description</label></div>
-		<div class="ym-fbox-check"><input type="checkbox" id="search_name" name="sinname" {{ 'checked' if search_name else '' }}/><label for="search_name">Search in name</label></div>
-	</div>
+<input type="hidden" name="f" value="y"/>{#- -#}
+<div class="search-scope">
+	<div class="search-scope-opt" aria-hidden="true"><span class="pres-text" data-text="Search in:"></span></div>
+	<div class="search-scope-opt"><input type="checkbox" id="search_address" name="sinaddr" {{ 'checked' if search_address else '' }}/><label for="search_address"><span class="a11y-text">Search in </span>address</label></div>
+	<div class="search-scope-opt"><input type="checkbox" id="search_description" name="sindescr" {{ 'checked' if search_description else '' }}/><label for="search_description"><span class="a11y-text">Search in </span>description</label></div>
+	<div class="search-scope-opt"><input type="checkbox" id="search_name" name="sinname" {{ 'checked' if search_name else '' }}/><label for="search_name"><span class="a11y-text">Search in </span>name</label></div>
 </div>
 {% endblock %}
 {% block content %}

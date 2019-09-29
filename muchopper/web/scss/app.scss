@@ -114,6 +114,12 @@ header#main.slim > h1 > div {
 
 header#main.slim > .searchbox {
     flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+}
+
+header#main.slim > .searchbox > .searchbox-primary {
+    flex: 0 0 auto;
     font-size: 128.57143%;
     line-height: 1.16667;
     border: 1px solid $neutral-300;
@@ -126,13 +132,13 @@ header#main.slim > .searchbox {
     color: $neutral-100;
 }
 
-form:focus-within header#main.slim > .searchbox {
+form:focus-within header#main.slim > .searchbox > .searchbox-primary {
     border: 1px solid $neutral-600;
     border-radius: 0.1em;
 }
 
-header#main.slim > .searchbox > input,
-header#main.slim > .searchbox > button {
+header#main.slim > .searchbox > .searchbox-primary > input,
+header#main.slim > .searchbox > .searchbox-primary > button {
     flex: 1 1 auto;
     margin: 0;
     padding: 0;
@@ -142,18 +148,18 @@ header#main.slim > .searchbox > button {
     color: $neutral-800;
 }
 
-header#main.slim > .searchbox > input {
+header#main.slim > .searchbox > .searchbox-primary > input {
     padding: 0.375em;
 }
 
-header#main.slim > .searchbox > button {
+header#main.slim > .searchbox > .searchbox-primary > button {
     flex: 0 0 auto;
     padding: 0.375em;
     border-left: 1px solid transparent;
 }
 
-header#main.slim > .searchbox > input:focus + button,
-header#main.slim > .searchbox:hover > button {
+header#main.slim > .searchbox > .searchbox-primary > input:focus + button,
+header#main.slim > .searchbox > .searchbox-primary:hover > button {
     background-color: $accent-300;
     border-left: 1px solid $accent-600;
 }
@@ -462,6 +468,10 @@ div.listing-wrap {
     top: -100px;
 }
 
+.pres-text:before {
+    content: attr(data-text);
+}
+
 .with-tooltip {
     cursor: help;
 }
@@ -599,15 +609,27 @@ tbody tr:hover td.supp-no {
 
 div.search-scope {
     display: flex;
+    flex-flow: row wrap;
 }
 
-div.ym-fbox-check {
-    margin-bottom: 1.5em;
-    margin-right: 1.5em;
+div.search-scope-opt {
+    padding: 0.75em;
+    break-after: avoid;
+    break-before: avoid;
+    flex: 0 0 auto;
 }
 
-div.search-scope input[type="checkbox"] + label {
+div.search-scope-opt:first-child {
+    break-after: auto;
+}
+
+div.search-scope-opt input[type="checkbox"] + label {
     margin-left: 0.5em;
+    /* increase clickable range */
+    padding-top: 0.75em;
+    padding-bottom: 0.75em;
+    margin-top: -0.75em;
+    margin-bottom: -0.75em;
 }
 
 

@@ -23,12 +23,15 @@
 		{% block header %}
 		<form name="search" method="GET" action="{{ url_for('search') }}"><header id="main" class="slim">
 			<h1><a href="{{ url_for('index') }}">{% include "icon.svg" %}{{ config["APPNAME"] }}</a><div class="subtitle">Chat Room Search Engine</h1>
-			<div class="searchbox" id="searchbox">
-				<input type="text" name="q" placeholder="Search rooms">{#- -#}
-				<button type="submit">{% call icon('search', alt='Search') %}{% endcall %}</button>
+			<div class="searchbox" id="searchbox">{#- -#}
+				<div class="searchbox-primary">{#- -#}
+					<input type="text" name="q" placeholder="Search rooms" value="{{ orig_keywords | default('') }}">{#- -#}
+					<button type="submit">{% call icon('search', alt='Search') %}{% endcall %}</button>{#- -#}
+				</div>{#- -#}
+				{%- block searchbox_ext %}{% endblock -%}
 			</div>
 			<div class="expand"></div>
-		</header>{% block searchbox_ext %}{% endblock %}</form>
+		</header></form>
 		{% endblock %}
 		<main>{% block body %}{% endblock %}</main>
 		<nav id="nav-footer">
