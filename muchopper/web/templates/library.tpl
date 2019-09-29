@@ -76,6 +76,7 @@
 	{% set is_closed = not muc.is_open %}
 	{% set web_chat_url = public_info.web_chat_url %}
 	{% set http_logs_url = public_info.http_logs_url %}
+	{% set set_lang_attr = public_info.language %}
 	<li class="roomcard">
 		{# this is aria-hidden; we put the number of online users inline with the main content of the room card as a11y text #}
 		<div class="avatar-column" aria-hidden="true">
@@ -85,11 +86,11 @@
 			<div class="expand"></div>
 		</div>
 		<div class="main">
-			<h3 class="title"><a href="xmpp:{{ muc.address }}?join" rel="nofollow">{{ name }}</a></h3>
+			<h3 class="title"{% if set_lang_attr %} lang="{{ public_info.language }}"{% endif %}><a href="xmpp:{{ muc.address }}?join" rel="nofollow">{{ name }}</a></h3>
 			<div class="addr"><a href="xmpp:{{ muc.address }}?join" rel="nofollow">{% call room_address(muc.address, keywords=keywords) %}{% endcall %}</a>{%- call clipboard_button() %}{{ muc.address }}{% endcall -%}</div>
 			<div class="a11y-text">{{ (nusers | pretty_number_info)['accessible'] }} users online</div>
 			{% if show_descr -%}
-			<div class="descr">{{ descr }}</div>
+			<div class="descr"{% if set_lang_attr %} lang="{{ public_info.language }}"{% endif %}>{{ descr }}</div>
 			{%- endif %}
 			{%- if show_lang or is_nonanon or is_closed -%}
 			<div><ul class="inline slim">
