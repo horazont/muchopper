@@ -24,12 +24,12 @@
 {% endmacro %}
 
 {% macro room_name(muc, public_info, caller=None) -%}
-{%- if public_info.name and public_info.name != muc.address.localpart %}{{ public_info.name }}{% else %}{{ muc.address }}{% endif -%}
+{%- if public_info.name and public_info.name != muc.address.localpart %}{{ public_info.name }}{% else %}{{ (muc.address.localpart | jid_unescape) or muc.address }}{% endif -%}
 {%- endmacro %}
 
 {% macro room_address(address, keywords=[], caller=None) -%}
 {%- if address.localpart -%}
-<span class="address"><span class="localpart">{{ address.localpart | highlight(keywords) }}</span><span class="at">@</span><span class="domain">{{ address.domain | highlight(keywords) }}</span></span>
+<span class="address"><span class="localpart">{{ address.localpart | jid_unescape | highlight(keywords) }}</span><span class="at">@</span><span class="domain">{{ address.domain | highlight(keywords) }}</span></span>
 {%- else -%}
 {{ address | highlight(keywords) }}
 {%- endif -%}
@@ -64,7 +64,11 @@
 {% macro room_table(items, keywords=[], caller=None) %}
 <ol class="roomlist">{% for muc, public_info, has_avatar in items %}
 	{% set nusers = (muc.nusers_moving_average or muc.nusers) | round %}
-	{% set name = public_info.name or muc.address.localpart or (muc.address | string) %}
+	{% if public_info.name != muc.address.localpart and public_info.name %}
+	{% set name = public_info.name %}
+	{% else %}
+	{% set name = (muc.address.localpart | jid_unescape) or (muc.address | string) %}
+	{% endif %}
 	{% set descr = public_info.description or public_info.subject %}
 	{% set show_descr = descr and descr != muc.address.localpart %}
 	{% set show_lang = public_info.language %}

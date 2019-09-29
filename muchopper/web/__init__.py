@@ -43,6 +43,27 @@ db = SQLAlchemy(app, metadata=model.Base.metadata)
 main_menu = Menu(app)
 
 
+try:
+    from aioxmpp import jid_unescape
+except ImportError:
+    ESCAPABLE_CODEPOINTS = " \"&'/:<>@"
+
+    # This is the jid_unescape implementation as stolen from aioxmpp.
+    def jid_unescape(localpart):
+        s = localpart
+
+        for cp in ESCAPABLE_CODEPOINTS:
+            s = s.replace("\\{:02x}".format(ord(cp)), cp)
+
+        for cp in ESCAPABLE_CODEPOINTS + "\\":
+            s = s.replace(
+                "\\5c{:02x}".format(ord(cp)),
+                "\\{:02x}".format(ord(cp)),
+            )
+
+        return s
+
+
 def abort_json(status_code, payload):
     resp = jsonify(payload)
     resp.status_code = status_code
@@ -257,6 +278,13 @@ def highlight(s, keywords):
 def force_escape(s):
     s = str(s)
     return jinja2.Markup(html.escape(s))
+
+
+@app.template_filter("jid_unescape")
+def jid_unescape_filter(s):
+    if s is None:
+        return s
+    return jid_unescape(s)
 
 
 @app.template_filter("pretty_number_info")
