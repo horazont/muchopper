@@ -17,6 +17,12 @@
 		<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/core/base.min.css') }}">
 		<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/screen/typography.css') }}">
 		<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/app.css') }}">
+		<link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='img/apple-touch-icon.png') }}">
+		<link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='img/favicon-32x32.png') }}">
+		<link rel="icon" type="image/png" sizes="16x16" href="{{ url_for('static', filename='img/favicon-16x16.png') }}">
+		<link rel="manifest" href="/site.webmanifest">
+		<meta name="msapplication-TileColor" content="#da532c">
+		<meta name="theme-color" content="#ffffff">
 		{% endblock %}
 	</head>
 	<body>{% include "icons.html" %}<div class="ym-wrapper"><div class="ym-wbox">

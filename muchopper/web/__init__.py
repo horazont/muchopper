@@ -1003,4 +1003,41 @@ def metrics():
     )
 
 
+@app.route("/site.manifest")
+def site_manifest():
+    # this is needed for icons
+    generator = functools.partial(
+        jsonify,
+        {
+            "name": "",
+            "short_name": "",
+            "icons": [
+                {
+                    "src": url_for("static",
+                                   filename="img/android-chrome-192x192.png"),
+                    "sizes": "192x192",
+                    "type": "image/png"
+                },
+                {
+                    "src": url_for("static",
+                                   filename="img/android-chrome-512x512.png"),
+                    "sizes": "512x512",
+                    "type": "image/png"
+                }
+            ],
+            "theme_color": "#ffffff",
+            "background_color": "#ffffff",
+            "display": "standalone"
+        }
+    )
+
+    return static_content(generator, "site.manifest", "application/json")
+
+
+@app.route("/favicon.ico")
+def favicon():
+    # fallback resource
+    return app.send_static_file('img/favicon.ico')
+
+
 prometheus_client.core.REGISTRY.register(MetricCollector())
