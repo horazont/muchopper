@@ -12,10 +12,10 @@
 <ul>
 	<li>Its identifying address (Jabber ID, JID).</li>
 	<li>The number of users last seen online in the MUC, as well as a moving average over this number.</li>
-	<li>The timestamp of the last message seen in the MUC (if available).</li>
 	<li>Whether the MUC can be joined into by everybody (<code>muc_open</code> flag and not <code>muc_passwordprotected</code> flag).</li>
 	<li>Whether the MUC shall be publicly listed (<code>muc_public</code> flag)</li>
 	<li>The timestamp of the last time {{ appname() }} successfully made contact with the MUC</li>
+	<li>Whether the MUC exposes the addresses of users (<code>muc_semianonymous</code> and <code>muc_nonanonymous</code> flags).</li>
 </ul>
 <p>In addition, for publicly listed MUCs, the following data is stored:</p>
 <ul>
@@ -23,6 +23,9 @@
 	<li>The room name (if available).</li>
 	<li>The current room subject (if available).</li>
 	<li>The room language (if available).</li>
+	<li>The URL to an anonymous web chat (if available).</li>
+	<li>The URL to web logs of the room (if available).</li>
+	<li>A (potentially downscaled) version of the avatar (if available and white-listed).</li>
 </ul>
 <p>If a room was delisted at our discretion, as described in the <a href="{{ url_for('owners') }}#delisting">documentation for owners</a>, or due to other reason, we store its address in a blacklist (legitimate interest under Art 6.1f).</p>
 
