@@ -420,12 +420,26 @@ span.dummy-avatar > span:before {
 }
 
 div.nusers {
-    text-align: center;
     font-weight: bolder;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: 0.1em;
+    margin-right: 0.1em;
 }
 
 div.nusers > span:before {
     content: attr(data-content);
+    display: block;
+    flex: 1 1 auto;
+}
+
+div.nusers > span.expand {
+    flex: 0 1 0.2em;
+}
+
+div.nusers > svg.icon {
+    flex: 0 0 auto;
 }
 
 .roomcard h6.title {

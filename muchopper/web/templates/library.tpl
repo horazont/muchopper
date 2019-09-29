@@ -81,7 +81,7 @@
 		<div class="avatar-column" aria-hidden="true">
 			<div class="avatar">{% call avatar(has_avatar, muc.address) %}{{ name }}{% endcall %}</div>
 			<div class="expand"></div>
-			<div class="nusers" title="Number of users online">{% call icon("users") %}{% endcall %}<span data-content="{{ (nusers | pretty_number_info)['short'] }}"></span></div>
+			<div class="nusers" title="Number of users online">{% call icon("users") %}{% endcall %}<span class="expand"></span><span data-content="{{ (nusers | pretty_number_info)['short'] }}"></span></div>
 			<div class="expand"></div>
 		</div>
 		<div class="main">
