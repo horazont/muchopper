@@ -9,7 +9,7 @@
 </li>
 {%- endmacro -%}
 <!DOCTYPE html>
-<html>
+<html lang="en">
 	<head>
 		<title>{{ title }} - {{ config["APPNAME"] }}</title>
 		<meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -31,8 +31,9 @@
 			<h1><a href="{{ url_for('index') }}">{% include "icon.svg" %}{{ config["APPNAME"] }}</a><div class="subtitle">Chat Room Search Engine</h1>
 			<div class="searchbox" id="searchbox">{#- -#}
 				<div class="searchbox-primary">{#- -#}
-					<input type="text" name="q" placeholder="Search rooms" value="{{ orig_keywords | default('') }}">{#- -#}
-					<button type="submit">{% call icon('search', alt='Search') %}{% endcall %}</button>{#- -#}
+					<label class="a11y-text" for="q-field">Search keywords: </label>
+					<input type="text" name="q" id="q-field" placeholder="Search rooms" value="{{ orig_keywords | default('') }}">{#- -#}
+					<button type="submit" aria-label="Search">{% call icon('search') %}{% endcall %}</button>{#- -#}
 				</div>{#- -#}
 				{%- block searchbox_ext %}{% endblock -%}
 			</div>

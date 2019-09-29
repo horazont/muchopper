@@ -2,14 +2,15 @@
 {% from "library.tpl" import room_table %}
 {% set title = "All rooms" %}
 {% macro pagination() %}
-<nav class="pagination">
+<nav class="pagination" role="navigation" aria-label="Pagination Navigation">
 	<ul>
 	{%- if page.has_prev %}<li class="prev"><a href="{{ url_for('room_list', pageno=page.page-1) }}">Previous page</a>{% endif -%}
 	{%- for pageno, insert_skip in visible_pages -%}
+	{%- set is_current = pageno == page.page -%}
 	{%- if insert_skip -%}
 	<li>...</li>
 	{%- endif -%}
-	<li class="{{ 'current' if pageno == page.page else '' }}"><a href="{{ url_for('room_list', pageno=pageno) }}">{{ pageno }}</a></li>
+	<li class="{{ 'current' if is_current else '' }}"><a href="{{ url_for('room_list', pageno=pageno) }}" aria-label="{% if is_current %}Page {{ pageno }}, current page{% else %}Go to page {{ pageno }}{% endif %}" {% if is_current %}aria-current="true"{% endif %}>{{ pageno }}</a></li>
 	{%- endfor -%}
 	{%- if page.has_next %}<li class="next"><a href="{{ url_for('room_list', pageno=page.page+1) }}">Next page</a>{% endif -%}
 	</ul>
