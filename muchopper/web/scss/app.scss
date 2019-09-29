@@ -411,7 +411,7 @@ span.dummy-avatar > span:before {
     max-width: calc(100% - 3.5em);
 }
 
-.roomcard h6.title,
+.roomcard h3.title,
 .roomcard .addr {
     max-width: 100%;
     text-overflow: ellipsis;
@@ -442,7 +442,7 @@ div.nusers > svg.icon {
     flex: 0 0 auto;
 }
 
-.roomcard h6.title {
+.roomcard h3.title {
     font-weight: inherit;
     margin-bottom: 0;
     font-size: 128.57143%;

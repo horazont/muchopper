@@ -85,7 +85,7 @@
 			<div class="expand"></div>
 		</div>
 		<div class="main">
-			<h6 class="title"><a href="xmpp:{{ muc.address }}?join" rel="nofollow">{{ name }}</a></h6>
+			<h3 class="title"><a href="xmpp:{{ muc.address }}?join" rel="nofollow">{{ name }}</a></h3>
 			<div class="addr"><a href="xmpp:{{ muc.address }}?join" rel="nofollow">{% call room_address(muc.address, keywords=keywords) %}{% endcall %}</a>{%- call clipboard_button() %}{{ muc.address }}{% endcall -%}</div>
 			<div class="a11y-text">{{ (nusers | pretty_number_info)['accessible'] }} users online</div>
 			{% if show_descr -%}
