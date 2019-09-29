@@ -338,13 +338,17 @@ ol.roomlist > li.roomcard {
     padding: 0;
     display: flex;
     padding: 0.75em;
-    margin-bottom: 1.5em;
     font-family: "Droid Sans", Arial, Helvetica, sans-serif;
     max-width: $listing-width-inner;
+    border: 1px solid transparent;
+    margin: -1px;
+    margin-bottom: calc(1.5em - 1px);
+    border-radius: 0.1em;
 }
 
 ol.roomlist > li.roomcard:hover {
-    background: $neutral-200;
+    background: $neutral-100;
+    border: 1px solid $neutral-300;
 }
 
 .roomcard .copy-to-clipboard {
@@ -456,6 +460,60 @@ span.scheme {
 div.listing-wrap {
     margin-left: $margin-left-full-scale;
     width: 47em;
+}
+
+ul.actions {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+}
+
+ul.actions > li {
+    flex: 0 0 auto;
+    margin: 0;
+    padding: 0;
+}
+
+.actions a {
+    display: block;
+    background-color: $primary-100;
+    color: $neutral-800;
+    padding: 0.375em;
+    padding-left: 0.5625em;
+    padding-right: 0.5625em;
+    margin: 0.375em;
+    border-radius: 0.375em;
+    margin-left: 0;
+    margin-right: 0.75em;
+    /* box-shadow:
+        0px 1px 2px rgba(0, 0, 0, 0.1),
+        0px 2px 4px rgba(0, 0, 0, 0.05),
+        inset 0px 1px 2px white; */
+}
+
+.actions a svg.icon {
+    margin-right: 0.1875em;
+}
+
+.actions a:hover,
+.actions a:focus,
+.actions a:active {
+    background-color: $primary-300;
+    /* box-shadow:
+        0px 1px 2px rgba(0, 0, 0, 0.1),
+        0px 2px 4px rgba(0, 0, 0, 0.05),
+        inset 0px 1px 2px $primary-200; */
+}
+
+.actions a:active {
+    padding-top: calc(0.375em + 1px);
+    padding-bottom: calc(0.375em - 1px);
+    /* padding-left: calc(0.5625em + 1px);
+    padding-right: calc(0.5625em - 1px); */
+    box-shadow:
+        inset 0px 1px 1px $primary-400,
+        inset 0px -1px 1px $primary-200;
 }
 
 /* common things */
