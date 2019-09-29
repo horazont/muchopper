@@ -231,7 +231,9 @@ nav#nav-footer > ul > li > ul > li.active {
     font-weight: bold;
 }
 
-nav#nav-footer h6 {
+nav#nav-footer h3 {
+    font-size: inherit;
+    font-weight: bold;
     color: $neutral-700;
 }
 

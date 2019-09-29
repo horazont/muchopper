@@ -46,7 +46,7 @@
 			<ul>
 				{%- for submenu in current_menu.children -%}
 				<li>{{ '' -}}
-					<h6>{{ submenu.text }}</h6>
+					<h3>{{ submenu.text }}</h3>
 					<ul>
 						{%- for item in submenu.children -%}
 						{% call menu_item(item) %}{% endcall %}
