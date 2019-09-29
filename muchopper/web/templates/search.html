@@ -1,7 +1,7 @@
 {% extends "listing_base.html" %}
 {% from "library.tpl" import room_table %}
 {% if results is not none %}
-{% set title = "Search Results" %}
+{% set title = '"%s"' | format(orig_keywords) %}
 {% else %}
 {% set title = "Search" %}
 {% endif %}
