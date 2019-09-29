@@ -8,7 +8,7 @@
 	{%- for pageno, insert_skip in visible_pages -%}
 	{%- set is_current = pageno == page.page -%}
 	{%- if insert_skip -%}
-	<li>...</li>
+	<li aria-label="several pages omitted">...</li>
 	{%- endif -%}
 	<li class="{{ 'current' if is_current else '' }}"><a href="{{ url_for('room_list', pageno=pageno) }}" aria-label="{% if is_current %}Page {{ pageno }}, current page{% else %}Page {{ pageno }}{% endif %}" {% if is_current %}aria-current="true"{% endif %}>{{ pageno }}</a></li>
 	{%- endfor -%}
