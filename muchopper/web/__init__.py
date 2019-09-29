@@ -708,10 +708,15 @@ def privacy():
     return render_static_template("privacy.html")
 
 
+@app.route("/legal")
+@register_menu(app, "meta.legal", "Legal notes & Contact", order=4)
+def legal():
+    return render_static_template("legal.html")
+
+
 @app.route("/contact")
-@register_menu(app, "meta.contact", "Contact", order=4)
 def contact():
-    return render_static_template("contact.html")
+    return redirect(url_for('legal'))
 
 
 # API
