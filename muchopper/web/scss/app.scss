@@ -63,10 +63,11 @@ a:hover, a:focus, a:active {
 header#main.slim {
     display: flex;
     padding: $header-margin;
-    background-color: $neutral-100;
+    background-color: $neutral-800;
+    color: $neutral-200;
     align-items: baseline;
     margin-bottom: 1.5em;
-    box-shadow: 0px 1px 1px $neutral-200;
+    box-shadow: 0px 1px 1px rgba(0, 0, 0, 0.4);
 }
 
 header#main.slim a {
@@ -91,6 +92,7 @@ header#main.slim > h1 {
     font-size: 150%;
     letter-spacing: -0.05em;
     width: $header-width;
+    color: $neutral-100;
 }
 
 header#main.slim > h1 svg {
@@ -103,7 +105,7 @@ header#main.slim > h1 > a {
 }
 
 header#main.slim > h1 > div {
-    color: $neutral-800;
+    color: $neutral-200;
     font-weight: light;
     font-size: 75%;
     text-align: center;
@@ -121,10 +123,12 @@ header#main.slim > .searchbox {
         0px 2px 4px rgba(0, 0, 0, 0.05);
     max-width: $listing-width-full-scale;
     display: flex;
+    color: $neutral-100;
 }
 
 form:focus-within header#main.slim > .searchbox {
-    border-color: $neutral-400;
+    border: 1px solid $neutral-600;
+    border-radius: 0.1em;
 }
 
 header#main.slim > .searchbox > input,
@@ -133,8 +137,9 @@ header#main.slim > .searchbox > button {
     margin: 0;
     padding: 0;
     border: 0;
-    background: transparent;
     border-radius: 0;
+    background-color: $neutral-100;
+    color: $neutral-800;
 }
 
 header#main.slim > .searchbox > input {
@@ -144,11 +149,13 @@ header#main.slim > .searchbox > input {
 header#main.slim > .searchbox > button {
     flex: 0 0 auto;
     padding: 0.375em;
+    border-left: 1px solid transparent;
 }
 
 header#main.slim > .searchbox > input:focus + button,
 header#main.slim > .searchbox:hover > button {
     background-color: $accent-300;
+    border-left: 1px solid $accent-600;
 }
 
 /* footer */
