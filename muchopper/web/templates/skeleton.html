@@ -41,7 +41,8 @@
 		</header></form>
 		{% endblock %}
 		<main>{% block body %}{% endblock %}</main>
-		<nav id="nav-footer">
+		<h2 class="a11y-text">Navigation</h2>
+		<nav id="nav-footer" role="navigation">
 			<ul>
 				{%- for submenu in current_menu.children -%}
 				<li>{{ '' -}}
