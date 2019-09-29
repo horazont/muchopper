@@ -255,11 +255,11 @@ nav.pagination > ul > li {
     text-align: center;
 }
 
-nav.pagination > ul > li.prev > a:before {
+nav.pagination > ul > li.prev > a > span:before {
     content: '⟨ ';
 }
 
-nav.pagination > ul > li.next > a:after {
+nav.pagination > ul > li.next > a > span:after {
     content: ' ⟩';
 }
 
