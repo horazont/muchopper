@@ -1,6 +1,7 @@
 import babel
 import contextlib
 import collections
+import functools
 import gzip
 import html
 import math
@@ -22,6 +23,8 @@ import prometheus_client.core
 import prometheus_client.exposition
 
 import aioxmpp
+
+import werkzeug
 
 from flask import (
     Flask, render_template, redirect, url_for, request, abort, jsonify,
@@ -172,48 +175,61 @@ def safe_writer(destpath, mode="wb", extra_paranoia=False):
 STATIC_RENDERED = set()
 
 
-def render_static_template(path):
+def static_content(generator, path, mimetype):
     if app.debug:
-        return render_template(path)
+        return generator()
 
     try:
         static_path = pathlib.Path(app.config["STATIC_PAGE_CACHE"])
     except KeyError:
-        return render_template(path)
+        return generator()
 
     rendered_path = (static_path / path).absolute()
     # basic escape check
     if not str(rendered_path).startswith(str(static_path)):
-        return render_template(path)
+        return generator()
 
     if (rendered_path in STATIC_RENDERED and
             rendered_path.is_file()):
         return send_file(str(rendered_path),
-                         mimetype="text/html",
+                         mimetype=mimetype,
                          add_etags=CACHE_USE_ETAGS,
                          conditional=True,
                          as_attachment=False)
 
-    content = render_template(path)
+    response = generator()
+    if isinstance(response, werkzeug.BaseResponse):
+        content = b"".join(response.response)
+        response.response = [content]
+    elif isinstance(response, str):
+        content = response.encode("utf-8")
+    else:
+        content = response
 
     try:
-        with safe_writer(rendered_path, mode="w") as f:
+        with safe_writer(rendered_path, mode="wb") as f:
             f.write(content)
         with safe_writer(
                 rendered_path.with_name(rendered_path.name + ".gz"),
                 mode="wb") as f:
             with gzip.GzipFile(fileobj=f, mode="wb") as zf:
-                zf.write(content.encode("utf-8"))
+                zf.write(content)
     except IOError:
         pass
     else:
         STATIC_RENDERED.add(rendered_path)
         return send_file(str(rendered_path),
-                         mimetype="text/html",
+                         mimetype=mimetype,
                          conditional=True,
                          as_attachment=False)
 
-    return render_template(path)
+    return response
+
+
+def render_static_template(path):
+    return static_content(functools.partial(render_template, path),
+                          path,
+                          "text/html")
 
 
 @app.template_filter("highlight")
