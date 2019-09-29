@@ -44,7 +44,7 @@
 {%- endmacro %}
 
 {% macro logs_url(url, caller=None) -%}
-<li><a href="{{ url }}" rel="nofollow">{% call icon("history") %}{% endcall %} View logs<span class="a11y-text"> of {{ caller() }} in your browser</span></a></li>
+<li><a href="{{ url }}" rel="nofollow">{% call icon("history") %}{% endcall %} View history<span class="a11y-text"> of {{ caller() }} in your browser</span></a></li>
 {%- endmacro %}
 
 {% macro join_url(url, caller=None) -%}
