@@ -74,7 +74,7 @@
 			{% for name, abs_occ in softwares %}
 			{% if abs_occ >= 3 %}
 			<tr>
-				<td>{{ name }}{% if name == "Christopher Muclumbus" %} <a href="#footnote-1" class="footnote-ref">(1)</a>{% endif %}</td>
+				<td>{{ name }}{% if name == "search.jabber.network Crawler" %} <a href="#footnote-1" class="footnote-ref">(1)</a>{% endif %}</td>
 				<td class="numeric">{{ abs_occ }}</td>
 				<td class="numeric">{{ "%.0f" | format(abs_occ / total_software_info * 100) }}%</td>
 			</tr>
@@ -124,7 +124,7 @@ var chart = new Chart(ctx, {
 </div>
 <p>Footnotes:</p>
 <ol class="footnotes">
-	<li id="footnote-1">So some people apparently find it useful to host "echo" services which simply reflect the query back to the sender. They act like a mirror. So when {{ appname() }} asks them for the software they’re running, it effectively asks itself without knowing that it does that. That’s what those "{{ appname() }}" entries are.</li>
+	<li id="footnote-1">So some people apparently find it useful to host "echo" services which simply reflect the query back to the sender. They act like a mirror. So when the {{ appname() }} Crawer asks them for the software they’re running, it effectively asks itself without knowing that it does that. That’s what those "search.jabber.network Crawler" entries are.</li>
 </ol>
 <h3 id="services">Service statistics</h3>
 <table>
