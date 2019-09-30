@@ -1,6 +1,7 @@
 import babel
 import contextlib
 import collections
+import functools
 import gzip
 import html
 import math
@@ -23,6 +24,8 @@ import prometheus_client.exposition
 
 import aioxmpp
 
+import werkzeug
+
 from flask import (
     Flask, render_template, redirect, url_for, request, abort, jsonify,
     send_file, Response,
@@ -38,6 +41,27 @@ app = Flask(__name__)
 app.config.from_envvar("MUCHOPPER_WEB_CONFIG")
 db = SQLAlchemy(app, metadata=model.Base.metadata)
 main_menu = Menu(app)
+
+
+try:
+    from aioxmpp import jid_unescape
+except ImportError:
+    ESCAPABLE_CODEPOINTS = " \"&'/:<>@"
+
+    # This is the jid_unescape implementation as stolen from aioxmpp.
+    def jid_unescape(localpart):
+        s = localpart
+
+        for cp in ESCAPABLE_CODEPOINTS:
+            s = s.replace("\\{:02x}".format(ord(cp)), cp)
+
+        for cp in ESCAPABLE_CODEPOINTS + "\\":
+            s = s.replace(
+                "\\5c{:02x}".format(ord(cp)),
+                "\\{:02x}".format(ord(cp)),
+            )
+
+        return s
 
 
 def abort_json(status_code, payload):
@@ -172,48 +196,61 @@ def safe_writer(destpath, mode="wb", extra_paranoia=False):
 STATIC_RENDERED = set()
 
 
-def render_static_template(path):
+def static_content(generator, path, mimetype):
     if app.debug:
-        return render_template(path)
+        return generator()
 
     try:
         static_path = pathlib.Path(app.config["STATIC_PAGE_CACHE"])
     except KeyError:
-        return render_template(path)
+        return generator()
 
     rendered_path = (static_path / path).absolute()
     # basic escape check
     if not str(rendered_path).startswith(str(static_path)):
-        return render_template(path)
+        return generator()
 
     if (rendered_path in STATIC_RENDERED and
             rendered_path.is_file()):
         return send_file(str(rendered_path),
-                         mimetype="text/html",
+                         mimetype=mimetype,
                          add_etags=CACHE_USE_ETAGS,
                          conditional=True,
                          as_attachment=False)
 
-    content = render_template(path)
+    response = generator()
+    if isinstance(response, werkzeug.BaseResponse):
+        content = b"".join(response.response)
+        response.response = [content]
+    elif isinstance(response, str):
+        content = response.encode("utf-8")
+    else:
+        content = response
 
     try:
-        with safe_writer(rendered_path, mode="w") as f:
+        with safe_writer(rendered_path, mode="wb") as f:
             f.write(content)
         with safe_writer(
                 rendered_path.with_name(rendered_path.name + ".gz"),
                 mode="wb") as f:
             with gzip.GzipFile(fileobj=f, mode="wb") as zf:
-                zf.write(content.encode("utf-8"))
+                zf.write(content)
     except IOError:
         pass
     else:
         STATIC_RENDERED.add(rendered_path)
         return send_file(str(rendered_path),
-                         mimetype="text/html",
+                         mimetype=mimetype,
                          conditional=True,
                          as_attachment=False)
 
-    return render_template(path)
+    return response
+
+
+def render_static_template(path):
+    return static_content(functools.partial(render_template, path),
+                          path,
+                          "text/html")
 
 
 @app.template_filter("highlight")
@@ -241,6 +278,13 @@ def highlight(s, keywords):
 def force_escape(s):
     s = str(s)
     return jinja2.Markup(html.escape(s))
+
+
+@app.template_filter("jid_unescape")
+def jid_unescape_filter(s):
+    if s is None:
+        return s
+    return jid_unescape(s)
 
 
 @app.template_filter("pretty_number_info")
@@ -664,10 +708,15 @@ def privacy():
     return render_static_template("privacy.html")
 
 
+@app.route("/legal")
+@register_menu(app, "meta.legal", "Legal notes & Contact", order=4)
+def legal():
+    return render_static_template("legal.html")
+
+
 @app.route("/contact")
-@register_menu(app, "meta.contact", "Contact", order=4)
 def contact():
-    return render_static_template("contact.html")
+    return redirect(url_for('legal'))
 
 
 # API
@@ -985,6 +1034,43 @@ def metrics():
         prometheus_client.exposition.generate_latest(),
         mimetype=prometheus_client.exposition.CONTENT_TYPE_LATEST,
     )
+
+
+@app.route("/site.manifest")
+def site_manifest():
+    # this is needed for icons
+    generator = functools.partial(
+        jsonify,
+        {
+            "name": "",
+            "short_name": "",
+            "icons": [
+                {
+                    "src": url_for("static",
+                                   filename="img/android-chrome-192x192.png"),
+                    "sizes": "192x192",
+                    "type": "image/png"
+                },
+                {
+                    "src": url_for("static",
+                                   filename="img/android-chrome-512x512.png"),
+                    "sizes": "512x512",
+                    "type": "image/png"
+                }
+            ],
+            "theme_color": "#ffffff",
+            "background_color": "#ffffff",
+            "display": "standalone"
+        }
+    )
+
+    return static_content(generator, "site.manifest", "application/json")
+
+
+@app.route("/favicon.ico")
+def favicon():
+    # fallback resource
+    return app.send_static_file('img/favicon.ico')
 
 
 prometheus_client.core.REGISTRY.register(MetricCollector())

@@ -1,0 +1,760 @@
+$primary-900: #024157;
+$primary-800: #055b78;
+$primary-700: #0b7396;
+$primary-600: #1593be;
+$primary-500: #00B8F5;
+$primary-400: #48c2ed;
+$primary-300: #7cd7f6;
+$primary-200: #a3e4fa;
+$primary-100: #cdf2ff;
+
+$accent-900: #0a4b02;
+$accent-800: #24701c;
+$accent-700: #2d8124;
+$accent-600: #27931a;
+$accent-500: #30a722;
+$accent-400: #4ac23b;
+$accent-300: #7de072;
+$accent-200: #acf5a4;
+$accent-100: #d7f9d3;
+
+$neutral-900: #161412;
+$neutral-800: #2e2a28;
+$neutral-700: #4b4745;
+$neutral-600: #646160;
+$neutral-500: #888380;
+$neutral-400: #aca8a6;
+$neutral-300: #c4c0bd;
+$neutral-200: #e3e0de;
+$neutral-100: #f8f7f7;
+
+/* those are em scaled by 0.875 for mapping to rem */
+$header-width: 20rem;
+$header-margin: 0.65625rem;
+$margin-left-full-scale: $header-width + $header-margin;
+$content-width-full-scale: 52.5rem;
+$listing-width-inner: 39.8125rem;
+$listing-width-text: $listing-width-inner - 2.625rem;
+$listing-width-full-scale: 41.125rem;
+$content-width-with-margin: $margin-left-full-scale + $content-width-full-scale;
+$listing-width-with-margin: $margin-left-full-scale + $listing-width-full-scale;
+$content-width-with-both-margins: $margin-left-full-scale + $content-width-full-scale + $margin-left-full-scale;
+$listing-width-with-both-margins: $margin-left-full-scale + $listing-width-full-scale + $margin-left-full-scale;
+
+body {
+    color: $neutral-800;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    color: $neutral-900;
+}
+
+a {
+    color: $primary-600;
+}
+
+a:hover, a:focus, a:active {
+    color: $neutral-100;
+    background-color: $primary-600;
+}
+
+/* slim header */
+
+header#main.slim {
+    display: flex;
+    padding: $header-margin;
+    background-color: $neutral-800;
+    color: $neutral-200;
+    align-items: baseline;
+    margin-bottom: 1.5em;
+    box-shadow: 0px 1px 1px rgba(0, 0, 0, 0.4);
+}
+
+header#main.slim a {
+    display: block;
+    color: inherit;
+}
+
+header#main.slim a:hover,
+header#main.slim a:focus,
+header#main.slim a:active {
+    background: transparent;
+    color: inherit;
+}
+
+header#main.slim a:focus,
+header#main.slim a:active {
+    text-decoration: underline;
+}
+
+header#main.slim > h1 {
+    flex: 0 0 auto;
+    font-size: 150%;
+    letter-spacing: -0.05em;
+    width: $header-width;
+    color: $neutral-100;
+}
+
+header#main.slim > h1 svg {
+    width: 3em;
+    vertical-align: middle;
+}
+
+header#main.slim > h1 > a {
+    display: block;
+}
+
+header#main.slim > h1 > div {
+    color: $neutral-200;
+    font-weight: light;
+    font-size: 75%;
+    text-align: center;
+    letter-spacing: 0;
+}
+
+header#main.slim > .searchbox {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+}
+
+header#main.slim > .searchbox > .searchbox-primary {
+    flex: 0 0 auto;
+    font-size: 128.57143%;
+    line-height: 1.16667;
+    border: 1px solid $neutral-300;
+    border-radius: 0.1em;
+    box-shadow:
+        0px 1px 2px rgba(0, 0, 0, 0.1),
+        0px 2px 4px rgba(0, 0, 0, 0.05);
+    max-width: $listing-width-full-scale;
+    display: flex;
+    color: $neutral-100;
+}
+
+form:focus-within header#main.slim > .searchbox > .searchbox-primary {
+    border: 1px solid $neutral-600;
+    border-radius: 0.1em;
+}
+
+header#main.slim > .searchbox > .searchbox-primary > input,
+header#main.slim > .searchbox > .searchbox-primary > button {
+    flex: 1 1 auto;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background-color: $neutral-100;
+    color: $neutral-800;
+}
+
+header#main.slim > .searchbox > .searchbox-primary > input {
+    padding: 0.375em;
+}
+
+header#main.slim > .searchbox > .searchbox-primary > button {
+    flex: 0 0 auto;
+    padding: 0.375em;
+    border-left: 1px solid transparent;
+}
+
+header#main.slim > .searchbox > .searchbox-primary > input:focus + button,
+header#main.slim > .searchbox > .searchbox-primary:hover > button {
+    background-color: $primary-300;
+    border-left: 1px solid $primary-600;
+}
+
+/* footer */
+
+footer#footer-main {
+    text-align: center;
+    padding: 1.5em;
+    background-color: $neutral-100;
+    color: $neutral-600;
+}
+
+footer#footer-main > ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+}
+
+footer#footer-main > ul > li {
+    display: inline-block;
+    margin: 0;
+    margin-left: 1.5em;
+    margin-right: 1.5em;
+    padding: 0;
+}
+
+nav#nav-footer {
+    padding-left: $margin-left-full-scale;
+    font-family: "Droid Sans", Arial, Helvetica, sans-serif;
+    background-color: $neutral-200;
+    color: $neutral-700;
+    box-shadow: inset 0px 1px 1px $neutral-300;
+}
+
+nav#nav-footer ul {
+    list-style-type: none;
+    margin: 0;
+}
+
+nav#nav-footer li {
+    margin: 0;
+    padding: 0;
+}
+
+nav#nav-footer > ul {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+nav#nav-footer > ul > li {
+    display: block;
+    flex: 1 0 auto;
+    max-width: 15em;
+    margin: 1.5em;
+}
+
+nav#nav-footer > ul > li > ul {
+    list-style-type: disc;
+    margin-left: 1.5em;
+}
+
+nav#nav-footer > ul > li > ul > li > a,
+nav#nav-footer > ul > li > ul > li > span {
+    display: block;
+}
+
+nav#nav-footer > ul > li > ul > li.active {
+    font-weight: bold;
+}
+
+nav#nav-footer h3 {
+    font-size: inherit;
+    font-weight: bold;
+    color: $neutral-700;
+}
+
+nav.pagination {
+    background: transparent;
+    margin: 1.5em;
+}
+
+nav.pagination > ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    text-align: center;
+}
+
+nav.pagination > ul > li {
+    display: inline-block;
+    padding: 0;
+    margin: 0;
+    min-width: 2em;
+    text-align: center;
+}
+
+nav.pagination > ul > li.prev > a > span:before {
+    content: '⟨ ';
+}
+
+nav.pagination > ul > li.next > a > span:after {
+    content: ' ⟩';
+}
+
+nav.pagination > ul > li > a {
+    display: block;
+    margin: 0;
+    padding: 0.5em;
+}
+
+nav.pagination > ul > li.current > a {
+    display: block;
+    font-weight: bold;
+    color: inherit;
+}
+
+@media screen and ( max-width: 760px ) {
+    td.nusers {
+        width: auto;
+    }
+}
+
+span.search-match {
+    text-decoration: underline;
+    color: #800;
+    font-weight: bold;
+}
+
+@media screen and ( max-width: 960px )  {
+    /* linearization for grid module */
+    .linearize-960, .linearize-960 > [class*="ym-g"] {
+        display: block;
+        float: none;
+        padding: 0;
+        margin: 0;
+        width: 100% !important;
+    }
+    /* reset defined gutter values */
+    .linearize-960 > [class*="ym-g"] > [class*="ym-gbox"] {
+        overflow: hidden; /* optional for containing floats */
+        padding: 0;
+        margin: 0;
+    }
+}
+
+.stats-canvas-limit {
+    max-width: 480px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.copy-to-clipboard {
+    cursor: pointer;
+    margin-left: 0.5em;
+    font-style: normal;
+}
+
+/* room / result list */
+
+span.localpart {
+}
+
+span.at {
+    opacity: 0.5;
+}
+
+span.domain {
+    opacity: 0.95;
+}
+
+ol.roomlist {
+    list-style-type: none;
+}
+
+ol.roomlist > li.roomcard {
+    margin: 0;
+    padding: 0;
+    display: flex;
+    padding: 0.75em;
+    font-family: "Droid Sans", Arial, Helvetica, sans-serif;
+    max-width: $listing-width-inner;
+    border: 1px solid transparent;
+    margin: -1px;
+    margin-bottom: calc(1.5em - 1px);
+    border-radius: 0.1em;
+}
+
+ol.roomlist > li.roomcard:hover {
+    background: $neutral-100;
+    border: 1px solid $neutral-300;
+}
+
+.roomcard .copy-to-clipboard {
+    display: inline;
+    visibility: hidden;
+}
+
+.roomcard:hover .copy-to-clipboard,
+.roomcard:focus-within .copy-to-clipboard,
+a:focus + .copy-to-clipboard,
+.copy-to-clipboard:focus {
+    display: inline;
+    visibility: visible;
+}
+
+div.avatar-column {
+    display: flex;
+    flex: 0 0 auto;
+    margin-right: 0.5em;
+    height: 6em;
+    flex-direction: column;
+}
+
+div.avatar {
+    width: 2.8em;
+    height: 2.8em;
+    margin: 0.1em;
+    border-radius: 0.2em;
+    overflow: hidden;
+}
+
+div.avatar > span.dummy-avatar,
+div.avatar > span.real-avatar {
+    width: 100%;
+    height: 100%;
+}
+
+div.avatar > span.real-avatar {
+    display: block;
+    background-size: contain;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+span.dummy-avatar {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+span.dummy-avatar > span:before {
+    content: attr(data-avatar-content);
+    flex: 0 0 auto;
+    display: inline;
+    color: white;
+    font-size: 150%;
+}
+
+.roomcard div.main {
+    max-width: calc(100% - 3.5em);
+}
+
+.roomcard h3.title,
+.roomcard .addr {
+    max-width: 100%;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    overflow-wrap: anywhere;
+}
+
+.roomcard .descr {
+    margin-bottom: 0;
+}
+
+div.nusers {
+    font-weight: bolder;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: 0.1em;
+    margin-right: 0.1em;
+}
+
+div.nusers > span:before {
+    content: attr(data-content);
+    display: block;
+    flex: 1 1 auto;
+}
+
+div.nusers > span.expand {
+    flex: 0 1 0.2em;
+}
+
+div.nusers > svg.icon {
+    flex: 0 0 auto;
+}
+
+.roomcard h3.title {
+    font-weight: inherit;
+    margin-bottom: 0;
+    font-size: 128.57143%;
+    line-height: 1.16667;
+    color: $primary-700;
+}
+
+.roomcard .title a,
+.roomcard .addr a {
+    color: inherit;
+}
+
+.roomcard .title a:hover,
+.roomcard .addr a:hover {
+    background: transparent;
+    text-decoration: underline;
+}
+
+.roomcard div.addr {
+    font-size: 95%;
+    line-height: 1.5789473684210527;
+    color: $accent-700;
+}
+
+span.scheme {
+    opacity: 0.5;
+}
+
+div.listing-wrap {
+    margin-left: $margin-left-full-scale;
+    width: 47em;
+}
+
+ul.actions {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+}
+
+ul.actions > li {
+    flex: 0 0 auto;
+    margin: 0;
+    padding: 0;
+}
+
+.actions a {
+    display: block;
+    background-color: $primary-100;
+    color: $neutral-800;
+    padding: 0.375em;
+    padding-left: 0.5625em;
+    padding-right: 0.5625em;
+    margin: 0.375em;
+    border-radius: 0.375em;
+    margin-left: 0;
+    margin-right: 0.75em;
+    /* box-shadow:
+        0px 1px 2px rgba(0, 0, 0, 0.1),
+        0px 2px 4px rgba(0, 0, 0, 0.05),
+        inset 0px 1px 2px white; */
+}
+
+.actions a svg.icon {
+    margin-right: 0.1875em;
+}
+
+.actions a:hover,
+.actions a:focus,
+.actions a:active {
+    background-color: $primary-300;
+    /* box-shadow:
+        0px 1px 2px rgba(0, 0, 0, 0.1),
+        0px 2px 4px rgba(0, 0, 0, 0.05),
+        inset 0px 1px 2px $primary-200; */
+}
+
+.actions a:active {
+    padding-top: calc(0.375em + 1px);
+    padding-bottom: calc(0.375em - 1px);
+    /* padding-left: calc(0.5625em + 1px);
+    padding-right: calc(0.5625em - 1px); */
+    box-shadow:
+        inset 0px 1px 1px $primary-400,
+        inset 0px -1px 1px $primary-200;
+}
+
+/* common things */
+
+.a11y-text {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    top: -100px;
+}
+
+.pres-text:before {
+    content: attr(data-text);
+}
+
+.with-tooltip {
+    cursor: help;
+}
+
+ul.slim {
+    list-style-type: none;
+}
+
+ul.slim.inline > li:before {
+    content: '';
+}
+
+code {
+    background: rgba(240, 240, 240, 0.8);
+    padding: 0.2em;
+    margin-top: -0.2em;
+    margin-bottom: -0.2em;
+    border: 1px solid rgba(220, 220, 220, 0.8);
+    box-shadow: 0 0 1px rgba(220, 220, 220, 0.8);
+}
+
+pre > code {
+    display: block;
+}
+
+ul.inline {
+    display: inline-block;
+    margin: 0;
+    padding: 0;
+}
+
+ul.inline > li {
+    display: inline-block;
+    margin: 0;
+    padding: 0;
+}
+
+ul.inline > li:before {
+    content: '• ';
+}
+
+ul.inline > li:after {
+    content: ', ';
+    padding-right: 0.2em;
+}
+
+ul.inline > li:last-child:after {
+    content: '';
+}
+
+.footnote-ref {
+    vertical-align: super;
+    font-size: 85%;
+}
+
+.footnotes > li:target {
+    background: rgba(0, 0, 0, 0.2);
+}
+
+td.numeric {
+    text-align: right;
+}
+
+abbr {
+    font-variant: normal;
+}
+
+.expand {
+    flex: 1 1 0px;
+}
+
+div.content-wrap {
+    margin-left: $margin-left-full-scale;
+    max-width: $content-width-full-scale;
+}
+
+/* API reference */
+
+section.api-call {
+    margin-bottom: 3em;
+    margin-top: 3em;
+}
+
+/* icons */
+
+svg.icon {
+    display: inline-block;
+    vertical-align: middle;
+    width: 1em;
+    height: 1em;
+    stroke-width: 0;
+    stroke: currentColor;
+    fill: currentColor;
+}
+
+svg.icon-users {
+    vertical-align: -0.18em;
+}
+
+svg.icon-lang1 {
+    vertical-align: -0.16em;
+}
+
+/* feature support matrix */
+
+table.features {
+    width: auto;
+}
+
+th > div.feature-id {
+    font-weight: normal;
+}
+
+td.supp-yes {
+    background-color: rgba(0, 255, 0, 0.2);
+}
+
+td.supp-ext {
+    background-color: rgba(255, 191, 0, 0.2);
+}
+
+td.supp-no {
+    background-color: rgba(255, 0, 0, 0.2);
+}
+
+tbody tr:hover td.supp-yes {
+    background-color: rgba(0, 255, 0, 0.3);
+}
+
+tbody tr:hover td.supp-ext {
+    background-color: rgba(255, 191, 0, 0.3);
+}
+
+tbody tr:hover td.supp-no {
+    background-color: rgba(255, 0, 0, 0.3);
+}
+
+/* search */
+
+div.search-scope {
+    display: flex;
+    flex-flow: row wrap;
+}
+
+div.search-scope-opt {
+    padding: 0.75em;
+    break-after: avoid;
+    break-before: avoid;
+    flex: 0 0 auto;
+}
+
+div.search-scope-opt:first-child {
+    break-after: auto;
+}
+
+div.search-scope-opt input[type="checkbox"] + label {
+    margin-left: 0.5em;
+    /* increase clickable range */
+    padding-top: 0.75em;
+    padding-bottom: 0.75em;
+    margin-top: -0.75em;
+    margin-bottom: -0.75em;
+}
+
+
+/* global layout responsiveness */
+
+/* stage 1: make left and right margin equal */
+
+@media screen and ( max-width: $listing-width-with-both-margins ) {
+    div.listing-wrap {
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    header#main.slim > .expand {
+        width: 0;
+        flex: 0 0 auto;
+    }
+}
+
+@media screen and ( max-width: $listing-width-with-margin ) {
+    nav#nav-footer {
+        padding-left: 0;
+    }
+}
+
+@media screen and ( max-width: $content-width-with-both-margins ) {
+    div.content-wrap {
+        margin-left: auto;
+        margin-right: auto;
+    }
+}
+
+/* stage 2: collapse header */
+
+@media screen and ( max-width: $content-width-full-scale ) {
+    header#main.slim {
+        display: block;
+    }
+
+    div.content-wrap,
+    div.listing-wrap {
+        margin-left: 10px;
+        margin-right: 10px;
+        width: auto;
+    }
+}

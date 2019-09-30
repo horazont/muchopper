@@ -1,33 +1,28 @@
 {% extends "listing_base.html" %}
 {% from "library.tpl" import room_table %}
 {% if results is not none %}
-{% set title = "Search Results" %}
+{% set title = '"%s"' | format(orig_keywords) %}
 {% else %}
 {% set title = "Search" %}
 {% endif %}
-{% block searchbox %}
-<form method="GET" class="searchbox searchbox-full" id="searchbox">
-    <div>
-        <input id="keywords" type="text" name="q" value="{{ orig_keywords }}" required="required"/>
-        <input type="hidden" name="f" value="y"/>
-        <button class="ym-button ym-primary ym-search" type="submit">Search</button>
-    </div>
-    <div class="search-scope">
-        <div class="ym-fbox-check"><input type="checkbox" id="search_address" name="sinaddr" {{ 'checked' if search_address else '' }}/><label for="search_address">Search in addresses</label></div>
-        <div class="ym-fbox-check"><input type="checkbox" id="search_description" name="sindescr" {{ 'checked' if search_description else '' }}/><label for="search_description">Search in description</label></div>
-        <div class="ym-fbox-check"><input type="checkbox" id="search_name" name="sinname" {{ 'checked' if search_name else '' }}/><label for="search_name">Search in name</label></div>
-    </div>
-</form>
+{% block searchbox_ext %}
+<input type="hidden" name="f" value="y"/>{#- -#}
+<div class="search-scope">
+	<div class="search-scope-opt" aria-hidden="true"><span class="pres-text" data-text="Search in:"></span></div>
+	<div class="search-scope-opt"><input type="checkbox" id="search_address" name="sinaddr" {{ 'checked' if search_address else '' }}/><label for="search_address"><span class="a11y-text">Search in </span>address</label></div>
+	<div class="search-scope-opt"><input type="checkbox" id="search_description" name="sindescr" {{ 'checked' if search_description else '' }}/><label for="search_description"><span class="a11y-text">Search in </span>description</label></div>
+	<div class="search-scope-opt"><input type="checkbox" id="search_name" name="sinname" {{ 'checked' if search_name else '' }}/><label for="search_name"><span class="a11y-text">Search in </span>name</label></div>
+</div>
 {% endblock %}
 {% block content %}
 {% if no_keywords %}
 <p class="box error">
-    <strong>No search keywords found in input.</strong> Note that words with less than three codepoints are ignored. Spaces at the beginning and end of a word are ignored.
+	<strong>No search keywords found in input.</strong> Note that words with less than three codepoints are ignored. Spaces at the beginning and end of a word are ignored.
 </p>
 {% endif %}
 {% if too_many_keywords %}
 <p class="box error">
-    <strong>Too many keywords in input.</strong> Currently, there is a limit on the number of keywords allowed in a single search. Reduce the number of keywords used.
+	<strong>Too many keywords in input.</strong> Currently, there is a limit on the number of keywords allowed in a single search. Reduce the number of keywords used.
 </p>
 {% endif %}
 {% if results is not none %}
@@ -35,17 +30,17 @@
 {% call room_table(results, keywords) %}{% endcall %}
 {% else %}
 <p class="box warning">
-    <strong>No results for search terms:</strong> {{ keywords | join(", ")}}.
+	<strong>No results for search terms:</strong> {{ keywords | join(", ")}}.
 </p>
 {% endif %}
 {% else %}
 <p class="box info">
-    <strong>Start a search using the search form <a href="#searchbox" onclick="document.getElementById('keywords').focus(); return false;">above</a>.</strong>
+	<strong>Start a search using the search form <a href="#searchbox" onclick="document.getElementById('keywords').focus(); return false;">above</a>.</strong>
 </p>
 {% endif %}
 {% if too_many_results %}
 <p class="box warning">
-    <strong>Too many results.</strong> Search results are limited to {{ results | length }} items for now.
+	<strong>Too many results.</strong> Search results are limited to {{ results | length }} items for now.
 </p>
 {% endif %}
 {% endblock %}

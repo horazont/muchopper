@@ -4,8 +4,8 @@
 {% macro service_table_entry(label, count, caller=None) %}
 {% if count > 0 %}
 <tr>
-    <td><em>{{ label }}</em><br/>{{ caller() }}</td>
-    <td class="numeric">{{ count }}</td>
+	<td><em>{{ label }}</em><br/>{{ caller() }}</td>
+	<td class="numeric">{{ count }}</td>
 </tr>
 {% endif %}
 {% endmacro %}
@@ -17,144 +17,144 @@
 {% block content %}
 <h3 id="network">Network statistics</h3>
 <table>
-    <thead>
-        <tr>
-            <th>Metric</th>
-            <th>Value</th>
-            <th>Notes</th>
-        </tr>
-    </thead>
-    <tr>
-        <th>Chat rooms</th>
-        <td class="numeric">{{ nmucs }}</td>
-        <td>Includes all persistent rooms known (public/non-public and open/non-open)</td>
-    </tr>
-    <tr>
-        <th>Public rooms</th>
-        <td class="numeric">{{ npublicmucs }}</td>
-        <td>Only publicly listed rooms</td>
-    </tr>
-    <tr>
-        <th>Open rooms</th>
-        <td class="numeric">{{ nopenmucs }}</td>
-        <td>Only rooms which can be joined without password/invitation</td>
-    </tr>
-    <tr>
-        <th>Hidden rooms</th>
-        <td class="numeric">{{ nhiddenmucs }}</td>
-        <td>Publicly listed MUCs where owners have requested de-listing from this directory</td>
-    </tr>
-    <tr>
-        <th>Total users</th>
-        <td class="numeric">{{ nusers }}</td>
-        <td>Total number of users in all MUCs. Since we do not (and can not) track the real identities of users, this most certainly includes duplicates.</td>
-    </tr>
-    <tr>
-        <th>Domains</th>
-        <td class="numeric">{{ ndomains }}</td>
-        <td>Number of domains known; this includes non-MUC service domains and usually a single XMPP service has multiple domains (e.g. a base domain and a MUC service domain).</td>
-    </tr>
-    <tr>
-        <th>Stale domains</th>
-        <td class="numeric">{{ ndomains_stale }}</td>
-        <td>Number of domains which haven’t been reachable for more than 24 hours. Domains which are not reachable for more than seven days are removed from the database, unless they are being advertised by other domains.</td>
-    </tr>
+	<thead>
+		<tr>
+			<th>Metric</th>
+			<th>Value</th>
+			<th>Notes</th>
+		</tr>
+	</thead>
+	<tr>
+		<th>Chat rooms</th>
+		<td class="numeric">{{ nmucs }}</td>
+		<td>Includes all persistent rooms known (public/non-public and open/non-open)</td>
+	</tr>
+	<tr>
+		<th>Public rooms</th>
+		<td class="numeric">{{ npublicmucs }}</td>
+		<td>Only publicly listed rooms</td>
+	</tr>
+	<tr>
+		<th>Open rooms</th>
+		<td class="numeric">{{ nopenmucs }}</td>
+		<td>Only rooms which can be joined without password/invitation</td>
+	</tr>
+	<tr>
+		<th>Hidden rooms</th>
+		<td class="numeric">{{ nhiddenmucs }}</td>
+		<td>Publicly listed MUCs where owners have requested de-listing from this directory</td>
+	</tr>
+	<tr>
+		<th>Total users</th>
+		<td class="numeric">{{ nusers }}</td>
+		<td>Total number of users in all MUCs. Since we do not (and can not) track the real identities of users, this most certainly includes duplicates.</td>
+	</tr>
+	<tr>
+		<th>Domains</th>
+		<td class="numeric">{{ ndomains }}</td>
+		<td>Number of domains known; this includes non-MUC service domains and usually a single XMPP service has multiple domains (e.g. a base domain and a MUC service domain).</td>
+	</tr>
+	<tr>
+		<th>Stale domains</th>
+		<td class="numeric">{{ ndomains_stale }}</td>
+		<td>Number of domains which haven’t been reachable for more than 24 hours. Domains which are not reachable for more than seven days are removed from the database, unless they are being advertised by other domains.</td>
+	</tr>
 </table>
 <h3 id="software">Software statistics</h3>
 <div class="ym-grid linearize-960">
-    <div class="ym-g66 ym-gl"><div class="ym-gbox">
-        <table>
-            <thead>
-                <tr>
-                    <th>Software name</th>
-                    <th>Absolute occurences</th>
-                    <th>Relative occurences</th>
-                </tr>
-            </thead>
-            {% for name, abs_occ in softwares %}
-            {% if abs_occ >= 3 %}
-            <tr>
-                <td>{{ name }}{% if name == "Christopher Muclumbus" %} <a href="#footnote-1" class="footnote-ref">(1)</a>{% endif %}</td>
-                <td class="numeric">{{ abs_occ }}</td>
-                <td class="numeric">{{ "%.0f" | format(abs_occ / total_software_info * 100) }}%</td>
-            </tr>
-            {% endif %}
-            {% endfor %}
-            <tr>
-                <td><em>Other</em> (less than 3 instances)</td>
-                <td class="numeric">{{ other_software_info }}</td>
-                <td class="numeric">{{ "%.0f" | format(other_software_info / total_software_info * 100) }}%</td>
-            </tr>
-            <tr>
-                <td><em>Unknown</em> (no version info available)</td>
-                <td class="numeric">{{ ndomains - total_software_info }}</td>
-                <td class="numeric">—</td>
-            </tr>
-        </table>
-    </div></div>
-    <div class="ym-g33 ym-gr"><div class="ym-gbox">
-        <div class="stats-canvas-limit">
-          <canvas id="software-version-chart" width="100%" height="100%"></canvas>
-        </div>
-        <script>
+	<div class="ym-g66 ym-gl"><div class="ym-gbox">
+		<table>
+			<thead>
+				<tr>
+					<th>Software name</th>
+					<th>Absolute occurences</th>
+					<th>Relative occurences</th>
+				</tr>
+			</thead>
+			{% for name, abs_occ in softwares %}
+			{% if abs_occ >= 3 %}
+			<tr>
+				<td>{{ name }}{% if name == "Christopher Muclumbus" %} <a href="#footnote-1" class="footnote-ref">(1)</a>{% endif %}</td>
+				<td class="numeric">{{ abs_occ }}</td>
+				<td class="numeric">{{ "%.0f" | format(abs_occ / total_software_info * 100) }}%</td>
+			</tr>
+			{% endif %}
+			{% endfor %}
+			<tr>
+				<td><em>Other</em> (less than 3 instances)</td>
+				<td class="numeric">{{ other_software_info }}</td>
+				<td class="numeric">{{ "%.0f" | format(other_software_info / total_software_info * 100) }}%</td>
+			</tr>
+			<tr>
+				<td><em>Unknown</em> (no version info available)</td>
+				<td class="numeric">{{ ndomains - total_software_info }}</td>
+				<td class="numeric">—</td>
+			</tr>
+		</table>
+	</div></div>
+	<div class="ym-g33 ym-gr"><div class="ym-gbox">
+		<div class="stats-canvas-limit">
+		  <canvas id="software-version-chart" width="100%" height="100%"></canvas>
+		</div>
+		<script>
 var ctx = document.getElementById('software-version-chart').getContext('2d');
 var chart = new Chart(ctx, {
   type: 'pie',
   data: {{ software_version_chart_cfg | tojson }},
   options: {
-    tooltips: {
-      callbacks: {
-        label: function(tooltipItem, data) {
-          var label = data.labels[tooltipItem.index] || '';
-          var value = data.datasets[tooltipItem.datasetIndex].data[tooltipItem.index];
+	tooltips: {
+	  callbacks: {
+		label: function(tooltipItem, data) {
+		  var label = data.labels[tooltipItem.index] || '';
+		  var value = data.datasets[tooltipItem.datasetIndex].data[tooltipItem.index];
 
-          if (label) {
-            label += ': ';
-          }
+		  if (label) {
+			label += ': ';
+		  }
 
-          label += value + ' (' + Math.round(value / {{ software_version_chart_sum }} * 100) + '%)';
-          return label;
-        }
-      }
-    }
+		  label += value + ' (' + Math.round(value / {{ software_version_chart_sum }} * 100) + '%)';
+		  return label;
+		}
+	  }
+	}
   }
 });
-        </script>
-    </div></div>
-</div></div>
+		</script>
+	</div></div>
+</div>
 <p>Footnotes:</p>
 <ol class="footnotes">
-    <li id="footnote-1">So some people apparently find it useful to host "echo" services which simply reflect the query back to the sender. They act like a mirror. So when {{ appname() }} asks them for the software they’re running, it effectively asks itself without knowing that it does that. That’s what those "{{ appname() }}" entries are.</li>
+	<li id="footnote-1">So some people apparently find it useful to host "echo" services which simply reflect the query back to the sender. They act like a mirror. So when {{ appname() }} asks them for the software they’re running, it effectively asks itself without knowing that it does that. That’s what those "{{ appname() }}" entries are.</li>
 </ol>
 <h3 id="services">Service statistics</h3>
 <table>
-    <thead>
-        <tr>
-            <th>Service type</th>
-            <th>Instances</th>
-        </tr>
-    </thead>
-    {% call service_table_entry("User Server", services["server.im"]) -%}
+	<thead>
+		<tr>
+			<th>Service type</th>
+			<th>Instances</th>
+		</tr>
+	</thead>
+	{% call service_table_entry("User Server", services["server.im"]) -%}
 Normal user accounts, like you and me
-    {%- endcall %}
-    {% call service_table_entry("Group Chat Server", services["conference.text"]) -%}
+	{%- endcall %}
+	{% call service_table_entry("Group Chat Server", services["conference.text"]) -%}
 Group chat rooms, as listed by this service
-    {%- endcall %}
-    {% call service_table_entry("IRC Gateway", services["gateway.irc"]) -%}
+	{%- endcall %}
+	{% call service_table_entry("IRC Gateway", services["gateway.irc"]) -%}
 Access to IRC networks via Jabber
-    {%- endcall %}
-    {% call service_table_entry("File Storage / Upload Service", services["store.file"]) -%}
+	{%- endcall %}
+	{% call service_table_entry("File Storage / Upload Service", services["store.file"]) -%}
 File storage for use with Jabber (e.g. HTTP Upload)
-    {%- endcall %}
-    {% call service_table_entry("Publish-Subscribe Service", services["pubsub.service"]) -%}
+	{%- endcall %}
+	{% call service_table_entry("Publish-Subscribe Service", services["pubsub.service"]) -%}
 Distribute data in a publish-subscribe manner; e.g. news, weather alerts, etc.
-    {%- endcall %}
-    {% call service_table_entry("File Transfer Proxy", services["proxy.ft"]) -%}
+	{%- endcall %}
+	{% call service_table_entry("File Transfer Proxy", services["proxy.ft"]) -%}
 To facilitate file transfer via "difficult" networks
-    {%- endcall %}
-    <!-- <tr>
-        <td><em>Unknown</em></td>
-        <td class="numeric">{{ unknown_service_types }}</td>
-    </tr> -->
+	{%- endcall %}
+	<!-- <tr>
+		<td><em>Unknown</em></td>
+		<td class="numeric">{{ unknown_service_types }}</td>
+	</tr> -->
 </table>
 {% endblock %}

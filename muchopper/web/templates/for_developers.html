@@ -4,453 +4,453 @@
 {% macro escape(caller=None) %}{{ caller() | force_escape }}{% endmacro %}
 {% block content %}
 <article>
-    <h3>Overview</h3>
-    <p>We offer two ways to access our data:</p>
-    <ol>
-        <li>The <a href="#xmpp">XMPP API</a> (preferred)</li>
-        <li>The <a href="#http">anonymous HTTP API</a> (discouraged)</li>
-    </ol>
-    <p>If you have not noticed by now, the usage of the XMPP API is preferred. The reason is that you need to be authenticated to perform requests against the XMPP API, which makes it easier for us to work against abuse.</p>
-    <p>The HTTP API can be used anonymously, so we might rate-limit it more strictly in the future.</p>
-    <h3><a name="xmpp"></a>XMPP API</h3>
-    <p>The XMPP API is based on <a href="https://xmpp.org/extensions/xep-0004.html">XEP-0004 (Data Forms)</a> and <a href="https://xmpp.org/extensions/xep-0059.html">XEP-0059 (Result Set Management)</a> (don’t worry: the results are <em>not</em> in a XEP-0004 report!).</p>
-    <p>The search parameters are sent via a XEP-0004 form. The results are in a custom wire format which is paginated using XEP-0059 RSM.</p>
-    <p>The XMPP API endpoint is <a href="xmpp:{{ config["APIJID"] }}"><code>{{ config["APIJID"] }}</code></a>.</p>
-    <h6>Obtaining the search parameters form</h6>
-    <p>To request the search form, send the following request:</p>
-    <pre><code>{% call escape() %}<iq to="{{ config["APIJID"] }}" type="get">
-    <search xmlns="https://xmlns.zombofant.net/muclumbus/search/1.0"/>
+	<h3>Overview</h3>
+	<p>We offer two ways to access our data:</p>
+	<ol>
+		<li>The <a href="#xmpp">XMPP API</a> (preferred)</li>
+		<li>The <a href="#http">anonymous HTTP API</a> (discouraged)</li>
+	</ol>
+	<p>If you have not noticed by now, the usage of the XMPP API is preferred. The reason is that you need to be authenticated to perform requests against the XMPP API, which makes it easier for us to work against abuse.</p>
+	<p>The HTTP API can be used anonymously, so we might rate-limit it more strictly in the future.</p>
+	<h3><a name="xmpp"></a>XMPP API</h3>
+	<p>The XMPP API is based on <a href="https://xmpp.org/extensions/xep-0004.html">XEP-0004 (Data Forms)</a> and <a href="https://xmpp.org/extensions/xep-0059.html">XEP-0059 (Result Set Management)</a> (don’t worry: the results are <em>not</em> in a XEP-0004 report!).</p>
+	<p>The search parameters are sent via a XEP-0004 form. The results are in a custom wire format which is paginated using XEP-0059 RSM.</p>
+	<p>The XMPP API endpoint is <a href="xmpp:{{ config["APIJID"] }}"><code>{{ config["APIJID"] }}</code></a>.</p>
+	<h6>Obtaining the search parameters form</h6>
+	<p>To request the search form, send the following request:</p>
+	<pre><code>{% call escape() %}<iq to="{{ config["APIJID"] }}" type="get">
+	<search xmlns="https://xmlns.zombofant.net/muclumbus/search/1.0"/>
 </iq>{% endcall %}</code></pre>
-    <p class="box">
-        <strong>Reminder:</strong> You have to set a unique <code>id</code> attribute on the IQ.
-    </p>
-    <p class="box">
-        <strong>Note:</strong> You may find it weird that the <code>to</code> address is a bare JID. This is intended and correct. <code>{{ config["APIJID"] }}</code> is in fact a proxy service which delegates the query to one of possibly multiple workers.
-    </p>
-    <p>The service will respond with the form (<a href="#xmpp-form-type">see below for the full form type specification</a>):</p>
-    <pre><code>{% call escape() %}<iq type='result' from='{{ config["APIJID"] }}'>
+	<p class="box">
+		<strong>Reminder:</strong> You have to set a unique <code>id</code> attribute on the IQ.
+	</p>
+	<p class="box">
+		<strong>Note:</strong> You may find it weird that the <code>to</code> address is a bare JID. This is intended and correct. <code>{{ config["APIJID"] }}</code> is in fact a proxy service which delegates the query to one of possibly multiple workers.
+	</p>
+	<p>The service will respond with the form (<a href="#xmpp-form-type">see below for the full form type specification</a>):</p>
+	<pre><code>{% call escape() %}<iq type='result' from='{{ config["APIJID"] }}'>
   <search xmlns='https://xmlns.zombofant.net/muclumbus/search/1.0'>
-    <x xmlns='jabber:x:data' type='form'>
-      <field type='hidden' var='FORM_TYPE'>
-        <value>https://xmlns.zombofant.net/muclumbus/search/1.0#params</value>
-      </field>
-      <field type='text-single' var='q' label='Search for'>
-      </field>
-      <field type='boolean' var='sinname' label='Search in name'>
-        <value>true</value>
-      </field>
-      <field type='boolean' var='sindescription' label='Search in description'>
-        <value>true</value>
-      </field>
-      <field type='boolean' var='sinaddr' label='Search in address'>
-        <value>true</value>
-      </field>
-      <field type='text-single' var='min_users' label='Minimum number of users'>
-        <value>1</value>
-      </field>
-      <field type='list-single' var='key' label='Sort results by'>
-        <value>nusers</value>
-        <option label='Number of online users'><value>nusers</value></option>
-        <option label='Address'><value>address</value></option>
-      </field>
-    </x>
+	<x xmlns='jabber:x:data' type='form'>
+	  <field type='hidden' var='FORM_TYPE'>
+		<value>https://xmlns.zombofant.net/muclumbus/search/1.0#params</value>
+	  </field>
+	  <field type='text-single' var='q' label='Search for'>
+	  </field>
+	  <field type='boolean' var='sinname' label='Search in name'>
+		<value>true</value>
+	  </field>
+	  <field type='boolean' var='sindescription' label='Search in description'>
+		<value>true</value>
+	  </field>
+	  <field type='boolean' var='sinaddr' label='Search in address'>
+		<value>true</value>
+	  </field>
+	  <field type='text-single' var='min_users' label='Minimum number of users'>
+		<value>1</value>
+	  </field>
+	  <field type='list-single' var='key' label='Sort results by'>
+		<value>nusers</value>
+		<option label='Number of online users'><value>nusers</value></option>
+		<option label='Address'><value>address</value></option>
+	  </field>
+	</x>
   </search>
 </iq>{% endcall %}</code></pre>
-    <h6>Search parameters</h6>
-    <dl>
-        <dt><code>q</code></dt>
-        <dd>Optional string. Operates like the search box on the website. If left blank, keyword search is disabled altogether and a full result is returned.</dd>
-        <dt><code>sinname</code></dt>
-        <dd>Optional boolean (default: true). Flag to indicate that the search should search within the MUC names.</dd>
-        <dt><code>sindescription</code></dt>
-        <dd>Optional boolean (default: true). Flag to indicate that the search should search within the MUC descriptions.</dd>
-        <dt><code>sinaddr</code></dt>
-        <dd>Optional boolean (default: true). Flag to indicate that the search should search within the MUC addresess.</dd>
-        <dt><code>min_users</code></dt>
-        <dd>Optional integer (default: 1). Minimum number of users in the MUCs to return.</dd>
-        <dt><code>key</code></dt>
-        <dd>The key of the result set management and the field by which the results are ordered. See below for details.</dd>
-    </dl>
-    <p>The <code>key</code> field specifies the order in which results are returned and also the field which is used for XEP-0059 pagination. Two values are allowed:</p>
-    <dl>
-        <dt><code>address</code></dt>
-        <dd>Order ascendingly by the address of the MUC. Paginating through this result will provide a duplicate-free but not necessarily complete view of the database (with respect to the keyword search and min users parameters). If a MUC is updated to match the search criteria or added while the pagination happens it may or may not be included in the complete result set.</dd>
-        <dt><code>nusers</code></dt>
-        <dd>Order descendingly by the number of users in the MUC. Paginating through the result may have duplicates and may not include all items.</dd>
-    </dl>
-    <h6>Executing the search</h6>
-    <p>To execute the search, the filled-out search form must be sent. For example, to search for <code>xmpp.org</code> in ascending order of the address with a page size of 5 and only returning MUCs which have at least one user, use:</p>
-    <pre><code>{% call escape() %}<iq to="{{ config["APIJID"] }}" type="get">
+	<h6>Search parameters</h6>
+	<dl>
+		<dt><code>q</code></dt>
+		<dd>Optional string. Operates like the search box on the website. If left blank, keyword search is disabled altogether and a full result is returned.</dd>
+		<dt><code>sinname</code></dt>
+		<dd>Optional boolean (default: true). Flag to indicate that the search should search within the MUC names.</dd>
+		<dt><code>sindescription</code></dt>
+		<dd>Optional boolean (default: true). Flag to indicate that the search should search within the MUC descriptions.</dd>
+		<dt><code>sinaddr</code></dt>
+		<dd>Optional boolean (default: true). Flag to indicate that the search should search within the MUC addresess.</dd>
+		<dt><code>min_users</code></dt>
+		<dd>Optional integer (default: 1). Minimum number of users in the MUCs to return.</dd>
+		<dt><code>key</code></dt>
+		<dd>The key of the result set management and the field by which the results are ordered. See below for details.</dd>
+	</dl>
+	<p>The <code>key</code> field specifies the order in which results are returned and also the field which is used for XEP-0059 pagination. Two values are allowed:</p>
+	<dl>
+		<dt><code>address</code></dt>
+		<dd>Order ascendingly by the address of the MUC. Paginating through this result will provide a duplicate-free but not necessarily complete view of the database (with respect to the keyword search and min users parameters). If a MUC is updated to match the search criteria or added while the pagination happens it may or may not be included in the complete result set.</dd>
+		<dt><code>nusers</code></dt>
+		<dd>Order descendingly by the number of users in the MUC. Paginating through the result may have duplicates and may not include all items.</dd>
+	</dl>
+	<h6>Executing the search</h6>
+	<p>To execute the search, the filled-out search form must be sent. For example, to search for <code>xmpp.org</code> in ascending order of the address with a page size of 5 and only returning MUCs which have at least one user, use:</p>
+	<pre><code>{% call escape() %}<iq to="{{ config["APIJID"] }}" type="get">
   <search xmlns="https://xmlns.zombofant.net/muclumbus/search/1.0">
-    <set xmlns="http://jabber.org/protocol/rsm">
-      <max>5</max>
-    </set>
-    <x xmlns="jabber:x:data" type="submit">
-      <field var="FORM_TYPE" type="hidden">
-        <value>https://xmlns.zombofant.net/muclumbus/search/1.0#params</value>
-      </field>
-      <field var="q" type="text-single" label="Search for">
-        <value>xmpp.org</value>
-      </field>
-      <field var="sinname" type="boolean" label="Search in name">
-        <value>true</value>
-      </field>
-      <field var="sindescription" type="boolean" label="Search in description">
-        <value>true</value>
-      </field>
-      <field var="sinaddr" type="boolean" label="Search in address">
-        <value>true</value>
-      </field>
-      <field var="min_users" type="text-single" label="Minimum number of users">
-        <value>1</value>
-      </field>
-      <field var="key" type="list-single" label="Sort results by">
-        <value>address</value>
-        <option label="Number of online users"><value>nusers</value></option>
-        <option label="Address"><value>address</value></option>
-      </field>
-    </x>
+	<set xmlns="http://jabber.org/protocol/rsm">
+	  <max>5</max>
+	</set>
+	<x xmlns="jabber:x:data" type="submit">
+	  <field var="FORM_TYPE" type="hidden">
+		<value>https://xmlns.zombofant.net/muclumbus/search/1.0#params</value>
+	  </field>
+	  <field var="q" type="text-single" label="Search for">
+		<value>xmpp.org</value>
+	  </field>
+	  <field var="sinname" type="boolean" label="Search in name">
+		<value>true</value>
+	  </field>
+	  <field var="sindescription" type="boolean" label="Search in description">
+		<value>true</value>
+	  </field>
+	  <field var="sinaddr" type="boolean" label="Search in address">
+		<value>true</value>
+	  </field>
+	  <field var="min_users" type="text-single" label="Minimum number of users">
+		<value>1</value>
+	  </field>
+	  <field var="key" type="list-single" label="Sort results by">
+		<value>address</value>
+		<option label="Number of online users"><value>nusers</value></option>
+		<option label="Address"><value>address</value></option>
+	  </field>
+	</x>
   </search>
 </iq>{% endcall %}</code></pre>
-    <p>The XEP-0059 element is optional in the initial search request. It MAY be used to configure the page size. Note that the service may override your choice.</p>
-    <p>The server will then respond with the first page of the result set:</p>
+	<p>The XEP-0059 element is optional in the initial search request. It MAY be used to configure the page size. Note that the service may override your choice.</p>
+	<p>The server will then respond with the first page of the result set:</p>
   <pre><code>{% call escape() %}<iq type='result' from='{{ config["APIJID"] }}'>
   <result xmlns='https://xmlns.zombofant.net/muclumbus/search/1.0'>
-    <item address='commteam@muc.xmpp.org'>
-      <name>commteam</name>
-      <nusers>10</nusers>
-      <is-open/>
-    </item>
-    […]
-    <item address='operators@muc.xmpp.org'>
-      <name>XMPP Service Operators</name>
-      <description>Discussion venue for operators of federated XMPP services</description>
-      <nusers>43</nusers>
-      <is-open/>
-    </item>
-    <set xmlns='http://jabber.org/protocol/rsm'>
-      <first>opaque-string-1</first>
-      <last>opaque-string-2</last>
-      <max>5</max>
-    </set>
+	<item address='commteam@muc.xmpp.org'>
+	  <name>commteam</name>
+	  <nusers>10</nusers>
+	  <is-open/>
+	</item>
+	[…]
+	<item address='operators@muc.xmpp.org'>
+	  <name>XMPP Service Operators</name>
+	  <description>Discussion venue for operators of federated XMPP services</description>
+	  <nusers>43</nusers>
+	  <is-open/>
+	</item>
+	<set xmlns='http://jabber.org/protocol/rsm'>
+	  <first>opaque-string-1</first>
+	  <last>opaque-string-2</last>
+	  <max>5</max>
+	</set>
   </result>
 </iq>{% endcall %}</code></pre>
-    <p class="box">
-        <strong>Note:</strong> The child element of the <code>iq</code> is a different one than used in the request!
-    </p>
-    <p>The result contains of a sequence of items and a XEP-0059 element. The latter is used for pagination. The <code>&lt;max/&gt;</code> child is always included; it indicates the page size chosen by the service. If the number of items returned is less than the page size, you have reached the last page and should not continue to paginate further.</p>
-    <p>The result <code>&lt;item/&gt;</code> elements have the following syntax:</p>
-    <dl>
-        <dt>@<code>address</code></dt>
-        <dd>This attribute carries the address of the result MUC.</dd>
-        <dt><code>&lt;name/&gt;</code></dt>
-        <dd>Optional string. The name of the MUC. May be omitted if unknown.</dd>
-        <dt><code>&lt;description/&gt;</code></dt>
-        <dd>Optional string. The description of the MUC. May be omitted if unknown.</dd>
-        <dt><code>&lt;language/&gt;</code></dt>
-        <dd>Optional string. The language of the MUC. May be omitted if unknown.</dd>
-        <dt><code>&lt;is-open/&gt;</code></dt>
-        <dd>Optional. Does not have children or text. Its presence indicates that the MUC is open to join by anyone.</dd>
-        <dt><code>&lt;anonymity-mode/&gt;</code></dt>
-        <dd>Optional string. Anonymity mode of the MUC. Either <code>semi</code> or <code>none</code>. <code>semi</code> indicates that only room moderators can see the occupants real JIDs. <code>none</code> indicates that everyone can see everyones JIDs.</dd>
-        <dt><code>&lt;nusers&gt;</code></dt>
-        <dd>Integer. Approximate number of users in the room.</dd>
-    </dl>
-    <p>Note: more fields may be added in the future without notice or changing the namespace.</p>
-    <h6>Pagination</h6>
-    <p>To paginate through the results, send the same form again and set the &lt;after/&gt; element of the XEP-0059 element to the value given in the &lt;last/&gt; element of the last page your received:</p>
-    <pre><code>{% call escape() %}<iq to="{{ config["APIJID"] }}" id="xfdrffYzW2FTxdE2i6+0W" type="get">
-    <search xmlns="https://xmlns.zombofant.net/muclumbus/search/1.0">
-    <set xmlns="http://jabber.org/protocol/rsm">
-      <after>opaque-string-2</after>
-      <max>5</max>
-    </set>
-    <x xmlns="jabber:x:data" type="submit">
-      <!-- Your search goes here -->
-    </x>
+	<p class="box">
+		<strong>Note:</strong> The child element of the <code>iq</code> is a different one than used in the request!
+	</p>
+	<p>The result contains of a sequence of items and a XEP-0059 element. The latter is used for pagination. The <code>&lt;max/&gt;</code> child is always included; it indicates the page size chosen by the service. If the number of items returned is less than the page size, you have reached the last page and should not continue to paginate further.</p>
+	<p>The result <code>&lt;item/&gt;</code> elements have the following syntax:</p>
+	<dl>
+		<dt>@<code>address</code></dt>
+		<dd>This attribute carries the address of the result MUC.</dd>
+		<dt><code>&lt;name/&gt;</code></dt>
+		<dd>Optional string. The name of the MUC. May be omitted if unknown.</dd>
+		<dt><code>&lt;description/&gt;</code></dt>
+		<dd>Optional string. The description of the MUC. May be omitted if unknown.</dd>
+		<dt><code>&lt;language/&gt;</code></dt>
+		<dd>Optional string. The language of the MUC. May be omitted if unknown.</dd>
+		<dt><code>&lt;is-open/&gt;</code></dt>
+		<dd>Optional. Does not have children or text. Its presence indicates that the MUC is open to join by anyone.</dd>
+		<dt><code>&lt;anonymity-mode/&gt;</code></dt>
+		<dd>Optional string. Anonymity mode of the MUC. Either <code>semi</code> or <code>none</code>. <code>semi</code> indicates that only room moderators can see the occupants real JIDs. <code>none</code> indicates that everyone can see everyones JIDs.</dd>
+		<dt><code>&lt;nusers&gt;</code></dt>
+		<dd>Integer. Approximate number of users in the room.</dd>
+	</dl>
+	<p>Note: more fields may be added in the future without notice or changing the namespace.</p>
+	<h6>Pagination</h6>
+	<p>To paginate through the results, send the same form again and set the &lt;after/&gt; element of the XEP-0059 element to the value given in the &lt;last/&gt; element of the last page your received:</p>
+	<pre><code>{% call escape() %}<iq to="{{ config["APIJID"] }}" id="xfdrffYzW2FTxdE2i6+0W" type="get">
+	<search xmlns="https://xmlns.zombofant.net/muclumbus/search/1.0">
+	<set xmlns="http://jabber.org/protocol/rsm">
+	  <after>opaque-string-2</after>
+	  <max>5</max>
+	</set>
+	<x xmlns="jabber:x:data" type="submit">
+	  <!-- Your search goes here -->
+	</x>
   </search>
 </iq>{% endcall %}</code></pre>
-    <p>The server will then return the next page. You can repeat this until your recieve a result set which has fewer items than indicated in the &lt;max/&gt; element of the results RSM element.</p>
-    <p class="box warning">
-        <strong>Note:</strong> This service does <em>not</em> support the full XEP-0059 semantics. Paginating is only supported through the &lt;after/&gt; element.
-    </p>
-    <h6><a name="xmpp-form-type"></a>Form specification</h6>
-    <pre><code>{% call escape() %}<form_type>
+	<p>The server will then return the next page. You can repeat this until your recieve a result set which has fewer items than indicated in the &lt;max/&gt; element of the results RSM element.</p>
+	<p class="box warning">
+		<strong>Note:</strong> This service does <em>not</em> support the full XEP-0059 semantics. Paginating is only supported through the &lt;after/&gt; element.
+	</p>
+	<h6><a name="xmpp-form-type"></a>Form specification</h6>
+	<pre><code>{% call escape() %}<form_type>
   <name>https://xmlns.zombofant.net/muclumbus/search/1.0</name>
   <doc>https://muclumbus.jabbercat.org/docs/api</doc>
   <desc>
-    Form to search through a public MUC directory.
+	Form to search through a public MUC directory.
   </desc>
   <field
-     var='q'
-     type='text-single'
-     label='Search for'/>
+	 var='q'
+	 type='text-single'
+	 label='Search for'/>
   <field
-      var='sinname'
-      type='boolean'
-      label='Search in name'/>
+	  var='sinname'
+	  type='boolean'
+	  label='Search in name'/>
   <field
-      var='sindescription'
-      type='boolean'
-      label='Search in description'/>
+	  var='sindescription'
+	  type='boolean'
+	  label='Search in description'/>
   <field
-      var='sinaddr'
-      type='boolean'
-      label='Search in address'/>
+	  var='sinaddr'
+	  type='boolean'
+	  label='Search in address'/>
   <field
-      var='min_users'
-      type='text-single'
-      label='Minimum number of users'/>
+	  var='min_users'
+	  type='text-single'
+	  label='Minimum number of users'/>
   <field
-      var='key'
-      type='list-single'
-      label='Sort results by'/>
+	  var='key'
+	  type='list-single'
+	  label='Sort results by'/>
 </form_type>{% endcall %}</code></pre>
-    <h3><a name="http"></a>HTTP API</h3>
-    <p>We offer a minimalistic HTTP-based JSON API to query the room list.</p>
-    <h4>Rate limiting</h4>
-    <p>We offer this service as a best-effort service. If you receive a 429 status code, please wait at least one minute for your next request.</p>
-    <p>Please avoid downloading the whole list unless you have to do so. If you want to do additional filtering locally, that is a good reason.</p>
-    <h4>API calls</h4>
-    <ul>
-        <li><a href="#api-1.0-rooms">Complete room listing</a> (<code>GET /api/1.0/rooms</code>)</li>
-        <li><a href="#api-1.0-rooms/unsafe">Quick (unsafe) room listing</a> (<code>GET /api/1.0/rooms/unsafe</code>)</li>
-        <li><a href="#api-1.0-search">Search for rooms</a> (<code>POST /api/1.0/search</code>)</li>
-        <li><a href="#api-1.0-badge">SVG "badges" for rooms</a> (<code>GET /api/1.0/badge</code>)</li>
-    </ul>
-    <section class="api-call">
-        <h4><a name="api-1.0-rooms"></a><code>GET /api/1.0/rooms</code></h4>
-        <h6>Description</h6>
-        <p>Return the list of rooms as JSON object. The list is paginated with a constant number items per page and ordered by the address ascendingly.</p>
-        <h6>Parameters</h6>
-        <dl>
-            <dt><code>after</code></dt>
-            <dd>Optional JID. Only MUCs whose address orders after the given JID will be returned. This is used for pagination.</p>
-            <dt><code>min_users</code></dt>
-            <dd>Optional integer number. Only MUCs whose number of users moving average is greater than or equal to this number will be returned.</p>
-        </dl>
-        <h6>Error conditions</h6>
-        <dl>
-            <dt><code>400</code></dt>
-            <dd><ul>
-                <li>The <code>after</code> argument is not a valid JID.</li>
-                <li>The <code>min_users</code> argument is not an integer.</li>
-            </ul></dd>
-            <dt><code>429</code></dt>
-            <dd>Rate limit exceeded. Please wait at least one minute before issuing the next request.</dd>
-        </dl>
-        <h6>Response</h6>
-        <p>The response is a JSON object formatted like this:</p>
-        <pre><code>{
-    "items": [
-        {
-            "address": &lt;(str) address of the room&gt;,
-            "nusers": &lt;(int or null) approximate number of users&gt;,
-            "is_open": &lt;(bool) whether it can be joined by anyone&gt;,
-            "name": &lt;(str or null) name of the room&gt;,
-            "description": &lt;(str or null) description of the room&gt;,
-            "language": &lt;(str or null) primary language of the room&gt;
-        },
-        &lt; ... &gt;
-    ]
+	<h3><a name="http"></a>HTTP API</h3>
+	<p>We offer a minimalistic HTTP-based JSON API to query the room list.</p>
+	<h4>Rate limiting</h4>
+	<p>We offer this service as a best-effort service. If you receive a 429 status code, please wait at least one minute for your next request.</p>
+	<p>Please avoid downloading the whole list unless you have to do so. If you want to do additional filtering locally, that is a good reason.</p>
+	<h4>API calls</h4>
+	<ul>
+		<li><a href="#api-1.0-rooms">Complete room listing</a> (<code>GET /api/1.0/rooms</code>)</li>
+		<li><a href="#api-1.0-rooms/unsafe">Quick (unsafe) room listing</a> (<code>GET /api/1.0/rooms/unsafe</code>)</li>
+		<li><a href="#api-1.0-search">Search for rooms</a> (<code>POST /api/1.0/search</code>)</li>
+		<li><a href="#api-1.0-badge">SVG "badges" for rooms</a> (<code>GET /api/1.0/badge</code>)</li>
+	</ul>
+	<section class="api-call">
+		<h4><a name="api-1.0-rooms"></a><code>GET /api/1.0/rooms</code></h4>
+		<h6>Description</h6>
+		<p>Return the list of rooms as JSON object. The list is paginated with a constant number items per page and ordered by the address ascendingly.</p>
+		<h6>Parameters</h6>
+		<dl>
+			<dt><code>after</code></dt>
+			<dd>Optional JID. Only MUCs whose address orders after the given JID will be returned. This is used for pagination.</p>
+			<dt><code>min_users</code></dt>
+			<dd>Optional integer number. Only MUCs whose number of users moving average is greater than or equal to this number will be returned.</p>
+		</dl>
+		<h6>Error conditions</h6>
+		<dl>
+			<dt><code>400</code></dt>
+			<dd><ul>
+				<li>The <code>after</code> argument is not a valid JID.</li>
+				<li>The <code>min_users</code> argument is not an integer.</li>
+			</ul></dd>
+			<dt><code>429</code></dt>
+			<dd>Rate limit exceeded. Please wait at least one minute before issuing the next request.</dd>
+		</dl>
+		<h6>Response</h6>
+		<p>The response is a JSON object formatted like this:</p>
+		<pre><code>{
+	"items": [
+		{
+			"address": &lt;(str) address of the room&gt;,
+			"nusers": &lt;(int or null) approximate number of users&gt;,
+			"is_open": &lt;(bool) whether it can be joined by anyone&gt;,
+			"name": &lt;(str or null) name of the room&gt;,
+			"description": &lt;(str or null) description of the room&gt;,
+			"language": &lt;(str or null) primary language of the room&gt;
+		},
+		&lt; ... &gt;
+	]
 }</code></pre>
-        <p>The number of items per page is a service constant.</p>
-        <p>To continue to the next page, send a new request with the <code>after</code> argument set to the <code>address</code> of the last item in the previous page. Paging backwards is not supported.</p>
-        <p>This method is intended to obtain a complete listing of the rooms. If rooms are added concurrently with the listing, they may or may not be included. If a <code>min_users</code> condition is used and the number of users in the room crosses the threshold concurrently to the listing, it may or may not be included.</p>
-    </section>
-    <section class="api-call">
-        <h4><a name="api-1.0-rooms/unsafe"></a><code>GET /api/1.0/rooms/unsafe</code></h4>
-        <h6>Description</h6>
-        <p>Return the list of rooms as JSON object. The list is paginated with a (fairly) constant number items per page and ordered by number of users descendingly.</p>
-        <h6>Parameters</h6>
-        <dl>
-            <dt><code>p</code></dt>
-            <dd>Required. The page of the listing. The first page is page 1.</p>
-            <dt><code>order_by</code></dt>
-            <dd>Optional. The column by which the results will be ordered. Allowed values: <ul class="inline"><li><code>nusers</code></li></ul>. Default: <code>nusers</code></dd>
-        </dl>
-        <h6>Error conditions</h6>
-        <dl>
-            <dt><code>400</code></dt>
-            <dd><ul>
-                <li>The page number was not given.</li>
-                <li>The given page was not an integer.</li>
-                <li>The given page was less than one.</li>
-                <li>The order by column was given and not equal to <code>nusers</code>.</li>
-            </ul></dd>
-            <dt><code>429</code></dt>
-            <dd>Rate limit exceeded. Please wait at least one minute before issuing the next request.</dd>
-        </dl>
-        <h6>Response</h6>
-        <p>The response is a JSON object formatted like this:</p>
-        <pre><code>{
-    "page": &lt;(int) page number&gt;,
-    "total": &lt;(int) total number of items in all pages&gt;,
-    "pages": &lt;(int) total number of pages&gt;,
-    "items": [
-        {
-            "address": &lt;(str) address of the room&gt;,
-            "nusers": &lt;(int or null) approximate number of users&gt;,
-            "is_open": &lt;(bool) whether it can be joined by anyone&gt;,
-            "anonymity_mode": &lt;(str) "semi" or "none", indicating the level of anonymity ("semi" = room moderators can see occupant JIDs, "none" = everyone can)&gt;,
-            "name": &lt;(str or null) name of the room&gt;,
-            "description": &lt;(str or null) description of the room&gt;,
-            "language": &lt;(str or null) primary language of the room&gt;
-        },
-        &lt; ... &gt;
-    ]
+		<p>The number of items per page is a service constant.</p>
+		<p>To continue to the next page, send a new request with the <code>after</code> argument set to the <code>address</code> of the last item in the previous page. Paging backwards is not supported.</p>
+		<p>This method is intended to obtain a complete listing of the rooms. If rooms are added concurrently with the listing, they may or may not be included. If a <code>min_users</code> condition is used and the number of users in the room crosses the threshold concurrently to the listing, it may or may not be included.</p>
+	</section>
+	<section class="api-call">
+		<h4><a name="api-1.0-rooms/unsafe"></a><code>GET /api/1.0/rooms/unsafe</code></h4>
+		<h6>Description</h6>
+		<p>Return the list of rooms as JSON object. The list is paginated with a (fairly) constant number items per page and ordered by number of users descendingly.</p>
+		<h6>Parameters</h6>
+		<dl>
+			<dt><code>p</code></dt>
+			<dd>Required. The page of the listing. The first page is page 1.</p>
+			<dt><code>order_by</code></dt>
+			<dd>Optional. The column by which the results will be ordered. Allowed values: <ul class="inline"><li><code>nusers</code></li></ul>. Default: <code>nusers</code></dd>
+		</dl>
+		<h6>Error conditions</h6>
+		<dl>
+			<dt><code>400</code></dt>
+			<dd><ul>
+				<li>The page number was not given.</li>
+				<li>The given page was not an integer.</li>
+				<li>The given page was less than one.</li>
+				<li>The order by column was given and not equal to <code>nusers</code>.</li>
+			</ul></dd>
+			<dt><code>429</code></dt>
+			<dd>Rate limit exceeded. Please wait at least one minute before issuing the next request.</dd>
+		</dl>
+		<h6>Response</h6>
+		<p>The response is a JSON object formatted like this:</p>
+		<pre><code>{
+	"page": &lt;(int) page number&gt;,
+	"total": &lt;(int) total number of items in all pages&gt;,
+	"pages": &lt;(int) total number of pages&gt;,
+	"items": [
+		{
+			"address": &lt;(str) address of the room&gt;,
+			"nusers": &lt;(int or null) approximate number of users&gt;,
+			"is_open": &lt;(bool) whether it can be joined by anyone&gt;,
+			"anonymity_mode": &lt;(str) "semi" or "none", indicating the level of anonymity ("semi" = room moderators can see occupant JIDs, "none" = everyone can)&gt;,
+			"name": &lt;(str or null) name of the room&gt;,
+			"description": &lt;(str or null) description of the room&gt;,
+			"language": &lt;(str or null) primary language of the room&gt;
+		},
+		&lt; ... &gt;
+	]
 }</code></pre>
-        <p>The number of items per page is a service constant.</p>
-        <p class="box warning">
-            <strong>Warning:</strong> This listing is not safe against insert/reorder/delete race conditions when fetching multiple pages. This means that rooms can be missing or can be duplicated in the result.
-        </p>
-    </section>
-    <section class="api-call">
-        <h4><a name="api-1.0-search"></a><code>POST /api/1.0/search</code></h4>
-        <h6>Description</h6>
-        <p class="box warning"><strong>Warning:</strong> This API is experimental and may change in incompatible ways without notice.</p>
-        <p>Execute a room search like on the website.</p>
-        <p class="box warning">
-          <strong>Warning:</strong> The search result is not safe against insert/reorder/delete race conditions when fetching multiple pages. This means that rooms can be missing or can be duplicated in the result.
-        </p>
-        <h6>Payload</h6>
-        <p>The payload must be JSON-formatted string. It <em>must</em> be sent with <code>Content-Type: application/json</code> and be encoded for the wire using UTF-8.</p>
-        <p>The object can have the following keys:</p>
-        <dl>
-          <dt><code>keywords</code></dt>
-          <dd>Required. Either a string (which will be tokenized in an unspecified way like the web UI tokenizes it) or a list of keywords.</dd>
-          <dt><code>sinaddr</code></dt>
-          <dd>Optional boolean. If true, the search will take the address of the rooms into account. Defaults to true.</dd>
-          <dt><code>sindescr</code></dt>
-          <dd>Optional boolean. If true, the search will take the description of the rooms into account. Defaults to true.</dd>
-          <dt><code>sinname</code></dt>
-          <dd>Optional boolean. If true, the search will take the name of the rooms into account. Defaults to true.</dd>
-          <dt><code>min_users</code></dt>
-          <dd>Optional float. The minimum number of users a room must have to be included in the result. Defaults to 0.</dd>
-          <dt><code>after</code></dt>
-          <dd>Optional. Pagination key. See below for details.</dd>
-        </dl>
-        <h6>Error conditions</h6>
-        <dl>
-            <dt><code>400</code></dt>
-            <dd><ul>
-                <li>Too many keywords in request</li>
-                <li>Invalid type for <code>keywords</code>, <code>min_users</code> or <code>after</code></li>
-                <li>Search scope is empty: none of the boolean flags for where to search evaluated to true.</li>
-                <li><code>keywords</code> is missing.</li>
-            </ul></dd>
-            <dt><code>429</code></dt>
-            <dd>Rate limit exceeded. Please wait at least one minute before issuing the next request.</dd>
-        </dl>
-        <h6>Pagination</h6>
-        <p>The API will only return a limited number of items. This is at least 10 items. The actual number may vary with server load or at the discretion of the service provider.</p>
-        <p>To request the next page of results, the value of the <code>last</code> key in the <code>result</code> key of the response object must be passed as <code>after</code> in the subsequent request.</p>
-        <h6>Response</h6>
-        <p>The response is a JSON object formatted like this:</p>
-        <pre><code>{
-    "query": {
-        &lt;the expanded search request&gt;
-    },
-    "result": {
-        "last": &lt;opaque pagination key (see above)&gt;,
-        "more": &lt;(bool) flag which indicates that there may be more data available on a subsequent page&gt;,
-        "items": [
-            {
-                "address": &lt;(str) address of the room&gt;,
-                "nusers": &lt;(int or null) approximate number of users&gt;,
-                "is_open": &lt;(bool) whether it can be joined by anyone&gt;,
-                "anonymity_mode": &lt;(str or null) "semi" or "none", indicating the level of anonymity ("semi" = room moderators can see occupant JIDs, "none" = everyone can). May be null if the service currently lacks data.&gt;,
-                "name": &lt;(str or null) name of the room&gt;,
-                "description": &lt;(str or null) description of the room&gt;,
-                "language": &lt;(str or null) primary language of the room&gt;
-            },
-            &lt; ... &gt;
-        ]
-    }
+		<p>The number of items per page is a service constant.</p>
+		<p class="box warning">
+			<strong>Warning:</strong> This listing is not safe against insert/reorder/delete race conditions when fetching multiple pages. This means that rooms can be missing or can be duplicated in the result.
+		</p>
+	</section>
+	<section class="api-call">
+		<h4><a name="api-1.0-search"></a><code>POST /api/1.0/search</code></h4>
+		<h6>Description</h6>
+		<p class="box warning"><strong>Warning:</strong> This API is experimental and may change in incompatible ways without notice.</p>
+		<p>Execute a room search like on the website.</p>
+		<p class="box warning">
+		  <strong>Warning:</strong> The search result is not safe against insert/reorder/delete race conditions when fetching multiple pages. This means that rooms can be missing or can be duplicated in the result.
+		</p>
+		<h6>Payload</h6>
+		<p>The payload must be JSON-formatted string. It <em>must</em> be sent with <code>Content-Type: application/json</code> and be encoded for the wire using UTF-8.</p>
+		<p>The object can have the following keys:</p>
+		<dl>
+		  <dt><code>keywords</code></dt>
+		  <dd>Required. Either a string (which will be tokenized in an unspecified way like the web UI tokenizes it) or a list of keywords.</dd>
+		  <dt><code>sinaddr</code></dt>
+		  <dd>Optional boolean. If true, the search will take the address of the rooms into account. Defaults to true.</dd>
+		  <dt><code>sindescr</code></dt>
+		  <dd>Optional boolean. If true, the search will take the description of the rooms into account. Defaults to true.</dd>
+		  <dt><code>sinname</code></dt>
+		  <dd>Optional boolean. If true, the search will take the name of the rooms into account. Defaults to true.</dd>
+		  <dt><code>min_users</code></dt>
+		  <dd>Optional float. The minimum number of users a room must have to be included in the result. Defaults to 0.</dd>
+		  <dt><code>after</code></dt>
+		  <dd>Optional. Pagination key. See below for details.</dd>
+		</dl>
+		<h6>Error conditions</h6>
+		<dl>
+			<dt><code>400</code></dt>
+			<dd><ul>
+				<li>Too many keywords in request</li>
+				<li>Invalid type for <code>keywords</code>, <code>min_users</code> or <code>after</code></li>
+				<li>Search scope is empty: none of the boolean flags for where to search evaluated to true.</li>
+				<li><code>keywords</code> is missing.</li>
+			</ul></dd>
+			<dt><code>429</code></dt>
+			<dd>Rate limit exceeded. Please wait at least one minute before issuing the next request.</dd>
+		</dl>
+		<h6>Pagination</h6>
+		<p>The API will only return a limited number of items. This is at least 10 items. The actual number may vary with server load or at the discretion of the service provider.</p>
+		<p>To request the next page of results, the value of the <code>last</code> key in the <code>result</code> key of the response object must be passed as <code>after</code> in the subsequent request.</p>
+		<h6>Response</h6>
+		<p>The response is a JSON object formatted like this:</p>
+		<pre><code>{
+	"query": {
+		&lt;the expanded search request&gt;
+	},
+	"result": {
+		"last": &lt;opaque pagination key (see above)&gt;,
+		"more": &lt;(bool) flag which indicates that there may be more data available on a subsequent page&gt;,
+		"items": [
+			{
+				"address": &lt;(str) address of the room&gt;,
+				"nusers": &lt;(int or null) approximate number of users&gt;,
+				"is_open": &lt;(bool) whether it can be joined by anyone&gt;,
+				"anonymity_mode": &lt;(str or null) "semi" or "none", indicating the level of anonymity ("semi" = room moderators can see occupant JIDs, "none" = everyone can). May be null if the service currently lacks data.&gt;,
+				"name": &lt;(str or null) name of the room&gt;,
+				"description": &lt;(str or null) description of the room&gt;,
+				"language": &lt;(str or null) primary language of the room&gt;
+			},
+			&lt; ... &gt;
+		]
+	}
 }</code></pre>
-        <h6>Example</h6>
-        <pre><code>$ curl -s \
-    --data '{"keywords": ["xsf"]}' \
-    -H 'Content-Type: application/json; charset=utf-8' \
-    https://search.jabber.network/api/1.0/search | jq -C .
+		<h6>Example</h6>
+		<pre><code>$ curl -s \
+	--data '{"keywords": ["xsf"]}' \
+	-H 'Content-Type: application/json; charset=utf-8' \
+	https://search.jabber.network/api/1.0/search | jq -C .
 <span style="font-weight:bold;color:black;">{
   </span><span style="font-weight:bold;color:blue;">&quot;query&quot;</span><span style="font-weight:bold;color:black;">: </span><span style="font-weight:bold;color:black;">{
-    </span><span style="font-weight:bold;color:blue;">&quot;after&quot;</span><span style="font-weight:bold;color:black;">: </span><span style="font-weight:bold;color:dimgray;">null</span><span style="font-weight:bold;color:black;">,
-    </span><span style="font-weight:bold;color:blue;">&quot;keywords&quot;</span><span style="font-weight:bold;color:black;">: </span><span style="font-weight:bold;color:black;">[
-      </span><span style="color:green;">&quot;xsf&quot;</span><span style="font-weight:bold;color:black;">
-    ]</span><span style="font-weight:bold;color:black;">,
-    </span><span style="font-weight:bold;color:blue;">&quot;min_users&quot;</span><span style="font-weight:bold;color:black;">: </span><span style="color:black;">0</span><span style="font-weight:bold;color:black;">,
-    </span><span style="font-weight:bold;color:blue;">&quot;sinaddr&quot;</span><span style="font-weight:bold;color:black;">: </span><span style="color:black;">true</span><span style="font-weight:bold;color:black;">,
-    </span><span style="font-weight:bold;color:blue;">&quot;sindescr&quot;</span><span style="font-weight:bold;color:black;">: </span><span style="color:black;">true</span><span style="font-weight:bold;color:black;">,
-    </span><span style="font-weight:bold;color:blue;">&quot;sinname&quot;</span><span style="font-weight:bold;color:black;">: </span><span style="color:black;">true</span><span style="font-weight:bold;color:black;">
+	</span><span style="font-weight:bold;color:blue;">&quot;after&quot;</span><span style="font-weight:bold;color:black;">: </span><span style="font-weight:bold;color:dimgray;">null</span><span style="font-weight:bold;color:black;">,
+	</span><span style="font-weight:bold;color:blue;">&quot;keywords&quot;</span><span style="font-weight:bold;color:black;">: </span><span style="font-weight:bold;color:black;">[
+	  </span><span style="color:green;">&quot;xsf&quot;</span><span style="font-weight:bold;color:black;">
+	]</span><span style="font-weight:bold;color:black;">,
+	</span><span style="font-weight:bold;color:blue;">&quot;min_users&quot;</span><span style="font-weight:bold;color:black;">: </span><span style="color:black;">0</span><span style="font-weight:bold;color:black;">,
+	</span><span style="font-weight:bold;color:blue;">&quot;sinaddr&quot;</span><span style="font-weight:bold;color:black;">: </span><span style="color:black;">true</span><span style="font-weight:bold;color:black;">,
+	</span><span style="font-weight:bold;color:blue;">&quot;sindescr&quot;</span><span style="font-weight:bold;color:black;">: </span><span style="color:black;">true</span><span style="font-weight:bold;color:black;">,
+	</span><span style="font-weight:bold;color:blue;">&quot;sinname&quot;</span><span style="font-weight:bold;color:black;">: </span><span style="color:black;">true</span><span style="font-weight:bold;color:black;">
   }</span><span style="font-weight:bold;color:black;">,
   </span><span style="font-weight:bold;color:blue;">&quot;result&quot;</span><span style="font-weight:bold;color:black;">: </span><span style="font-weight:bold;color:black;">{
-    </span><span style="font-weight:bold;color:blue;">&quot;items&quot;</span><span style="font-weight:bold;color:black;">: </span><span style="font-weight:bold;color:black;">[
-      {
-        </span><span style="font-weight:bold;color:blue;">&quot;address&quot;</span><span style="font-weight:bold;color:black;">: </span><span style="color:green;">&quot;xsf@muc.xmpp.org&quot;</span><span style="font-weight:bold;color:black;">,
-        </span><span style="font-weight:bold;color:blue;">&quot;anonymity_mode&quot;</span><span style="font-weight:bold;color:black;">: </span><span style="color:green;">&quot;semi&quot;</span><span style="font-weight:bold;color:black;">,
-        </span><span style="font-weight:bold;color:blue;">&quot;description&quot;</span><span style="font-weight:bold;color:black;">: </span><span style="color:green;">&quot;Discussion room of the XMPP Standards Foundation&quot;</span><span style="font-weight:bold;color:black;">,
-        </span><span style="font-weight:bold;color:blue;">&quot;is_open&quot;</span><span style="font-weight:bold;color:black;">: </span><span style="color:black;">true</span><span style="font-weight:bold;color:black;">,
-        </span><span style="font-weight:bold;color:blue;">&quot;language&quot;</span><span style="font-weight:bold;color:black;">: </span><span style="color:green;">&quot;en&quot;</span><span style="font-weight:bold;color:black;">,
-        </span><span style="font-weight:bold;color:blue;">&quot;name&quot;</span><span style="font-weight:bold;color:black;">: </span><span style="color:green;">&quot;XSF Discussion&quot;</span><span style="font-weight:bold;color:black;">,
-        </span><span style="font-weight:bold;color:blue;">&quot;nusers&quot;</span><span style="font-weight:bold;color:black;">: </span><span style="color:black;">66</span><span style="font-weight:bold;color:black;">
-      }</span><span style="font-weight:bold;color:black;">,
-      {
-        </span><span style="font-weight:bold;color:blue;">&quot;address&quot;</span><span style="font-weight:bold;color:black;">: </span><span style="color:green;">&quot;council@muc.xmpp.org&quot;</span><span style="font-weight:bold;color:black;">,
-        </span><span style="font-weight:bold;color:blue;">&quot;anonymity_mode&quot;</span><span style="font-weight:bold;color:black;">: </span><span style="color:green;">&quot;semi&quot;</span><span style="font-weight:bold;color:black;">,
-        </span><span style="font-weight:bold;color:blue;">&quot;description&quot;</span><span style="font-weight:bold;color:black;">: </span><span style="color:green;">&quot;Room where the XSF XMPP Council holds its meetings&quot;</span><span style="font-weight:bold;color:black;">,
-        </span><span style="font-weight:bold;color:blue;">&quot;is_open&quot;</span><span style="font-weight:bold;color:black;">: </span><span style="color:black;">true</span><span style="font-weight:bold;color:black;">,
-        </span><span style="font-weight:bold;color:blue;">&quot;language&quot;</span><span style="font-weight:bold;color:black;">: </span><span style="color:green;">&quot;en&quot;</span><span style="font-weight:bold;color:black;">,
-        </span><span style="font-weight:bold;color:blue;">&quot;name&quot;</span><span style="font-weight:bold;color:black;">: </span><span style="color:green;">&quot;XMPP Council&quot;</span><span style="font-weight:bold;color:black;">,
-        </span><span style="font-weight:bold;color:blue;">&quot;nusers&quot;</span><span style="font-weight:bold;color:black;">: </span><span style="color:black;">23</span><span style="font-weight:bold;color:black;">
-      }</span><span style="font-weight:bold;color:black;">,
-      {
-        </span><span style="font-weight:bold;color:blue;">&quot;address&quot;</span><span style="font-weight:bold;color:black;">: </span><span style="color:green;">&quot;commteam@muc.xmpp.org&quot;</span><span style="font-weight:bold;color:black;">,
-        </span><span style="font-weight:bold;color:blue;">&quot;anonymity_mode&quot;</span><span style="font-weight:bold;color:black;">: </span><span style="color:green;">&quot;semi&quot;</span><span style="font-weight:bold;color:black;">,
-        </span><span style="font-weight:bold;color:blue;">&quot;description&quot;</span><span style="font-weight:bold;color:black;">: </span><span style="font-weight:bold;color:dimgray;">null</span><span style="font-weight:bold;color:black;">,
-        </span><span style="font-weight:bold;color:blue;">&quot;is_open&quot;</span><span style="font-weight:bold;color:black;">: </span><span style="color:black;">true</span><span style="font-weight:bold;color:black;">,
-        </span><span style="font-weight:bold;color:blue;">&quot;language&quot;</span><span style="font-weight:bold;color:black;">: </span><span style="color:green;">&quot;en&quot;</span><span style="font-weight:bold;color:black;">,
-        </span><span style="font-weight:bold;color:blue;">&quot;name&quot;</span><span style="font-weight:bold;color:black;">: </span><span style="color:green;">&quot;XSF Communications Team&quot;</span><span style="font-weight:bold;color:black;">,
-        </span><span style="font-weight:bold;color:blue;">&quot;nusers&quot;</span><span style="font-weight:bold;color:black;">: </span><span style="color:black;">14</span><span style="font-weight:bold;color:black;">
-      }</span><span style="font-weight:bold;color:black;">,
-      {
-        </span><span style="font-weight:bold;color:blue;">&quot;address&quot;</span><span style="font-weight:bold;color:black;">: </span><span style="color:green;">&quot;editor@muc.xmpp.org&quot;</span><span style="font-weight:bold;color:black;">,
-        </span><span style="font-weight:bold;color:blue;">&quot;anonymity_mode&quot;</span><span style="font-weight:bold;color:black;">: </span><span style="color:green;">&quot;semi&quot;</span><span style="font-weight:bold;color:black;">,
-        </span><span style="font-weight:bold;color:blue;">&quot;description&quot;</span><span style="font-weight:bold;color:black;">: </span><span style="color:green;">&quot;Discussion room for the XSF Editor Team&quot;</span><span style="font-weight:bold;color:black;">,
-        </span><span style="font-weight:bold;color:blue;">&quot;is_open&quot;</span><span style="font-weight:bold;color:black;">: </span><span style="color:black;">true</span><span style="font-weight:bold;color:black;">,
-        </span><span style="font-weight:bold;color:blue;">&quot;language&quot;</span><span style="font-weight:bold;color:black;">: </span><span style="color:green;">&quot;en&quot;</span><span style="font-weight:bold;color:black;">,
-        </span><span style="font-weight:bold;color:blue;">&quot;name&quot;</span><span style="font-weight:bold;color:black;">: </span><span style="color:green;">&quot;XSF Editor Team&quot;</span><span style="font-weight:bold;color:black;">,
-        </span><span style="font-weight:bold;color:blue;">&quot;nusers&quot;</span><span style="font-weight:bold;color:black;">: </span><span style="color:black;">12</span><span style="font-weight:bold;color:black;">
-      }</span><span style="font-weight:bold;color:black;">
-    ]</span><span style="font-weight:bold;color:black;">,
-    </span><span style="font-weight:bold;color:blue;">&quot;last&quot;</span><span style="font-weight:bold;color:black;">: </span><span style="color:black;">12.1112915471192</span><span style="font-weight:bold;color:black;">,
-    </span><span style="font-weight:bold;color:blue;">&quot;more&quot;</span><span style="font-weight:bold;color:black;">: </span><span style="color:black;">false</span><span style="font-weight:bold;color:black;">
+	</span><span style="font-weight:bold;color:blue;">&quot;items&quot;</span><span style="font-weight:bold;color:black;">: </span><span style="font-weight:bold;color:black;">[
+	  {
+		</span><span style="font-weight:bold;color:blue;">&quot;address&quot;</span><span style="font-weight:bold;color:black;">: </span><span style="color:green;">&quot;xsf@muc.xmpp.org&quot;</span><span style="font-weight:bold;color:black;">,
+		</span><span style="font-weight:bold;color:blue;">&quot;anonymity_mode&quot;</span><span style="font-weight:bold;color:black;">: </span><span style="color:green;">&quot;semi&quot;</span><span style="font-weight:bold;color:black;">,
+		</span><span style="font-weight:bold;color:blue;">&quot;description&quot;</span><span style="font-weight:bold;color:black;">: </span><span style="color:green;">&quot;Discussion room of the XMPP Standards Foundation&quot;</span><span style="font-weight:bold;color:black;">,
+		</span><span style="font-weight:bold;color:blue;">&quot;is_open&quot;</span><span style="font-weight:bold;color:black;">: </span><span style="color:black;">true</span><span style="font-weight:bold;color:black;">,
+		</span><span style="font-weight:bold;color:blue;">&quot;language&quot;</span><span style="font-weight:bold;color:black;">: </span><span style="color:green;">&quot;en&quot;</span><span style="font-weight:bold;color:black;">,
+		</span><span style="font-weight:bold;color:blue;">&quot;name&quot;</span><span style="font-weight:bold;color:black;">: </span><span style="color:green;">&quot;XSF Discussion&quot;</span><span style="font-weight:bold;color:black;">,
+		</span><span style="font-weight:bold;color:blue;">&quot;nusers&quot;</span><span style="font-weight:bold;color:black;">: </span><span style="color:black;">66</span><span style="font-weight:bold;color:black;">
+	  }</span><span style="font-weight:bold;color:black;">,
+	  {
+		</span><span style="font-weight:bold;color:blue;">&quot;address&quot;</span><span style="font-weight:bold;color:black;">: </span><span style="color:green;">&quot;council@muc.xmpp.org&quot;</span><span style="font-weight:bold;color:black;">,
+		</span><span style="font-weight:bold;color:blue;">&quot;anonymity_mode&quot;</span><span style="font-weight:bold;color:black;">: </span><span style="color:green;">&quot;semi&quot;</span><span style="font-weight:bold;color:black;">,
+		</span><span style="font-weight:bold;color:blue;">&quot;description&quot;</span><span style="font-weight:bold;color:black;">: </span><span style="color:green;">&quot;Room where the XSF XMPP Council holds its meetings&quot;</span><span style="font-weight:bold;color:black;">,
+		</span><span style="font-weight:bold;color:blue;">&quot;is_open&quot;</span><span style="font-weight:bold;color:black;">: </span><span style="color:black;">true</span><span style="font-weight:bold;color:black;">,
+		</span><span style="font-weight:bold;color:blue;">&quot;language&quot;</span><span style="font-weight:bold;color:black;">: </span><span style="color:green;">&quot;en&quot;</span><span style="font-weight:bold;color:black;">,
+		</span><span style="font-weight:bold;color:blue;">&quot;name&quot;</span><span style="font-weight:bold;color:black;">: </span><span style="color:green;">&quot;XMPP Council&quot;</span><span style="font-weight:bold;color:black;">,
+		</span><span style="font-weight:bold;color:blue;">&quot;nusers&quot;</span><span style="font-weight:bold;color:black;">: </span><span style="color:black;">23</span><span style="font-weight:bold;color:black;">
+	  }</span><span style="font-weight:bold;color:black;">,
+	  {
+		</span><span style="font-weight:bold;color:blue;">&quot;address&quot;</span><span style="font-weight:bold;color:black;">: </span><span style="color:green;">&quot;commteam@muc.xmpp.org&quot;</span><span style="font-weight:bold;color:black;">,
+		</span><span style="font-weight:bold;color:blue;">&quot;anonymity_mode&quot;</span><span style="font-weight:bold;color:black;">: </span><span style="color:green;">&quot;semi&quot;</span><span style="font-weight:bold;color:black;">,
+		</span><span style="font-weight:bold;color:blue;">&quot;description&quot;</span><span style="font-weight:bold;color:black;">: </span><span style="font-weight:bold;color:dimgray;">null</span><span style="font-weight:bold;color:black;">,
+		</span><span style="font-weight:bold;color:blue;">&quot;is_open&quot;</span><span style="font-weight:bold;color:black;">: </span><span style="color:black;">true</span><span style="font-weight:bold;color:black;">,
+		</span><span style="font-weight:bold;color:blue;">&quot;language&quot;</span><span style="font-weight:bold;color:black;">: </span><span style="color:green;">&quot;en&quot;</span><span style="font-weight:bold;color:black;">,
+		</span><span style="font-weight:bold;color:blue;">&quot;name&quot;</span><span style="font-weight:bold;color:black;">: </span><span style="color:green;">&quot;XSF Communications Team&quot;</span><span style="font-weight:bold;color:black;">,
+		</span><span style="font-weight:bold;color:blue;">&quot;nusers&quot;</span><span style="font-weight:bold;color:black;">: </span><span style="color:black;">14</span><span style="font-weight:bold;color:black;">
+	  }</span><span style="font-weight:bold;color:black;">,
+	  {
+		</span><span style="font-weight:bold;color:blue;">&quot;address&quot;</span><span style="font-weight:bold;color:black;">: </span><span style="color:green;">&quot;editor@muc.xmpp.org&quot;</span><span style="font-weight:bold;color:black;">,
+		</span><span style="font-weight:bold;color:blue;">&quot;anonymity_mode&quot;</span><span style="font-weight:bold;color:black;">: </span><span style="color:green;">&quot;semi&quot;</span><span style="font-weight:bold;color:black;">,
+		</span><span style="font-weight:bold;color:blue;">&quot;description&quot;</span><span style="font-weight:bold;color:black;">: </span><span style="color:green;">&quot;Discussion room for the XSF Editor Team&quot;</span><span style="font-weight:bold;color:black;">,
+		</span><span style="font-weight:bold;color:blue;">&quot;is_open&quot;</span><span style="font-weight:bold;color:black;">: </span><span style="color:black;">true</span><span style="font-weight:bold;color:black;">,
+		</span><span style="font-weight:bold;color:blue;">&quot;language&quot;</span><span style="font-weight:bold;color:black;">: </span><span style="color:green;">&quot;en&quot;</span><span style="font-weight:bold;color:black;">,
+		</span><span style="font-weight:bold;color:blue;">&quot;name&quot;</span><span style="font-weight:bold;color:black;">: </span><span style="color:green;">&quot;XSF Editor Team&quot;</span><span style="font-weight:bold;color:black;">,
+		</span><span style="font-weight:bold;color:blue;">&quot;nusers&quot;</span><span style="font-weight:bold;color:black;">: </span><span style="color:black;">12</span><span style="font-weight:bold;color:black;">
+	  }</span><span style="font-weight:bold;color:black;">
+	]</span><span style="font-weight:bold;color:black;">,
+	</span><span style="font-weight:bold;color:blue;">&quot;last&quot;</span><span style="font-weight:bold;color:black;">: </span><span style="color:black;">12.1112915471192</span><span style="font-weight:bold;color:black;">,
+	</span><span style="font-weight:bold;color:blue;">&quot;more&quot;</span><span style="font-weight:bold;color:black;">: </span><span style="color:black;">false</span><span style="font-weight:bold;color:black;">
   }</span><span style="font-weight:bold;color:black;">
 }</span></pre></code>
-    </section>
-    <section class="api-call">
-        <h4><a name="api-1.0-badge"></a><code>GET /api/1.0/badge</code></h4>
-        <h6>Description</h6>
-        <p>Return an SVG image with the room name (or address, if the name is unavailable) and the number of users as shown on the listing.</p>
-        <h6>Parameters</h6>
-        <dl>
-            <dt><code>address</code></dt>
-            <dd>Required. The address of the room.</p>
-        </dl>
-        <h6>Error conditions</h6>
-        <dl>
-            <dt><code>400</code></dt>
-            <dd>The address was not given.</dd>
-            <dt><code>404</code></dt>
-            <dd>No room with the given address found.</dd>
-            <dt><code>429</code></dt>
-            <dd>Rate limit exceeded. Please wait at least one minute before issuing the next request.</dd>
-        </dl>
-        <h6>Response</h6>
-        <p>The response is an SVG image.</p>
-        <h6>Example</h6>
-        <pre><code>&lt;img src="https://search.jabber.network/api/1.0/badge?address=xsf@muc.xmpp.org"/&gt;</code></pre>
-        <p><img src="/api/1.0/badge?address=xsf@muc.xmpp.org"/></p>
-    </section>
+	</section>
+	<section class="api-call">
+		<h4><a name="api-1.0-badge"></a><code>GET /api/1.0/badge</code></h4>
+		<h6>Description</h6>
+		<p>Return an SVG image with the room name (or address, if the name is unavailable) and the number of users as shown on the listing.</p>
+		<h6>Parameters</h6>
+		<dl>
+			<dt><code>address</code></dt>
+			<dd>Required. The address of the room.</p>
+		</dl>
+		<h6>Error conditions</h6>
+		<dl>
+			<dt><code>400</code></dt>
+			<dd>The address was not given.</dd>
+			<dt><code>404</code></dt>
+			<dd>No room with the given address found.</dd>
+			<dt><code>429</code></dt>
+			<dd>Rate limit exceeded. Please wait at least one minute before issuing the next request.</dd>
+		</dl>
+		<h6>Response</h6>
+		<p>The response is an SVG image.</p>
+		<h6>Example</h6>
+		<pre><code>&lt;img src="https://search.jabber.network/api/1.0/badge?address=xsf@muc.xmpp.org"/&gt;</code></pre>
+		<p><img src="/api/1.0/badge?address=xsf@muc.xmpp.org"/></p>
+	</section>
 </article>
 {% endblock %}
