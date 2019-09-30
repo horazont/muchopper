@@ -1036,7 +1036,7 @@ def metrics():
     )
 
 
-@app.route("/site.manifest")
+@app.route("/site.webmanifest")
 def site_manifest():
     # this is needed for icons
     generator = functools.partial(
