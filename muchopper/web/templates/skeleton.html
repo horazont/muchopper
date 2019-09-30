@@ -25,7 +25,7 @@
 		<meta name="theme-color" content="#ffffff">
 		{% endblock %}
 	</head>
-	<body>{% include "icons.html" %}<div class="ym-wrapper"><div class="ym-wbox">
+	<body class="no-copy">{% include "icons.html" %}<div class="ym-wrapper"><div class="ym-wbox">
 		{% block header %}
 		<form name="search" method="GET" action="{{ url_for('search') }}"><header id="main" class="slim">
 			<h1><a href="{{ url_for('index') }}">{% include "icon.svg" %}{{ config["APPNAME"] }}</a><div class="subtitle">Chat Room Search Engine</h1>

@@ -758,3 +758,7 @@ div.search-scope-opt input[type="checkbox"] + label {
         width: auto;
     }
 }
+
+body.no-copy .copy-to-clipboard {
+    display: none !important;
+}
