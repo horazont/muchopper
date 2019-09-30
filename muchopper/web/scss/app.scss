@@ -50,12 +50,12 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 a {
-    color: $primary-600;
+    color: $primary-700;
 }
 
 a:hover, a:focus, a:active {
     color: $neutral-100;
-    background-color: $primary-600;
+    background-color: $primary-700;
 }
 
 /* slim header */
@@ -190,7 +190,7 @@ footer#footer-main > ul > li {
 nav#nav-footer {
     padding-left: $margin-left-full-scale;
     font-family: "Droid Sans", Arial, Helvetica, sans-serif;
-    background-color: $neutral-200;
+    background-color: $neutral-100;
     color: $neutral-700;
     box-shadow: inset 0px 1px 1px $neutral-300;
 }
@@ -235,6 +235,17 @@ nav#nav-footer h3 {
     font-size: inherit;
     font-weight: bold;
     color: $neutral-700;
+}
+
+nav#nav-footer a {
+    color: $primary-700;
+}
+
+nav#nav-footer a:hover,
+nav#nav-footer a:focus,
+nav#nav-footer a:active {
+    color: $neutral-100;
+    background-color: $primary-700;
 }
 
 nav.pagination {
@@ -328,7 +339,7 @@ span.at {
 }
 
 span.domain {
-    opacity: 0.95;
+    opacity: 0.975;
 }
 
 ol.roomlist {
