@@ -235,7 +235,7 @@ class MUCHopper:
             self._mirror_client.state = state
 
         version_svc = self._client.summon(aioxmpp.VersionServer)
-        version_svc.name = "Christopher Muclumbus"
+        version_svc.name = "search.jabber.network Crawler"
         version_svc.version = "0.1.0"
         version_svc.os = ""
 
