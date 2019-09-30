@@ -1,10 +1,10 @@
 <script async type="text/javascript">
 /* https://stackoverflow.com/a/30810322/1248008 */
 
-function fallbackCopyTextToClipboard(text) {
+function fallbackCopyTextToClipboard(text, context) {
   var textArea = document.createElement("textarea");
   textArea.value = text;
-  document.body.appendChild(textArea);
+  context.appendChild(textArea);
   textArea.focus();
   textArea.select();
 
@@ -18,12 +18,12 @@ function fallbackCopyTextToClipboard(text) {
 	console.error('Fallback: Oops, unable to copy', err);
   }
 
-  document.body.removeChild(textArea);
+  context.removeChild(textArea);
   return result;
 }
-function copyTextToClipboard(text, callback) {
+function copyTextToClipboard(text, context, callback) {
   if (!navigator.clipboard) {
-	callback(fallbackCopyTextToClipboard(text));
+	callback(fallbackCopyTextToClipboard(text, context));
 	return;
   }
   navigator.clipboard.writeText(text).then(function() {
@@ -41,7 +41,7 @@ var copy_to_clipboard = function(el) {
   if (!text) {
 	console.error('copy_to_clipboard used on element without text to copy');
   }
-  copyTextToClipboard(text, function(success) {
+  copyTextToClipboard(text, el, function(success) {
 	var existing_result_el = document.getElementById("clipboard-result");
 	if (existing_result_el !== null) {
 	  existing_result_el.parentNode.removeChild(existing_result_el);
