@@ -160,8 +160,8 @@ header#main.slim > .searchbox > .searchbox-primary > button {
 
 header#main.slim > .searchbox > .searchbox-primary > input:focus + button,
 header#main.slim > .searchbox > .searchbox-primary:hover > button {
-    background-color: $accent-300;
-    border-left: 1px solid $accent-600;
+    background-color: $primary-300;
+    border-left: 1px solid $primary-600;
 }
 
 /* footer */
