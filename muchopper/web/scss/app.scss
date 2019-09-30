@@ -473,7 +473,11 @@ div.nusers > svg.icon {
 }
 
 .roomcard .title a:hover,
-.roomcard .addr a:hover {
+.roomcard .title a:focus,
+.roomcard .title a:active,
+.roomcard .addr a:hover,
+.roomcard .addr a:focus,
+.roomcard .addr a:active {
     background: transparent;
     text-decoration: underline;
 }
