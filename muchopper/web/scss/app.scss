@@ -421,6 +421,10 @@ span.dummy-avatar > span:before {
     overflow-wrap: anywhere;
 }
 
+.roomcard .descr {
+    margin-bottom: 0;
+}
+
 div.nusers {
     font-weight: bolder;
     display: flex;

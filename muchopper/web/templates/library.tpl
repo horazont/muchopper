@@ -88,9 +88,9 @@
 		<div class="main">
 			<h3 class="title"{% if set_lang_attr %} lang="{{ public_info.language }}"{% endif %}><a href="xmpp:{{ muc.address }}?join" rel="nofollow">{{ name }}</a></h3>
 			<div class="addr"><a href="xmpp:{{ muc.address }}?join" rel="nofollow">{% call room_address(muc.address, keywords=keywords) %}{% endcall %}</a>{%- call clipboard_button() %}{{ muc.address }}{% endcall -%}</div>
-			<div class="a11y-text">{{ (nusers | pretty_number_info)['accessible'] }} users online</div>
+			<p class="a11y-text">{{ (nusers | pretty_number_info)['accessible'] }} users online</p>
 			{% if show_descr -%}
-			<div class="descr"{% if set_lang_attr %} lang="{{ public_info.language }}"{% endif %}>{{ descr }}</div>
+			<p class="descr"{% if set_lang_attr %} lang="{{ public_info.language }}"{% endif %}>{{ descr }}</p>
 			{%- endif %}
 			{%- if show_lang or is_nonanon or is_closed -%}
 			<div><ul class="inline slim">
