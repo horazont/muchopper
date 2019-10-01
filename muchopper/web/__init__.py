@@ -390,6 +390,9 @@ def index():
 
 
 def room_page(page, per_page, **kwargs):
+    if not (1 <= page < 4294967296):
+        raise ValueError("page out of range")
+
     q = queries.common_query(db.session, **kwargs)
     total = q.count()
     pages = (total+per_page-1) // per_page
@@ -411,7 +414,10 @@ def room_page(page, per_page, **kwargs):
 @PROMETHEUS_METRIC_ROOM_PAGE_HTML.time()
 def room_list(pageno=1):
     per_page = 25
-    page = room_page(pageno, per_page, with_avatar_flag=True)
+    try:
+        page = room_page(pageno, per_page, with_avatar_flag=True)
+    except ValueError:
+        return abort(400, "invalid page")
 
     pages = page.pages
     visible_pages = \
@@ -753,7 +759,10 @@ def api_rooms_unsafe():
     if pageno <= 0:
         return abort(400)
 
-    page = room_page(pageno, per_page=200, include_closed=include_closed)
+    try:
+        page = room_page(pageno, per_page=200, include_closed=include_closed)
+    except ValueError:
+        return abort(400)
 
     return jsonify({
         "total": page.total,
@@ -788,6 +797,8 @@ def api_rooms_safe():
             request.args, "min_users",
             int,
         )
+        if not (0 <= min_users <= 4294967296):
+            raise ValueError("min_users invalid")
     except ValueError:
         return abort(400)
 
