@@ -215,7 +215,7 @@
 	<ul>
 		<li><a href="#api-1.0-rooms">Complete room listing</a> (<code>GET /api/1.0/rooms</code>)</li>
 		<li><a href="#api-1.0-rooms/unsafe">Quick (unsafe) room listing</a> (<code>GET /api/1.0/rooms/unsafe</code>)</li>
-		<li><a href="#api-1.0-search">Search for rooms</a> (<code>POST /api/1.0/search</code>)</li>
+		<li><a href="#api-1.0-search">Search for rooms</a> (<code>GET /api/1.0/search</code>)</li>
 		<li><a href="#api-1.0-badge">SVG "badges" for rooms</a> (<code>GET /api/1.0/badge</code>)</li>
 	</ul>
 	<section class="api-call">
@@ -306,12 +306,15 @@
 		</p>
 	</section>
 	<section class="api-call">
-		<h4><a name="api-1.0-search"></a><code>POST /api/1.0/search</code></h4>
+		<h4><a name="api-1.0-search"></a><code>GET /api/1.0/search</code></h4>
 		<h6>Description</h6>
 		<p class="box warning"><strong>Warning:</strong> This API is experimental and may change in incompatible ways without notice.</p>
 		<p>Execute a room search like on the website.</p>
 		<p class="box warning">
 		  <strong>Warning:</strong> The search result is not safe against insert/reorder/delete race conditions when fetching multiple pages. This means that rooms can be missing or can be duplicated in the result.
+		</p>
+		<p class="box info">
+			<strong>Note:</strong> The use of the POST method for searching is supported, but deprecated.
 		</p>
 		<h6>Payload</h6>
 		<p>The payload must be JSON-formatted string. It <em>must</em> be sent with <code>Content-Type: application/json</code> and be encoded for the wire using UTF-8.</p>
