@@ -835,7 +835,7 @@ def api_rooms_safe():
             request.args, "min_users",
             int,
         )
-        if not (0 <= min_users <= 4294967296):
+        if min_users is not None and not (0 <= min_users <= 4294967296):
             raise ValueError("min_users invalid")
     except ValueError:
         return abort(400)
