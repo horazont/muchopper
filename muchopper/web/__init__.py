@@ -815,12 +815,12 @@ def api_rooms_safe():
     })
 
 
-@app.route("/api/1.0/search", methods=["POST"])
+@app.route("/api/1.0/search", methods=["POST", "GET"])
 @PROMETHEUS_METRIC_SEARCH_API.time()
 def api_search():
     payload = request.get_json()
     if payload is None:
-        return abort_json(400, {"error": "must POST JSON"})
+        return abort_json(400, {"error": "request body must be JSON"})
 
     try:
         keywords = payload["keywords"]
