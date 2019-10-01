@@ -28,7 +28,7 @@ import werkzeug
 
 from flask import (
     Flask, render_template, redirect, url_for, request, abort, jsonify,
-    send_file, Response,
+    send_file, Response, make_response
 )
 from flask_sqlalchemy import SQLAlchemy, Pagination, BaseQuery
 from flask_menu import register_menu, Menu
@@ -150,6 +150,12 @@ PROMETHEUS_METRIC_BADGE_API = prometheus_client.Summary(
     "Time to process an API badge request"
 )
 
+PROMETHEUS_METRIC_STATUS_CODE = prometheus_client.Counter(
+    "muclumbus_http_status",
+    "Result of a (known) request",
+    ["endpoint", "http_status"],
+)
+
 
 @contextlib.contextmanager
 def safe_writer(destpath, mode="wb", extra_paranoia=False):
@@ -251,6 +257,22 @@ def render_static_template(path):
     return static_content(functools.partial(render_template, path),
                           path,
                           "text/html")
+
+
+def collect_status(metric):
+    def wrapper(f):
+        @functools.wraps(f)
+        def wrapped(*args, **kwargs):
+            result = f(*args, **kwargs)
+            if not isinstance(result, werkzeug.BaseResponse):
+                result = make_response(result)
+
+            metric.labels(f.__name__, str(result.status_code)).inc()
+
+            return result
+
+        return wrapped
+    return wrapper
 
 
 @app.template_filter("highlight")
@@ -385,6 +407,7 @@ def ccg_rgb_triplet(s):
 
 
 @app.route("/")
+@collect_status(PROMETHEUS_METRIC_STATUS_CODE)
 def index():
     return redirect(url_for("room_list", pageno=1))
 
@@ -411,6 +434,7 @@ def room_page(page, per_page, **kwargs):
 @app.route("/rooms/")
 @app.route("/rooms/<int:pageno>")
 @register_menu(app, "data.rooms", "All Rooms", order=1)
+@collect_status(PROMETHEUS_METRIC_STATUS_CODE)
 @PROMETHEUS_METRIC_ROOM_PAGE_HTML.time()
 def room_list(pageno=1):
     per_page = 25
@@ -436,6 +460,7 @@ def room_list(pageno=1):
 
 
 @app.route("/avatar/v1/<address>")
+@collect_status(PROMETHEUS_METRIC_STATUS_CODE)
 def avatar_v1(address):
     try:
         address = aioxmpp.JID.fromstr(address)
@@ -475,6 +500,7 @@ def avatar_v1(address):
 
 @app.route("/search")
 @register_menu(app, "data.search", "Search", order=2)
+@collect_status(PROMETHEUS_METRIC_STATUS_CODE)
 @PROMETHEUS_METRIC_SEARCH_HTML.time()
 def search():
     no_keywords = False
@@ -587,6 +613,7 @@ def get_metrics():
 
 @app.route("/stats")
 @register_menu(app, "data.stats", "Statistics", order=4)
+@collect_status(PROMETHEUS_METRIC_STATUS_CODE)
 @PROMETHEUS_METRIC_STATS_HTML.time()
 def statistics():
     common_metrics = get_metrics()
@@ -674,53 +701,62 @@ def statistics():
 
 @app.route("/docs/faq")
 @register_menu(app, "docs.faq", "Frequent Questions (FAQ)", order=1)
+@collect_status(PROMETHEUS_METRIC_STATUS_CODE)
 def faq():
     return render_static_template("faq.html")
 
 
 @app.route("/docs/owners")
 @register_menu(app, "docs.owners", "For room owners", order=2)
+@collect_status(PROMETHEUS_METRIC_STATUS_CODE)
 def owners():
     return render_static_template("for_owners.html")
 
 
 @app.route("/docs/operators")
 @register_menu(app, "docs.operators", "For service operators", order=3)
+@collect_status(PROMETHEUS_METRIC_STATUS_CODE)
 def operators():
     return render_static_template("for_operators.html")
 
 
 @app.route("/docs/api")
 @register_menu(app, "docs.developers", "For developers", order=4)
+@collect_status(PROMETHEUS_METRIC_STATUS_CODE)
 def developers():
     return render_static_template("for_developers.html")
 
 
 @app.route("/about")
 @register_menu(app, "meta.about", "About", order=1)
+@collect_status(PROMETHEUS_METRIC_STATUS_CODE)
 def about():
     return render_static_template("about.html")
 
 
 @app.route("/tos")
 @register_menu(app, "meta.tos", "Terms of Service", order=2)
+@collect_status(PROMETHEUS_METRIC_STATUS_CODE)
 def tos():
     return render_static_template("tos.html")
 
 
 @app.route("/privacy")
 @register_menu(app, "meta.privacy", "Privacy Policy", order=3)
+@collect_status(PROMETHEUS_METRIC_STATUS_CODE)
 def privacy():
     return render_static_template("privacy.html")
 
 
 @app.route("/legal")
 @register_menu(app, "meta.legal", "Legal notes & Contact", order=4)
+@collect_status(PROMETHEUS_METRIC_STATUS_CODE)
 def legal():
     return render_static_template("legal.html")
 
 
 @app.route("/contact")
+@collect_status(PROMETHEUS_METRIC_STATUS_CODE)
 def contact():
     return redirect(url_for('legal'))
 
@@ -744,6 +780,7 @@ def room_to_json(muc, public_info):
 
 @app.route("/api/1.0/rooms.json")
 @app.route("/api/1.0/rooms/unsafe")
+@collect_status(PROMETHEUS_METRIC_STATUS_CODE)
 @PROMETHEUS_METRIC_ROOM_PAGE_UNSAFE_API.time()
 def api_rooms_unsafe():
     try:
@@ -785,6 +822,7 @@ def optional_typecast_argument(args, name, type_):
 
 
 @app.route("/api/1.0/rooms")
+@collect_status(PROMETHEUS_METRIC_STATUS_CODE)
 @PROMETHEUS_METRIC_ROOM_PAGE_API.time()
 def api_rooms_safe():
     PAGE_SIZE = 200
@@ -827,6 +865,7 @@ def api_rooms_safe():
 
 
 @app.route("/api/1.0/search", methods=["POST", "GET"])
+@collect_status(PROMETHEUS_METRIC_STATUS_CODE)
 @PROMETHEUS_METRIC_SEARCH_API.time()
 def api_search():
     payload = request.get_json()
@@ -953,6 +992,7 @@ def api_search():
 
 
 @app.route("/api/1.0/badge")
+@collect_status(PROMETHEUS_METRIC_STATUS_CODE)
 @PROMETHEUS_METRIC_BADGE_API.time()
 def api_badge():
     CHARWIDTH = 7
@@ -1040,6 +1080,7 @@ class MetricCollector:
 
 
 @app.route("/metrics")
+@collect_status(PROMETHEUS_METRIC_STATUS_CODE)
 def metrics():
     return Response(
         prometheus_client.exposition.generate_latest(),
@@ -1048,6 +1089,7 @@ def metrics():
 
 
 @app.route("/site.webmanifest")
+@collect_status(PROMETHEUS_METRIC_STATUS_CODE)
 def site_manifest():
     # this is needed for icons
     generator = functools.partial(
@@ -1079,6 +1121,7 @@ def site_manifest():
 
 
 @app.route("/favicon.ico")
+@collect_status(PROMETHEUS_METRIC_STATUS_CODE)
 def favicon():
     # fallback resource
     return app.send_static_file('img/favicon.ico')
