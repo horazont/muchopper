@@ -1034,6 +1034,8 @@ def api_badge():
 
     response = Response(rendered, mimetype="image/svg+xml")
     response.last_modified = last_update
+    response.headers["Content-Security-Policy"] = \
+        "frame-ancestors 'none'; default-src 'none'; style-src 'unsafe-inline'"
     return response
 
 
