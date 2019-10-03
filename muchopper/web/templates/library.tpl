@@ -44,11 +44,11 @@
 {%- endmacro %}
 
 {% macro logs_url(url, caller=None) -%}
-<li><a href="{{ url }}" rel="nofollow">{% call icon("history") %}{% endcall %} View history<span class="a11y-text"> of {{ caller() }} in your browser</span></a></li>
+<li><a href="{{ url }}" rel="nofollow noopener">{% call icon("history") %}{% endcall %} View history<span class="a11y-text"> of {{ caller() }} in your browser</span></a></li>
 {%- endmacro %}
 
 {% macro join_url(url, caller=None) -%}
-<li><a href="{{ url }}" rel="nofollow">{% call icon("join") %}{% endcall %} Join <span class="a11y-text">{{ caller() }} </span>using browser</a></li>
+<li><a href="{{ url }}" rel="nofollow noopener">{% call icon("join") %}{% endcall %} Join <span class="a11y-text">{{ caller() }} </span>using browser</a></li>
 {%- endmacro%}
 
 {% macro clipboard_button(caller=None) -%}
