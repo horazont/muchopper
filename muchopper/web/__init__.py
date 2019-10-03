@@ -997,6 +997,25 @@ def api_badge():
         return abort(404, "no such room")
 
     muc, public_info = room_info
+
+    # check if the room may have changed since the last request
+    last_update = None
+    if muc.last_seen is not None:
+        last_update = muc.last_seen
+    if muc.moving_average_last_update is not None:
+        if last_update is None:
+            last_update = muc.moving_average_last_update
+        else:
+            last_update = min(muc.moving_average_last_update,
+                              last_update)
+
+    # round up to the next second; this is not perfect, but good enough.
+    last_update = last_update.replace(microsecond=0) + timedelta(seconds=1)
+
+    if (request.if_modified_since is not None and
+            last_update <= request.if_modified_since):
+        return "", 304
+
     label = " {} ".format(public_info.name or muc.address)
     nusers = " {:.0f} ".format(muc.nusers_moving_average)
 
@@ -1012,7 +1031,10 @@ def api_badge():
         number=nusers,
         countwidth=countwidth,
     )
-    return Response(rendered, mimetype="image/svg+xml")
+
+    response = Response(rendered, mimetype="image/svg+xml")
+    response.last_modified = last_update
+    return response
 
 
 # prometheus export
