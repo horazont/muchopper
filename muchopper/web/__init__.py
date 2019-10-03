@@ -114,46 +114,16 @@ KNOWN_SERVICE_TYPES = {
     ("proxy", "bytestreams"): "proxy.ft",
 }
 
-
-PROMETHEUS_METRIC_ROOM_PAGE_HTML = prometheus_client.Summary(
-    "muclumbus_http_room_page_html_request_seconds",
-    "Time to process a HTML room page request"
-)
-
-PROMETHEUS_METRIC_SEARCH_HTML = prometheus_client.Summary(
-    "muclumbus_http_search_html_request_seconds",
-    "Time to process a HTML search request"
-)
-
-PROMETHEUS_METRIC_ROOM_PAGE_API = prometheus_client.Summary(
-    "muclumbus_http_room_page_api_request_seconds",
-    "Time to process an API room page request"
-)
-
-PROMETHEUS_METRIC_ROOM_PAGE_UNSAFE_API = prometheus_client.Summary(
-    "muclumbus_http_room_page_unsafe_api_request_seconds",
-    "Time to process an unsafe API room page request"
-)
-
-PROMETHEUS_METRIC_STATS_HTML = prometheus_client.Summary(
-    "muclumbus_http_stats_html_request_seconds",
-    "Time to process a HTML stats request"
-)
-
-PROMETHEUS_METRIC_SEARCH_API = prometheus_client.Summary(
-    "muclumbus_http_search_api_request_seconds",
-    "Time to process an API search request"
-)
-
-PROMETHEUS_METRIC_BADGE_API = prometheus_client.Summary(
-    "muclumbus_http_badge_api_request_seconds",
-    "Time to process an API badge request"
-)
-
 PROMETHEUS_METRIC_STATUS_CODE = prometheus_client.Counter(
     "muclumbus_http_status",
     "Result of a (known) request",
     ["endpoint", "http_status"],
+)
+
+PROMETHEUS_METRIC_RESPONSE_TIME = prometheus_client.Summary(
+    "muclumbus_http_processing_time_seconds",
+    "Monotonic time passed for processing a reqeust",
+    ["endpoint"]
 )
 
 
@@ -264,12 +234,14 @@ def observe(app):
 
     def wrapper(f):
         endpoint = f.__name__
+        timing_metric = PROMETHEUS_METRIC_RESPONSE_TIME.labels(endpoint)
         @functools.wraps(f)
         def wrapped(*args, **kwargs):
             status_code = 500
             try:
                 try:
-                    result = f(*args, **kwargs)
+                    with timing_metric.time():
+                        result = f(*args, **kwargs)
                 except BaseException as exc:
                     result = app.handle_user_exception(exc)
 
@@ -449,7 +421,6 @@ def room_page(page, per_page, **kwargs):
 @app.route("/rooms/<int:pageno>")
 @register_menu(app, "data.rooms", "All Rooms", order=1)
 @observe(app)
-@PROMETHEUS_METRIC_ROOM_PAGE_HTML.time()
 def room_list(pageno=1):
     per_page = 25
     try:
@@ -515,7 +486,6 @@ def avatar_v1(address):
 @app.route("/search")
 @register_menu(app, "data.search", "Search", order=2)
 @observe(app)
-@PROMETHEUS_METRIC_SEARCH_HTML.time()
 def search():
     no_keywords = False
     orig_keywords = ""
@@ -628,7 +598,6 @@ def get_metrics():
 @app.route("/stats")
 @register_menu(app, "data.stats", "Statistics", order=4)
 @observe(app)
-@PROMETHEUS_METRIC_STATS_HTML.time()
 def statistics():
     common_metrics = get_metrics()
 
@@ -795,7 +764,6 @@ def room_to_json(muc, public_info):
 @app.route("/api/1.0/rooms.json")
 @app.route("/api/1.0/rooms/unsafe")
 @observe(app)
-@PROMETHEUS_METRIC_ROOM_PAGE_UNSAFE_API.time()
 def api_rooms_unsafe():
     try:
         pageno = int(request.args["p"])
@@ -837,7 +805,6 @@ def optional_typecast_argument(args, name, type_):
 
 @app.route("/api/1.0/rooms")
 @observe(app)
-@PROMETHEUS_METRIC_ROOM_PAGE_API.time()
 def api_rooms_safe():
     PAGE_SIZE = 200
 
@@ -880,7 +847,6 @@ def api_rooms_safe():
 
 @app.route("/api/1.0/search", methods=["POST", "GET"])
 @observe(app)
-@PROMETHEUS_METRIC_SEARCH_API.time()
 def api_search():
     payload = request.get_json()
     if payload is None:
@@ -1007,7 +973,6 @@ def api_search():
 
 @app.route("/api/1.0/badge")
 @observe(app)
-@PROMETHEUS_METRIC_BADGE_API.time()
 def api_badge():
     CHARWIDTH = 7
 
