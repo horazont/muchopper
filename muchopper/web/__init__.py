@@ -467,16 +467,23 @@ def avatar_v1(address):
     except (ValueError, TypeError):
         return abort(400, "bad address")
 
-    if request.if_modified_since is not None:
-        # quick check if we can early-out
-        not_modified = db.session.query(
-            model.Avatar.address,
+    if (request.if_none_match.as_set() or
+            request.if_modified_since is not None):
+        metadata = db.session.query(
+            model.Avatar.hash_,
+            model.Avatar.last_updated,
         ).filter(
-            model.Avatar.address == address
-        ).filter(
-            model.Avatar.last_updated <= request.if_modified_since
+            model.Avatar.address == address,
         ).one_or_none()
-        if not_modified:
+        db.session.rollback()
+
+        metadata = metadata or (None, None)
+
+        etag, last_updated = metadata
+        if request.if_none_match.contains(etag):
+            return "", 304
+        if (request.if_modified_since is not None and
+                last_updated <= request.if_modified_since):
             return "", 304
 
     q = db.session.query(
@@ -494,6 +501,7 @@ def avatar_v1(address):
     )
     response.last_modified = avatar.last_updated
     response.expires = datetime.utcnow() + CACHE_AVATAR_TTL
+    response.add_etag(avatar.hash_)
     response.headers["Content-Security-Policy"] = \
         "frame-ancestors 'none'; default-src 'none'; style-src 'unsafe-inline'"
     return response
