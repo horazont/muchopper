@@ -10,6 +10,7 @@ import os
 import pathlib
 import re
 import shlex
+import time
 import tempfile
 
 from datetime import datetime, timedelta
@@ -114,15 +115,15 @@ KNOWN_SERVICE_TYPES = {
     ("proxy", "bytestreams"): "proxy.ft",
 }
 
-PROMETHEUS_METRIC_STATUS_CODE = prometheus_client.Counter(
-    "muclumbus_http_status",
-    "Result of a (known) request",
-    ["endpoint", "http_status"],
+PROMETHEUS_METRIC_RESPONSE_TIME = prometheus_client.Summary(
+    "muclumbus_http_response_seconds",
+    "Monotonic time passed for processing a reqeust",
+    ["endpoint", "http_status"]
 )
 
-PROMETHEUS_METRIC_RESPONSE_TIME = prometheus_client.Summary(
-    "muclumbus_http_processing_time_seconds",
-    "Monotonic time passed for processing a reqeust",
+PROMETHEUS_METRIC_ENDPOINT_EXISTANCE = prometheus_client.Gauge(
+    "muclumbus_http_endpoint_flag",
+    "Existence of an endpoint in the code",
     ["endpoint"]
 )
 
@@ -230,20 +231,22 @@ def render_static_template(path):
 
 
 def observe(app):
-    status_metric = PROMETHEUS_METRIC_STATUS_CODE
+    metric = PROMETHEUS_METRIC_RESPONSE_TIME
 
     def wrapper(f):
         endpoint = f.__name__
-        timing_metric = PROMETHEUS_METRIC_RESPONSE_TIME.labels(endpoint)
+        PROMETHEUS_METRIC_ENDPOINT_EXISTANCE.labels(endpoint).set(1)
         @functools.wraps(f)
         def wrapped(*args, **kwargs):
             status_code = 500
+            time_taken = 0
+            t0 = time.monotonic()
             try:
                 try:
-                    with timing_metric.time():
-                        result = f(*args, **kwargs)
+                    result = f(*args, **kwargs)
                 except BaseException as exc:
                     result = app.handle_user_exception(exc)
+                time_taken = time.monotonic() - t0
 
                 if not isinstance(result, werkzeug.BaseResponse):
                     result = make_response(result)
@@ -255,7 +258,7 @@ def observe(app):
                 status_code = 500
                 raise
             finally:
-                status_metric.labels(endpoint, str(status_code)).inc()
+                metric.labels(endpoint, str(status_code)).observe(time_taken)
 
         return wrapped
     return wrapper
