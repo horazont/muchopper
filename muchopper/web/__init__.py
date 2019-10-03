@@ -97,6 +97,10 @@ with app.app_context():
         "CACHE_BADGE_TTL",
         CACHE_TTL,
     )
+    CACHE_AVATAR_TTL = app.config.get(
+        "CACHE_AVATAR_TTL",
+        CACHE_TTL,
+    )
 
 
 Page = collections.namedtuple(
@@ -489,6 +493,7 @@ def avatar_v1(address):
         mimetype=avatar.mime_type,
     )
     response.last_modified = avatar.last_updated
+    response.expires = datetime.utcnow() + CACHE_AVATAR_TTL
     response.headers["Content-Security-Policy"] = \
         "frame-ancestors 'none'; default-src 'none'; style-src 'unsafe-inline'"
     return response
