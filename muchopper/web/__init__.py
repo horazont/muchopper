@@ -467,43 +467,52 @@ def avatar_v1(address):
     except (ValueError, TypeError):
         return abort(400, "bad address")
 
-    if (request.if_none_match.as_set() or
-            request.if_modified_since is not None):
-        metadata = db.session.query(
-            model.Avatar.hash_,
-            model.Avatar.last_updated,
-        ).filter(
-            model.Avatar.address == address,
-        ).one_or_none()
-        db.session.rollback()
-
-        metadata = metadata or (None, None)
-
-        etag, last_updated = metadata
-        if request.if_none_match.contains(etag):
-            return "", 304
-        if (request.if_modified_since is not None and
-                last_updated <= request.if_modified_since):
-            return "", 304
-
-    q = db.session.query(
-        model.Avatar,
+    metadata = db.session.query(
+        model.Avatar.hash_,
+        model.Avatar.last_updated,
+        model.Avatar.mime_type,
     ).filter(
-        model.Avatar.address == address
-    )
-    avatar = q.one_or_none()
-    if avatar is None:
+        model.Avatar.address == address,
+    ).one_or_none()
+
+    if metadata is None:
         return abort(404, "no avatar stored")
 
-    response = Response(
-        avatar.data,
-        mimetype=avatar.mime_type,
-    )
-    response.last_modified = avatar.last_updated
+    hash_, last_updated, mime_type = metadata
+
+    response = Response(mimetype=mime_type)
+    response.status_code = 500
+    response.add_etag(hash_)
+    response.last_modified = last_updated
     response.expires = datetime.utcnow() + CACHE_AVATAR_TTL
-    response.add_etag(avatar.hash_)
     response.headers["Content-Security-Policy"] = \
         "frame-ancestors 'none'; default-src 'none'; style-src 'unsafe-inline'"
+
+    if (request.if_none_match.contains(hash_) or
+            (request.if_modified_since is not None and
+             last_updated <= request.if_modified_since)):
+        response.status_code = 304
+        return response
+
+    if request.method == "HEAD":
+        # do not fetch the data, only its size
+        length, = db.session.query(
+            sqlalchemy.func.length(model.Avatar.data),
+        ).filter(
+            model.Avatar.address == address
+        ).one()
+        response.status_code = 200
+        response.content_length = length
+        return response
+
+    data, = db.session.query(
+        model.Avatar.data,
+    ).filter(
+        model.Avatar.address == address
+    ).one()
+
+    response.data = data
+    response.status_code = 200
     return response
 
 
