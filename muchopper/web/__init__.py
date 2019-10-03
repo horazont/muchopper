@@ -89,6 +89,14 @@ with app.app_context():
         cache_path.chmod(0o755)
 
     CACHE_USE_ETAGS = app.config.get("CACHE_USE_ETAGS", False)
+    CACHE_TTL = app.config.get(
+        "CACHE_TTL",
+        timedelta(hours=1),
+    )
+    CACHE_BADGE_TTL = app.config.get(
+        "CACHE_BADGE_TTL",
+        CACHE_TTL,
+    )
 
 
 Page = collections.namedtuple(
@@ -1034,6 +1042,8 @@ def api_badge():
 
     response = Response(rendered, mimetype="image/svg+xml")
     response.last_modified = last_update
+    if last_update is not None:
+        response.expires = last_update + CACHE_BADGE_TTL
     response.headers["Content-Security-Policy"] = \
         "frame-ancestors 'none'; default-src 'none'; style-src 'unsafe-inline'"
     return response
