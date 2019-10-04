@@ -13,6 +13,7 @@
 {{ super() }}
 <link rel='stylesheet' type='text/css' href='{{ url_for('static', filename='css/chart/chart.css') }}'>
 <script type='text/javascript' src='{{ url_for('static', filename='js/chart.js') }}'></script>
+<meta name="description" content="Statistics about the Jabber network, like software versions and numbers related to public chat rooms.">
 {% endblock %}
 {% block content %}
 <h3 id="network">Network statistics</h3>

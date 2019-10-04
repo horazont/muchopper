@@ -49,4 +49,9 @@
 {% if canonical_url | default(False) %}
 <link rel="canonical" href="{{ canonical_url }}">
 {% endif %}
+{% if orig_keywords | default(False) %}
+<meta name="description" content="Search for public Jabber chat rooms matching {{ orig_keywords }} on search.jabber.network.">
+{% else %}
+<meta name="description" content="Search for public Jabber chat rooms on search.jabber.network.">
+{% endif %}
 {% endblock %}

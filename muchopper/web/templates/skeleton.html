@@ -19,6 +19,9 @@
 		{% else %}
 		<meta name="robots" content="noimageindex">
 		{% endif %}
+		{% if description | default(False) %}
+		<meta name="description" content="{{ description }}">
+		{% endif %}
 		{% block head_includes %}
 		<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/core/base.min.css') }}">
 		<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/screen/typography.css') }}">

@@ -20,6 +20,7 @@
 {{ super() }}
 <link rel="canonical" href="{{ url_for('room_list', pageno=page.page) }}">
 {% if page.page == 1 %}
+<meta name="description" content="The top {{ page.items | length }} public chat rooms on Jabber.">
 {# only show this on the home page #}
 <script type="application/ld+json">
 {
@@ -33,6 +34,8 @@
   }
 }
 </script>
+{% else %}
+<meta name="description" content="Page {{ page.page }} of public Jabber chat rooms.">
 {% endif %}
 {% endblock %}
 {% block content %}
