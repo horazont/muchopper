@@ -19,6 +19,21 @@
 {% block head_includes %}
 {{ super() }}
 <link rel="canonical" href="{{ url_for('room_list', pageno=page.page) }}">
+{% if page.page == 1 %}
+{# only show this on the home page #}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "url": "{{ url_for('index', _external=True) }}",
+  "potentialAction": {
+    "@type": "SearchAction",
+    "target": "{{ url_for('search', _external=True) }}?q={search_term_string}",
+    "query-input": "required name=search_term_string"
+  }
+}
+</script>
+{% endif %}
 {% endblock %}
 {% block content %}
 {{ pagination() }}
