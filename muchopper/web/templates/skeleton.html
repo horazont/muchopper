@@ -16,6 +16,8 @@
 		{% if config["NOINDEX"] %}
 		<!-- Enabled via NOINDEX config option. -->
 		<meta name="robots" content="noindex">
+		{% else %}
+		<meta name="robots" content="noimageindex">
 		{% endif %}
 		{% block head_includes %}
 		<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/core/base.min.css') }}">
