@@ -13,6 +13,10 @@
 	<head>
 		<title>{{ title }} - {{ config["APPNAME"] }}</title>
 		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		{% if config["NOINDEX"] %}
+		<!-- Enabled via NOINDEX config option. -->
+		<meta name="robots" content="noindex">
+		{% endif %}
 		{% block head_includes %}
 		<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/core/base.min.css') }}">
 		<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/screen/typography.css') }}">
