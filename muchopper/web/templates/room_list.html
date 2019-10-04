@@ -16,6 +16,10 @@
 	</ul>
 </nav>
 {% endmacro %}
+{% block head_includes %}
+{{ super() }}
+<link rel="canonical" href="{{ url_for('room_list', pageno=page.page) }}">
+{% endblock %}
 {% block content %}
 {{ pagination() }}
 {% call room_table(page.items) %}{% endcall %}
