@@ -44,3 +44,9 @@
 </p>
 {% endif %}
 {% endblock %}
+{% block head_includes %}
+{{ super() }}
+{% if canonical_url | default(False) %}
+<link rel="canonical" href="{{ canonical_url }}">
+{% endif %}
+{% endblock %}

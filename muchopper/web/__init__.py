@@ -538,6 +538,19 @@ def search():
             search_name = "sinname" in request.args
 
         keywords = queries.prepare_keywords(orig_keywords)
+
+        canonical_args = {
+            "f": "y",
+            "q": " ".join(map(shlex.quote, keywords)),
+        }
+        if search_address:
+            canonical_args["sinaddr"] = "on"
+        if search_description:
+            canonical_args["sindescr"] = "on"
+        if search_name:
+            canonical_args["sinname"] = "on"
+        canonical_url = url_for('search', **canonical_args)
+
         if len(keywords) > 5:
             too_many_keywords = True
         elif not keywords:
@@ -569,6 +582,7 @@ def search():
                 too_many_results = True
     else:
         keywords = None
+        canonical_url = url_for('search')
 
     return render_template(
         "search.html",
@@ -581,6 +595,7 @@ def search():
         search_description=search_description,
         search_name=search_name,
         keywords=keywords,
+        canonical_url=canonical_url,
     )
 
 
