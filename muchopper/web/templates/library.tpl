@@ -53,7 +53,7 @@
 
 {% macro clipboard_button(caller=None) -%}
 {%- set text = caller() -%}
-<a title="Copy &quot;{{ text }}&quot; to clipboard" class="copy-to-clipboard" onclick="copy_to_clipboard(this); return false;" data-cliptext="{{ text }}" href="#">{% call icon("copy") %}{% endcall %}</a>
+<a title="Copy &quot;{{ text }}&quot; to clipboard" aria-label="Copy &quot;{{ text }}&quot; to clipboard" class="copy-to-clipboard" onclick="copy_to_clipboard(this); return false;" data-cliptext="{{ text }}" href="#">{% call icon("copy") %}{% endcall %}</a>
 {%- endmacro %}
 
 {% macro copyable_thing() %}
