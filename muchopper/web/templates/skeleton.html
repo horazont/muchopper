@@ -41,7 +41,7 @@
 			<div class="searchbox" id="searchbox">{#- -#}
 				<div class="searchbox-primary">{#- -#}
 					<label class="a11y-text" for="q-field">Search keywords: </label>
-					<input type="text" name="q" id="q-field" placeholder="Search rooms" value="{{ orig_keywords | default('') }}">{#- -#}
+					<input type="text" name="q" id="q-field" placeholder="Search rooms" value="{{ orig_keywords | default('') }}"{% if autofocus_search | default(False) %} autofocus="autofocus"{% endif %}>{#- -#}
 					<button type="submit" aria-label="Search">{% call icon('search') %}{% endcall %}</button>{#- -#}
 				</div>{#- -#}
 				{%- block searchbox_ext %}{% endblock -%}

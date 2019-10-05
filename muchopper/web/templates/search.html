@@ -4,6 +4,7 @@
 {% set title = '"%s"' | format(orig_keywords) %}
 {% else %}
 {% set title = "Search" %}
+{% set autofocus_search = True %}
 {% endif %}
 {% block searchbox_ext %}
 <input type="hidden" name="f" value="y"/>{#- -#}

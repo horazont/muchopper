@@ -1,6 +1,9 @@
 {% extends "listing_base.html" %}
 {% from "library.tpl" import room_table %}
 {% set title = "All rooms" %}
+{% if page.page == 1 %}
+{% set autofocus_search = True %}
+{% endif %}
 {% macro pagination() %}
 <nav class="pagination" role="navigation" aria-label="Pagination Navigation">
 	<ul>
