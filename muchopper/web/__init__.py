@@ -940,7 +940,7 @@ def api_search():
         )
 
     if not search_address and not search_description and not search_name:
-        return abort(
+        return abort_json(
             400,
             {
                 "error": "search scope is empty"
@@ -960,7 +960,7 @@ def api_search():
     elif isinstance(keywords, list):
         prepped_keywords = queries.filter_keywords(keywords, min_length=3)
     else:
-        return abort(
+        return abort_json(
             400,
             {
                 "error": "keywords must be a string or an array"
@@ -968,7 +968,7 @@ def api_search():
         )
 
     if len(prepped_keywords) > 5:
-        return abort(
+        return abort_json(
             400,
             {
                 "error": "too many words",
