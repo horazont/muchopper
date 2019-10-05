@@ -459,33 +459,35 @@ div.nusers > svg.icon {
 	flex: 0 0 auto;
 }
 
-.roomcard h3.title {
-	font-weight: inherit;
-	margin-bottom: 0;
-	font-size: 128.57143%;
-	line-height: 1.16667;
-	color: $primary-700;
-}
+.roomcard {
+	h3.title {
+		font-weight: inherit;
+		margin-bottom: 0;
+		font-size: 128.57143%;
+		line-height: 1.16667;
+		color: $primary-700;
+	}
 
-.roomcard .title a,
-.roomcard .addr a {
-	color: inherit;
-}
+	.title a,
+	.addr a {
+		color: inherit;
+	}
 
-.roomcard .title a:hover,
-.roomcard .title a:focus,
-.roomcard .title a:active,
-.roomcard .addr a:hover,
-.roomcard .addr a:focus,
-.roomcard .addr a:active {
-	background: transparent;
-	text-decoration: underline;
-}
+	.title a:hover,
+	.title a:focus,
+	.title a:active,
+	.addr a:hover,
+	.addr a:focus,
+	.addr a:active {
+		background: transparent;
+		text-decoration: underline;
+	}
 
-.roomcard div.addr {
-	font-size: 95%;
-	line-height: 1.5789473684210527;
-	color: $accent-700;
+	div.addr {
+		font-size: 95%;
+		line-height: 1.5789473684210527;
+		color: $accent-700;
+	}
 }
 
 span.scheme {
@@ -690,16 +692,18 @@ td.supp-no {
 	background-color: rgba(255, 0, 0, 0.2);
 }
 
-tbody tr:hover td.supp-yes {
-	background-color: rgba(0, 255, 0, 0.3);
-}
+tbody tr:hover {
+	td.supp-yes {
+		background-color: rgba(0, 255, 0, 0.3);
+	}
 
-tbody tr:hover td.supp-ext {
-	background-color: rgba(255, 191, 0, 0.3);
-}
+	td.supp-ext {
+		background-color: rgba(255, 191, 0, 0.3);
+	}
 
-tbody tr:hover td.supp-no {
-	background-color: rgba(255, 0, 0, 0.3);
+	td.supp-no {
+		background-color: rgba(255, 0, 0, 0.3);
+	}
 }
 
 /* search */
