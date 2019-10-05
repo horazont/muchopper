@@ -15,7 +15,11 @@
 </div>
 {% endblock %}
 {% block content %}
-{% if no_keywords %}
+{% if invalid_keywords %}
+<p class="box error">
+	<strong>The given keywords are malformed.</strong> Try removing special characters or wrapping them in single or double quotes.
+</p>
+{% elif no_keywords %}
 <p class="box error">
 	<strong>No search keywords found in input.</strong> Note that words with less than three codepoints are ignored. Spaces at the beginning and end of a word are ignored.
 </p>

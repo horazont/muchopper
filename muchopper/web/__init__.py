@@ -528,6 +528,7 @@ def search():
     search_address = True
     search_description = True
     search_name = True
+    invalid_keywords = False
 
     if "q" in request.args:
         orig_keywords = request.args["q"]
@@ -537,7 +538,11 @@ def search():
             search_description = "sindescr" in request.args
             search_name = "sinname" in request.args
 
-        keywords = queries.prepare_keywords(orig_keywords)
+        try:
+            keywords = queries.prepare_keywords(orig_keywords)
+        except ValueError:
+            keywords = []
+            invalid_keywords = True
 
         canonical_args = {
             "f": "y",
@@ -596,6 +601,7 @@ def search():
         search_name=search_name,
         keywords=keywords,
         canonical_url=canonical_url,
+        invalid_keywords=invalid_keywords,
     )
 
 
@@ -942,7 +948,15 @@ def api_search():
         )
 
     if isinstance(keywords, str):
-        prepped_keywords = queries.prepare_keywords(keywords)
+        try:
+            prepped_keywords = queries.prepare_keywords(keywords)
+        except ValueError:
+            return abort_json(
+                400,
+                {
+                    "error": "keywords failed to parse"
+                }
+            )
     elif isinstance(keywords, list):
         prepped_keywords = queries.filter_keywords(keywords, min_length=3)
     else:
