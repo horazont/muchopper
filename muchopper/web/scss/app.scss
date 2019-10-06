@@ -41,6 +41,19 @@ $listing-width-with-margin: $margin-left-full-scale + $listing-width-full-scale;
 $content-width-with-both-margins: $margin-left-full-scale + $content-width-full-scale + $margin-left-full-scale;
 $listing-width-with-both-margins: $margin-left-full-scale + $listing-width-full-scale + $margin-left-full-scale;
 
+$header-font-size: 150%;
+$header-font-size-f: 1.5%;
+$header-line-height: 0.875;
+$header-h1-margin-bottom: 0.57421875rem;
+$header-subtitle-font-size: 75%;
+$header-subtitle-font-size-f: 0.75;
+$header-searchbox-font-size: 128.57143%;
+$header-searchbox-font-size-f: 1.2857143;
+$header-searchbox-line-height: 1.16667;
+$header-searchbox-border: 1px;
+$header-searchbox-padding: 0.4821428625rem;
+$header-searchbox-margin-top: ($header-h1-margin-bottom + $header-font-size-f*1.5rem*0.875 + $header-font-size-f*$header-subtitle-font-size-f * $header-line-height*0.875rem)/2 - ($header-searchbox-padding*2 + $header-searchbox-font-size-f * $header-searchbox-line-height * 0.875rem)/2;
+
 body {
 	color: $neutral-800;
 }
@@ -89,15 +102,18 @@ header#main.slim a:active {
 
 header#main.slim > h1 {
 	flex: 0 0 auto;
-	font-size: 150%;
+	font-size: $header-font-size;
 	letter-spacing: -0.05em;
 	width: $header-width;
 	color: $neutral-100;
+	line-height: $header-line-height;
+	margin-bottom: $header-h1-margin-bottom;
 }
 
 header#main.slim > h1 svg {
-	width: 3em;
+	height: 1.5em;
 	vertical-align: middle;
+	width: 3em;
 }
 
 header#main.slim > h1 > a {
@@ -107,7 +123,7 @@ header#main.slim > h1 > a {
 header#main.slim > h1 > div {
 	color: $neutral-200;
 	font-weight: light;
-	font-size: 75%;
+	font-size: $header-subtitle-font-size;
 	text-align: center;
 	letter-spacing: 0;
 }
@@ -116,14 +132,16 @@ header#main.slim > .searchbox {
 	flex: 1 1 auto;
 	display: flex;
 	flex-direction: column;
-	margin: auto;
+	align-self: flex-start;
+	margin-top: $header-searchbox-margin-top;
 }
 
 header#main.slim > .searchbox > .searchbox-primary {
 	flex: 0 0 auto;
-	font-size: 128.57143%;
-	line-height: 1.16667;
-	border: 1px solid $neutral-300;
+	font-size: $header-searchbox-font-size;
+	line-height: $header-searchbox-line-height;
+	margin-top: -$header-searchbox-border;
+	border: $header-searchbox-border solid $neutral-300;
 	border-radius: 0.1em;
 	box-shadow:
 		0px 1px 2px rgba(0, 0, 0, 0.1),
@@ -134,7 +152,7 @@ header#main.slim > .searchbox > .searchbox-primary {
 }
 
 form:focus-within header#main.slim > .searchbox > .searchbox-primary {
-	border: 1px solid $neutral-600;
+	border: $header-searchbox-border solid $neutral-600;
 	border-radius: 0.1em;
 }
 
@@ -147,22 +165,23 @@ header#main.slim > .searchbox > .searchbox-primary > button {
 	border-radius: 0;
 	background-color: $neutral-100;
 	color: $neutral-800;
+	line-height: $header-searchbox-line-height;
 }
 
 header#main.slim > .searchbox > .searchbox-primary > input {
-	padding: 0.375em;
+	padding: $header-searchbox-padding;
 }
 
 header#main.slim > .searchbox > .searchbox-primary > button {
 	flex: 0 0 auto;
 	padding: 0.375em;
-	border-left: 1px solid transparent;
+	border-left: $header-searchbox-border solid transparent;
 }
 
 header#main.slim > .searchbox > .searchbox-primary > input:focus + button,
 header#main.slim > .searchbox > .searchbox-primary:hover > button {
 	background-color: $primary-300;
-	border-left: 1px solid $primary-600;
+	border-left: $header-searchbox-border solid $primary-600;
 }
 
 /* footer */
