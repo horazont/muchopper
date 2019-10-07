@@ -439,7 +439,8 @@ def room_page(page, per_page, **kwargs):
 def room_list(pageno=1):
     per_page = 25
     try:
-        page = room_page(pageno, per_page, with_avatar_flag=True)
+        page = room_page(pageno, per_page, with_avatar_flag=True,
+                         q=queries.view_base_query(db.session))
     except ValueError:
         return abort(400, "invalid page")
 
@@ -566,9 +567,9 @@ def search():
             no_keywords = True
         else:
             q = queries.common_query(
-                db.session,
+                None,
                 min_users=0,
-                with_avatar_flag=True,
+                q=queries.view_base_query(db.session),
             )
 
             q = queries.apply_search_conditions(
@@ -801,17 +802,18 @@ def contact():
 # API
 
 
-def room_to_json(muc, public_info):
+def room_to_json(info):
+    address, nusers, is_open, anonymity_mode, name, description, language = info
     result = {
-        "address": str(muc.address),
-        "nusers": round(muc.nusers_moving_average),
-        "is_open": muc.is_open,
-        "name": public_info.name,
-        "description": public_info.description,
-        "language": public_info.language,
+        "address": str(address),
+        "nusers": round(nusers),
+        "is_open": is_open,
+        "name": name,
+        "description": description,
+        "language": language,
     }
-    if muc.anonymity_mode is not None:
-        result["anonymity_mode"] = muc.anonymity_mode.value
+    if anonymity_mode is not None:
+        result["anonymity_mode"] = anonymity_mode.value
     return result
 
 
@@ -833,7 +835,8 @@ def api_rooms_unsafe():
         return abort(400)
 
     try:
-        page = room_page(pageno, per_page=200, include_closed=include_closed)
+        page = room_page(pageno, per_page=200, include_closed=include_closed,
+                         q=queries.api_base_query(db.session))
     except ValueError:
         return abort(400)
 
@@ -841,10 +844,7 @@ def api_rooms_unsafe():
         "total": page.total,
         "npages": page.pages,
         "page": page.page,
-        "items": [
-            room_to_json(muc, public_info)
-            for muc, public_info in page.items
-        ],
+        "items": list(map(room_to_json, page.items)),
     })
 
 
@@ -875,7 +875,11 @@ def api_rooms_safe():
     except ValueError:
         return abort(400)
 
-    q = queries.base_query(db.session, include_closed=include_closed)
+    q = queries.api_base_query(db.session)
+    q = queries.base_filter(
+        q,
+        include_closed=include_closed,
+    )
     if after is not None:
         q = q.filter(
             model.MUC.address > after
@@ -889,13 +893,9 @@ def api_rooms_safe():
     )
 
     q = q.limit(PAGE_SIZE)
-    results = list(q)
 
     return jsonify({
-        "items": [
-            room_to_json(muc, public_info)
-            for muc, public_info in results
-        ],
+        "items": list(map(room_to_json, q))
     })
 
 
@@ -976,8 +976,9 @@ def api_search():
         )
 
     q = queries.common_query(
-        db.session,
+        None,
         min_users=0,
+        q=queries.api_base_query(db.session),
     )
     if after is not None:
         q = q.filter(
@@ -986,7 +987,7 @@ def api_search():
 
     q = queries.apply_search_conditions(
         q,
-        keywords,
+        prepped_keywords,
         search_address,
         search_description,
         search_name,
@@ -995,24 +996,15 @@ def api_search():
     q = q.limit(101)
     results = list(q)
 
-    more = len(results) > 100
-
     items = []
     last_key = None
-    for muc, public_info in results[:100]:
-        anonymity_mode = None
-        if muc.anonymity_mode is not None:
-            anonymity_mode = muc.anonymity_mode.value
-        items.append({
-            "address": str(muc.address),
-            "is_open": muc.is_open,
-            "nusers": round(muc.nusers_moving_average),
-            "description": public_info.description,
-            "name": public_info.name,
-            "language": public_info.language,
-            "anonymity_mode": anonymity_mode,
-        })
-        last_key = muc.nusers_moving_average
+    for info in q:
+        items.append(room_to_json(info))
+        last_key = info[1]
+
+    more = len(items) > 100
+    if more:
+        items.pop()
 
     result = {
         "query": {

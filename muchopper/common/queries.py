@@ -40,10 +40,41 @@ def base_query(session, *,
     return base_filter(q, include_closed=include_closed)
 
 
+def api_base_query(session):
+    return session.query(
+        model.MUC.address,
+        model.MUC.nusers_moving_average,
+        model.MUC.is_open,
+        model.MUC.anonymity_mode,
+        model.PubliclyListedMUC.name,
+        model.PubliclyListedMUC.description,
+        model.PubliclyListedMUC.language,
+    ).select_from(model.MUC).join(model.PubliclyListedMUC)
+
+
+def view_base_query(session):
+    return session.query(
+        model.MUC.address,
+        model.MUC.nusers_moving_average,
+        model.MUC.is_open,
+        model.MUC.anonymity_mode,
+        model.PubliclyListedMUC.name,
+        model.PubliclyListedMUC.description,
+        model.PubliclyListedMUC.language,
+        model.PubliclyListedMUC.web_chat_url,
+        model.PubliclyListedMUC.http_logs_url,
+        model.Avatar.address != None,  # NOQA
+    ).select_from(model.MUC).join(model.PubliclyListedMUC).outerjoin(
+        model.Avatar
+    )
+
+
 def common_query(session, *,
                  min_users=1,
+                 q=None,
                  **kwargs):
-    q = base_query(session, **kwargs)
+    if q is None:
+        q = base_query(session, **kwargs)
 
     if min_users > 0:
         q = q.filter(
