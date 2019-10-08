@@ -51,7 +51,7 @@
 
 {% macro room_table(items, keywords=[], caller=None) %}
 <ol class="roomlist">{% for address, nusers, is_open, anonymity_mode, db_name, descr, db_language, web_chat_url, http_logs_url, has_avatar in items %}
-	{% set nusers = nusers | round %}
+	{% set nusers = nusers | round if nusers is not none else None %}
 	{% if db_name != address.localpart and db_name %}
 	{% set name = db_name %}
 	{% else %}

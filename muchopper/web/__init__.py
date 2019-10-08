@@ -312,6 +312,12 @@ def jid_unescape_filter(s):
 
 @app.template_filter("pretty_number_info")
 def pretty_number_info(n):
+    if n is None:
+        return {
+            "short": "?",
+            "accessible": "unknown",
+        }
+
     if n < 0.5:
         return {
             "short": "0",
@@ -806,7 +812,7 @@ def room_to_json(info):
     address, nusers, is_open, anonymity_mode, name, description, language = info
     result = {
         "address": str(address),
-        "nusers": round(nusers),
+        "nusers": round(nusers) if nusers is not None else 0,
         "is_open": is_open,
         "name": name,
         "description": description,
