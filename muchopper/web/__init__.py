@@ -917,6 +917,7 @@ def api_search():
         search_address = payload.get("sinaddr", True) is True
         search_description = payload.get("sindescr", True) is True
         search_name = payload.get("sinname", True) is True
+        include_closed = payload.get("include_closed", True) is True
         min_users = payload.get("min_users", 0)
         after = payload.get("after", None)
     except KeyError as e:

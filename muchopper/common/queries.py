@@ -40,8 +40,8 @@ def base_query(session, *,
     return base_filter(q, include_closed=include_closed)
 
 
-def api_base_query(session):
-    return session.query(
+def api_base_query(session, **kwargs):
+    q = session.query(
         model.MUC.address,
         model.MUC.nusers_moving_average,
         model.MUC.is_open,
@@ -50,10 +50,11 @@ def api_base_query(session):
         model.PubliclyListedMUC.description,
         model.PubliclyListedMUC.language,
     ).select_from(model.MUC).join(model.PubliclyListedMUC)
+    return base_filter(q, **kwargs)
 
 
-def view_base_query(session):
-    return session.query(
+def view_base_query(session, **kwargs):
+    q = session.query(
         model.MUC.address,
         model.MUC.nusers_moving_average,
         model.MUC.is_open,
@@ -67,6 +68,7 @@ def view_base_query(session):
     ).select_from(model.MUC).join(model.PubliclyListedMUC).outerjoin(
         model.Avatar
     )
+    return base_filter(q, **kwargs)
 
 
 def common_query(session, *,
