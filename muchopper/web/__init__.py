@@ -881,10 +881,9 @@ def api_rooms_safe():
     except ValueError:
         return abort(400)
 
-    q = queries.api_base_query(db.session)
-    q = queries.base_filter(
-        q,
-        include_closed=include_closed,
+    q = queries.api_base_query(
+        db.session,
+        include_closed=include_closed
     )
     if after is not None:
         q = q.filter(
