@@ -248,10 +248,10 @@ def static_content(generator, path, mimetype):
     return response
 
 
-def render_static_template(path):
+def render_static_template(path, *, mimetype="text/html"):
     return static_content(functools.partial(render_template, path),
                           path,
-                          "text/html")
+                          mimetype)
 
 
 def observe(app):
