@@ -747,9 +747,12 @@ def statistics():
 
     languages_raw = db.session.query(
         sqlalchemy.func.count().label("total"),
+        sqlalchemy.func.sum(model.MUC.nusers_moving_average),
         model.PubliclyListedMUC.language,
     ).select_from(
         model.PubliclyListedMUC
+    ).join(
+        model.MUC,
     ).group_by(
         model.PubliclyListedMUC.language,
     ).order_by(
@@ -757,53 +760,58 @@ def statistics():
     )
 
     languages = []
-    unspec_total = 0
-    spec_total = 0
-    for total, lang_raw in languages_raw:
+    unspec_total_rooms = 0
+    unspec_total_users = 0
+    spec_total_rooms = 0
+    spec_total_users = 0
+    for total_rooms, total_users, lang_raw in languages_raw:
         if lang_raw is None:
-            unspec_total += total
+            unspec_total_rooms += total_rooms
+            unspec_total_users += total_users
             continue
 
         pretty_name = prettify_lang(lang_raw, fallback=False)
         if pretty_name is None:
-            unspec_total += total
+            unspec_total_rooms += total_rooms
+            unspec_total_users += total_users
             continue
 
         languages.append(
-            (total, lang_raw, pretty_name)
+            (total_rooms, total_users, lang_raw, pretty_name)
         )
-        spec_total += total
+        spec_total_users += total_users
+        spec_total_rooms += total_rooms
 
-    if unspec_total is not None:
-        languages.append((unspec_total, None, None))
+    if unspec_total_rooms > 0:
+        languages.append((unspec_total_rooms, unspec_total_users, None, None))
 
     pruned_languages = [
-        (total, name, colour.text_to_colour(tag))
-        for total, tag, name in languages
+        (total_rooms, total_users, name, colour.text_to_colour(tag))
+        for total_rooms, total_users, tag, name in languages
         if tag is not None
     ]
 
     language_chart_cfg = {
-        "labels": [name for _, name, _ in pruned_languages],
+        "labels": [name for _, _, name, _ in pruned_languages],
         "datasets": [{
             "label": "Occurences",
-            "data": [total for total, _, _ in pruned_languages],
+            "data": [total for total, _, _, _ in pruned_languages],
             "backgroundColor": [
                 "rgba({:.0f}, {:.0f}, {:.0f}, 0.8)".format(
                     r*255, g*255, b*255
                 )
-                for _, _, (r, g, b) in pruned_languages
+                for _, _, _, (r, g, b) in pruned_languages
             ],
             "borderColor": [
                 "rgba({:.0f}, {:.0f}, {:.0f}, 1.0)".format(
                     r*255, g*255, b*255
                 )
-                for _, _, (r, g, b) in pruned_languages
+                for _, _, _, (r, g, b) in pruned_languages
             ],
             "borderWidth": 1
         }]
     }
-    language_chart_sum = spec_total
+    language_chart_sum = spec_total_rooms
 
     return render_template(
         "stats.html",

@@ -166,16 +166,18 @@ To facilitate file transfer via "difficult" networks
 				<tr>
 					<th>Language</th>
 					<th>Rooms</th>
+					<th>Users</th>
 				</tr>
 			</thead>
-			{% for total, lang_raw, lang_pretty in languages %}
+			{% for total_rooms, total_users, lang_raw, lang_pretty in languages %}
 			<tr>
 				{% if not lang_raw %}
 				<td><em>unspecified</em></td>
 				{% else %}
 				<td>{{ lang_pretty }}</td>
 				{% endif %}
-				<td class="numeric">{{ total }}</td>
+				<td class="numeric">{{ "%.0f" | format(total_rooms) }}</td>
+				<td class="numeric">{{ "%.0f" | format(total_users) }}</td>
 			</tr>
 			{% endfor %}
 		</table>
