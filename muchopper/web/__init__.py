@@ -394,7 +394,7 @@ def prettify_number(n):
 
 
 @app.template_filter('prettify_lang')
-def prettify_lang(s):
+def prettify_lang(s, fallback=True):
     s = str(s)
     try:
         lang_name, region_name = s.split("-", 2)[:2]
@@ -413,7 +413,10 @@ def prettify_lang(s):
         except babel.core.UnknownLocaleError:
             pass
 
-    return s
+    if fallback:
+        return s
+
+    return None
 
 
 @app.template_filter("ccg_rgb_triplet")

@@ -58,10 +58,10 @@
 	{% set name = (address.localpart | jid_unescape) or (address | string) %}
 	{% endif %}
 	{% set show_descr = descr and descr != address.localpart %}
-	{% set show_lang = db_language %}
+	{% set show_lang = db_language | prettify_lang(fallback=False) %}
 	{% set is_nonanon = not anonymity_mode or anonymity_mode.value == "none" %}
 	{% set is_closed = not is_open %}
-	{% set set_lang_attr = db_language %}
+	{% set set_lang_attr = show_lang and db_language %}
 	<li class="roomcard">
 		{# this is aria-hidden; we put the number of online users inline with the main content of the room card as a11y text #}
 		<div class="avatar-column" aria-hidden="true">
