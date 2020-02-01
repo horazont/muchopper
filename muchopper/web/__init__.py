@@ -301,9 +301,7 @@ def process_text(s, highlight_keywords=[], linkify=False):
         ))
     if linkify:
         re_parts.append(r"(?P<url>https?://[^\])>\s]+)")
-    rx = re.compile(
-        "|".join(re_parts)
-    )
+    rx = re.compile("|".join(re_parts), re.I)
 
     prev_end = 0
     parts = []
