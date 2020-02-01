@@ -186,18 +186,37 @@ STATIC_RENDERED = set()
 
 
 def static_content(generator, path, mimetype):
+    def generate_response():
+        response = generator()
+        if isinstance(response, werkzeug.BaseResponse):
+            content = b"".join(response.response)
+            response.response = [content]
+        elif isinstance(response, str):
+            content = response.encode("utf-8")
+            response = Response(
+                content,
+                mimetype=mimetype,
+            )
+        else:
+            content = response
+            response = Response(
+                content,
+                mimetype=mimetype,
+            )
+        return response, content
+
     if app.debug:
-        return generator()
+        return generate_response()[0]
 
     try:
         static_path = pathlib.Path(app.config["STATIC_PAGE_CACHE"])
     except KeyError:
-        return generator()
+        return generate_response()[0]
 
     rendered_path = (static_path / path).absolute()
     # basic escape check
     if not str(rendered_path).startswith(str(static_path)):
-        return generator()
+        return generate_response()[0]
 
     if (rendered_path in STATIC_RENDERED and
             rendered_path.is_file()):
@@ -207,14 +226,7 @@ def static_content(generator, path, mimetype):
                          conditional=True,
                          as_attachment=False)
 
-    response = generator()
-    if isinstance(response, werkzeug.BaseResponse):
-        content = b"".join(response.response)
-        response.response = [content]
-    elif isinstance(response, str):
-        content = response.encode("utf-8")
-    else:
-        content = response
+    response, content = generate_response()
 
     try:
         with safe_writer(rendered_path, mode="wb") as f:
