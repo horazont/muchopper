@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<OpenSearchDescription xmlns="http://a9.com/-/spec/opensearch/1.1/">
+  <ShortName>Jabber chat room search</ShortName>
+  <Description>Use {{ config["APPNAME"] }} to search for public Jabber chat rooms</Description>
+  <Tags>jabber chat room</Tags>
+  <Url type="text/html"
+       template="{{ url_for('search', _external=True) }}?q={searchTerms}"/>
+  <Query role="example" searchTerms="xmpp" />
+</OpenSearchDescription>

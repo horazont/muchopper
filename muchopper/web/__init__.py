@@ -1204,4 +1204,12 @@ def favicon():
     return app.send_static_file('img/favicon.ico')
 
 
+@app.route("/meta/osd.xml")
+def opensearchdescription():
+    return render_static_template(
+        "opensearchdescription.xml",
+        mimetype="application/opensearchdescription+xml"
+    )
+
+
 prometheus_client.core.REGISTRY.register(MetricCollector())

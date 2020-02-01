@@ -10,7 +10,7 @@
 {%- endmacro -%}
 <!DOCTYPE html>
 <html lang="en">
-	<head>
+	<head profile="http://a9.com/-/spec/opensearch/1.1/">
 		<title>{{ title }} - {{ config["APPNAME"] }}</title>
 		<meta name="viewport" content="width=device-width, initial-scale=1.0">
 		{% if config["NOINDEX"] %}
@@ -30,6 +30,7 @@
 		<link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='img/favicon-32x32.png') }}">
 		<link rel="icon" type="image/png" sizes="16x16" href="{{ url_for('static', filename='img/favicon-16x16.png') }}">
 		<link rel="manifest" href="/site.webmanifest">
+		<link rel="search" type="application/opensearchdescription+xml" href="{{ url_for('opensearchdescription') }}" title="Jabber chat room search">
 		<meta name="msapplication-TileColor" content="#da532c">
 		<meta name="theme-color" content="#ffffff">
 		{% endblock %}
