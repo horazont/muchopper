@@ -25,9 +25,9 @@
 
 {% macro room_address(address, keywords=[], caller=None) -%}
 {%- if address.localpart -%}
-<span class="address"><span class="localpart">{{ address.localpart | jid_unescape | highlight(keywords) }}</span><span class="at">@</span><span class="domain">{{ address.domain | highlight(keywords) }}</span></span>
+<span class="address"><span class="localpart">{{ address.localpart | jid_unescape | process_text(keywords) }}</span><span class="at">@</span><span class="domain">{{ address.domain | process_text(keywords) }}</span></span>
 {%- else -%}
-{{ address | highlight(keywords) }}
+{{ address | process_text(keywords) }}
 {%- endif -%}
 {%- endmacro %}
 
@@ -71,11 +71,11 @@
 			<div class="expand"></div>
 		</div>
 		<div class="main">
-			<h3 class="title"{% if set_lang_attr %} lang="{{ db_language }}"{% endif %}><a href="xmpp:{{ address }}?join" rel="nofollow">{{ name | highlight(keywords) }}</a></h3>
+			<h3 class="title"{% if set_lang_attr %} lang="{{ db_language }}"{% endif %}><a href="xmpp:{{ address }}?join" rel="nofollow">{{ name | process_text(keywords) }}</a></h3>
 			<div class="addr"><a href="xmpp:{{ address }}?join" rel="nofollow">{% call room_address(address, keywords=keywords) %}{% endcall %}</a>{%- call clipboard_button() %}{{ address }}{% endcall -%}</div>
 			<p class="a11y-text">{{ (nusers | pretty_number_info)['accessible'] }} users online</p>
 			{% if show_descr -%}
-			<p class="descr"{% if set_lang_attr %} lang="{{ db_language }}"{% endif %}>{{ descr | highlight(keywords) }}</p>
+			<p class="descr"{% if set_lang_attr %} lang="{{ db_language }}"{% endif %}>{{ descr | process_text(keywords, config["DESCRIPTION_LINKS"] | default(False)) }}</p>
 			{%- endif %}
 			{%- if show_lang or is_nonanon or is_closed -%}
 			<div><ul class="inline slim">

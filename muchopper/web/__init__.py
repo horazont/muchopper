@@ -288,22 +288,43 @@ def observe(app):
     return wrapper
 
 
-@app.template_filter("highlight")
-def highlight(s, keywords):
+@app.template_filter("process_text")
+def process_text(s, highlight_keywords=[], linkify=False):
     s = str(s)
-    if not keywords:
+    if not highlight_keywords and not linkify:
         return jinja2.Markup(html.escape(s))
 
-    keyword_re = re.compile("|".join(map(re.escape, keywords)), re.I)
+    re_parts = []
+    if highlight_keywords:
+        re_parts.append("(?P<keyword>{})".format(
+            "|".join(map(re.escape, highlight_keywords))
+        ))
+    if linkify:
+        re_parts.append(r"(?P<url>https?://[^\])>\s]+)")
+    rx = re.compile(
+        "|".join(re_parts)
+    )
+
     prev_end = 0
     parts = []
-    for match in keyword_re.finditer(s):
+    for match in rx.finditer(s):
         start, end = match.span()
         parts.append(html.escape(s[prev_end:start]))
-        parts.append("<span class='search-match'>")
-        parts.append(html.escape(s[start:end]))
-        parts.append("</span>")
+        match_info = match.groupdict()
+        if match_info.get("keyword"):
+            parts.append("<span class='search-match'>")
+            parts.append(html.escape(s[start:end]))
+            parts.append("</span>")
+        elif match_info.get("url"):
+            url = html.escape(s[start:end])
+            parts.append(
+                "<a href='{url}' rel='nofollow'>{url}</a>".format(url=url)
+            )
+        else:
+            parts.append(html.escape(s[start:end]))
+
         prev_end = end
+
     parts.append(html.escape(s[prev_end:]))
 
     return jinja2.Markup("".join(parts))
