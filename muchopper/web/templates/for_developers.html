@@ -13,6 +13,17 @@
 	<p>If you have not noticed by now, the usage of the XMPP API is preferred. The reason is that you need to be authenticated to perform requests against the XMPP API, which makes it easier for us to work against abuse.</p>
 	<p>The HTTP API can be used anonymously, so we might rate-limit it more strictly in the future.</p>
 	<h3><a name="xmpp"></a>XMPP API</h3>
+	<aside class="box warning">
+		<h4>XMPP API Upgrade Heads Up</h4>
+		<p>The XMPP API is currently in the process of being turned into an official XEP. However, when preparing the document for submission, we made substantial changes to how the API will work.</p>
+		<p>If you are just now starting to implement the API, you may want to postpone a week or two until the ProtoXEP has been accepted as Experimental. This is when we’ll start to offer the new API.</p>
+		<p>The current XMPP API will be supported for at least another year (although no fixes or updates will be made). The HTTP API is not affected by this.</p>
+		<h5>References</h5>
+		<ul>
+			<li><a href="https://xmpp.org/extensions/inbox/extended-channel-search.html">ProtoXEP: Extended Channel Search</a></li>
+			<li><a href="https://mail.jabber.org/pipermail/standards/2020-February/037063.html">Extended Channel Search ProtoXEP announcement</a> and pre-acceptance discussion (if any)</li>
+		</ul>
+	</aside>
 	<p>The XMPP API is based on <a href="https://xmpp.org/extensions/xep-0004.html">XEP-0004 (Data Forms)</a> and <a href="https://xmpp.org/extensions/xep-0059.html">XEP-0059 (Result Set Management)</a> (don’t worry: the results are <em>not</em> in a XEP-0004 report!).</p>
 	<p>The search parameters are sent via a XEP-0004 form. The results are in a custom wire format which is paginated using XEP-0059 RSM.</p>
 	<p>The XMPP API endpoint is <a href="xmpp:{{ config["APIJID"] }}"><code>{{ config["APIJID"] }}</code></a>.</p>

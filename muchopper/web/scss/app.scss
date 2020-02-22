@@ -662,6 +662,11 @@ svg.icon {
 	fill: currentColor;
 }
 
+aside > h3, aside > h4, aside > h5 {
+	font-size: inherit;
+	font-weight: bold;
+}
+
 svg.icon-users {
 	vertical-align: -0.18em;
 }
