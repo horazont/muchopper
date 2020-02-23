@@ -1,6 +1,8 @@
 import asyncio
+import contextlib
 import functools
 import itertools
+import time
 
 from datetime import datetime, timedelta
 
@@ -83,7 +85,6 @@ class MirrorServer(utils.MuchopperService, aioxmpp.service.Service):
                 values=["1"]
             )
         )
-
 
     def _initialise(self, state_future):
         state = state_future.result()
@@ -303,11 +304,61 @@ class MirrorClient(utils.MuchopperService, aioxmpp.service.Service):
         aioxmpp.DiscoClient,
     ]
 
+    def __init__(self, client, **kwargs):
+        super().__init__(client, **kwargs)
+        try:
+            import prometheus_client
+        except ImportError:
+            self._last_update_metric = None
+            self._initial_sync_duration_metric = None
+            self._update_duration_metric = None
+        else:
+            self._initial_sync_duration_metric = prometheus_client.Gauge(
+                "muclumbus_mirror_client_initial_sync_duration_seconds",
+                "Duration of various initial sync phases",
+                ["phase"],
+            )
+            self._last_update_metric = prometheus_client.Gauge(
+                "muclumbus_mirror_client_last_update_seconds",
+                "Timestamp of the last update received"
+            )
+            self._update_duration_metric = prometheus_client.Summary(
+                "muclumbus_mirror_client_update_duration_seconds",
+                "Duration of the updates",
+                ["operation"],
+            )
+
+    @staticmethod
+    @contextlib.contextmanager
+    def time_optional(metric, *labels):
+        if metric is None:
+            yield
+            return
+        if labels:
+            m = metric.labels(*labels)
+        else:
+            m = metric
+        with m.time():
+            yield
+
+    @staticmethod
+    def set_optional(metric, value, *, labels=[]):
+        if metric is None:
+            return
+        if labels:
+            metric.labels(*labels).set(value)
+        else:
+            metric.set(value)
+
     @aioxmpp.service.depsignal(aioxmpp.Client, "on_stream_established",
                                defer=True)
     async def _on_stream_established(self):
         pubsub = self.dependencies[aioxmpp.PubSubClient]
         disco = self.dependencies[aioxmpp.DiscoClient]
+
+        t0 = time.monotonic()
+
+        self.logger.debug("subscribing to service at %s", self.source)
 
         try:
             await pubsub.subscribe(
@@ -320,6 +371,13 @@ class MirrorClient(utils.MuchopperService, aioxmpp.service.Service):
                 self.logger.debug("it appears we’re already subscribed...")
                 return
             raise
+
+        t_subscribed = time.monotonic()
+        self.set_optional(
+            self._initial_sync_duration_metric,
+            t_subscribed-t0,
+            labels=["subscribe"]
+        )
 
         self.logger.debug("subscribed to service at %s", self.source)
 
@@ -342,6 +400,13 @@ class MirrorClient(utils.MuchopperService, aioxmpp.service.Service):
             return
 
         existing_ids = set(item.name for item in existing_items.items)
+
+        t_ids = time.monotonic()
+        self.set_optional(
+            self._initial_sync_duration_metric,
+            t_ids-t_subscribed,
+            labels=["fetch_ids"]
+        )
 
         self.logger.info(
             "init-sync: remote knows %d entries, downloading "
@@ -390,9 +455,21 @@ class MirrorClient(utils.MuchopperService, aioxmpp.service.Service):
         finally:
             download_workers.close()
 
+        t_updates = time.monotonic()
+        self.set_optional(
+            self._initial_sync_duration_metric,
+            t_updates-t_ids,
+            labels=["updates"]
+        )
+
         self.logger.info("init-sync: state download complete")
 
-        with self._state.get_session() as session:
+        with contextlib.ExitStack() as stack:
+            stack.enter_context(self.time_optional(
+                self._update_duration_metric, "bulk_delete"
+            ))
+            session = stack.enter_context(self._state.get_session())
+
             for address, in session.query(model.MUC.address):
                 if str(address) in existing_ids:
                     continue
@@ -405,19 +482,28 @@ class MirrorClient(utils.MuchopperService, aioxmpp.service.Service):
                     model.MUC.address == address
                 ).delete()
 
+        t_deletes = time.monotonic()
+        self.set_optional(
+            self._initial_sync_duration_metric,
+            t_deletes-t_updates,
+            labels=["deletes"]
+        )
+
         self.logger.info("init-sync: state transfer complete")
 
     def _unwrap_item_into_state(self, data, state):
-        state.update_muc_metadata(
-            data.address,
-            nusers=data.nusers,
-            is_open=data.is_open,
-            name=data.name,
-            description=data.description,
-            language=data.language,
-            anonymity_mode=data.anonymity_mode,
-            is_saveable=True,
-        )
+        with self.time_optional(self._update_duration_metric, "merge"):
+            state.update_muc_metadata(
+                data.address,
+                nusers=data.nusers,
+                is_open=data.is_open,
+                name=data.name,
+                description=data.description,
+                language=data.language,
+                anonymity_mode=data.anonymity_mode,
+                is_saveable=True,
+            )
+        self.set_optional(self._last_update_metric, time.time())
 
     @aioxmpp.service.depsignal(aioxmpp.PubSubClient, "on_item_published")
     def _on_item_published(self, jid, node, item, **kwargs):
@@ -456,4 +542,6 @@ class MirrorClient(utils.MuchopperService, aioxmpp.service.Service):
 
         address = aioxmpp.JID.fromstr(id_)
         self.logger.debug("received delete for %s", address)
-        self._state.delete_all_muc_data(address)
+        with self.time_optional(self._update_duration_metric, "delete"):
+            self._state.delete_all_muc_data(address)
+        self.set_optional(self._last_update_metric, time.time())
