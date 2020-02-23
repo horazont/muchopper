@@ -11,6 +11,7 @@ from enum import Enum
 
 import aioxmpp
 
+import muchopper.bot.state
 from . import (
     worker_pool, state, utils, watcher, scanner, insideman, spokesman, mirror
 )
@@ -239,6 +240,11 @@ class MUCHopper:
             bind_host = prometheus_config["bind_address"]
             bind_port = prometheus_config["port"]
             self._prometheus_app = self._setup_prometheus(bind_host, bind_port)
+            if prometheus_config.get("state_metrics", False):
+                import prometheus_client
+                prometheus_client.REGISTRY.register(
+                    muchopper.bot.state.StateMetricsCollector(self._state)
+                )
         else:
             self._prometheus_app = None
 

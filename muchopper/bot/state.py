@@ -619,3 +619,68 @@ class State:
 
     def get_session(self):
         return model.session_scope(self._sessionmaker)
+
+
+try:
+    import prometheus_client
+    import prometheus_client.core
+except ImportError:
+    class StateMetricsCollector:
+        def __init__(self, state):
+            pass
+
+        def collect(self):
+            pass
+else:
+    class StateMetricsCollector:
+        def __init__(self, state):
+            super().__init__()
+            self._state = state
+
+        def collect(self):
+            with self._state.get_session() as session:
+                q = session.query(
+                    sqlalchemy.func.count(),
+                    sqlalchemy.func.count(model.PubliclyListedMUC.address),
+                    sqlalchemy.func.count(
+                        sqlalchemy.func.nullif(model.MUC.is_open, False)
+                    ),
+                    sqlalchemy.func.count(
+                        sqlalchemy.func.nullif(model.MUC.is_hidden, False)
+                    ),
+                    sqlalchemy.func.sum(model.MUC.nusers)
+                ).select_from(model.MUC).outerjoin(model.PubliclyListedMUC)
+
+                nmucs, npublicmucs, nopenmucs, nhiddenmucs, nusers = q.one()
+
+                ndomains, = session.query(
+                    sqlalchemy.func.count()
+                ).select_from(model.Domain).one()
+
+            yield prometheus_client.core.GaugeMetricFamily(
+                "muclumbus_state_mucs_total",
+                "Total number of MUCs in the database",
+                value=nmucs
+            )
+
+            mucs_by_state = prometheus_client.core.GaugeMetricFamily(
+                "muclumbus_state_mucs_state_total",
+                "Number of MUCs by state",
+                labels=["state"],
+            )
+            mucs_by_state.add_metric(["open"], nopenmucs)
+            mucs_by_state.add_metric(["public"], npublicmucs)
+            mucs_by_state.add_metric(["hidden"], nhiddenmucs)
+            yield mucs_by_state
+
+            yield prometheus_client.core.GaugeMetricFamily(
+                "muclumbus_state_occupants_total",
+                "Number of occupants summed over all MUCs",
+                value=nusers,
+            )
+
+            yield prometheus_client.core.GaugeMetricFamily(
+                "muclumbus_state_domains_total",
+                "Number of known domains",
+                value=ndomains,
+            )
