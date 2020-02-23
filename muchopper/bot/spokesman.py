@@ -12,6 +12,7 @@ from aioxmpp.utils import namespaces
 from ..common import queries, model
 
 from . import utils, xso
+from .promhelpers import time_optional
 
 
 class Spokesman(utils.MuchopperService, aioxmpp.service.Service):
@@ -43,6 +44,17 @@ class Spokesman(utils.MuchopperService, aioxmpp.service.Service):
                 self._key_address,
             )
         }
+
+        try:
+            import prometheus_client
+        except ImportError:
+            self._response_duration_metric = None
+        else:
+            self._response_duration_metric = prometheus_client.Summary(
+                "muclumbus_xmpp_search_response_duration_seconds",
+                "Time it takes to answer a search response",
+                ["phase"]
+            )
 
     def _base_query_nusers(self, session, after):
         q = queries.base_query(session)
@@ -94,82 +106,85 @@ class Spokesman(utils.MuchopperService, aioxmpp.service.Service):
 
         after = None
 
-        if request.rsm is not None:
-            if (request.rsm.before or request.rsm.first or request.rsm.last or
-                    request.rsm.index):
-                # we don’t support those
-                raise aioxmpp.errors.XMPPModifyError(
-                    (namespaces.stanzas, "feature-not-implemented"),
-                    text="Attempt to use unsupported RSM features"
-                )
+        with time_optional(self._response_duration_metric, "validate"):
+            if request.rsm is not None:
+                if (request.rsm.before or request.rsm.first or
+                        request.rsm.last or request.rsm.index):
+                    # we don’t support those
+                    raise aioxmpp.errors.XMPPModifyError(
+                        (namespaces.stanzas, "feature-not-implemented"),
+                        text="Attempt to use unsupported RSM features"
+                    )
 
-            if request.rsm.after:
-                after = request.rsm.after.value
+                if request.rsm.after:
+                    after = request.rsm.after.value
 
-            if request.rsm.max_ is not None and request.rsm.max_ > 0:
-                max_ = max(min(max_, request.rsm.max_), 1)
+                if request.rsm.max_ is not None and request.rsm.max_ > 0:
+                    max_ = max(min(max_, request.rsm.max_), 1)
 
-        if (request.form is None or
-                request.form.get_form_type() != xso.SearchForm.FORM_TYPE):
-            raise aioxmpp.errors.XMPPModifyError(
-                (namespaces.stanzas, "bad-request"),
-                text="Form missing or invalid FORM_TYPE"
-            )
-
-        try:
-            form = xso.SearchForm.from_xso(request.form)
-        except (ValueError, TypeError) as exc:
-            raise aioxmpp.errors.XMPPModifyError(
-                (namespaces.stanzas, "bad-request"),
-                text="Failed to parse search form ({})".format(exc)
-            )
-
-        try:
-            base_query_func, key_func = self._helper_funcs[form.order_by.value]
-        except KeyError:
-            raise aioxmpp.errors.XMPPModifyError(
-                (namespaces.stanzas, "bad-request"),
-                text="Invalid key value"
-            )
-
-        if form.query.value:
-            if len(form.query.value) > self.max_query_length:
-                raise aioxmpp.errors.XMPPModifyError(
-                    (namespaces.stanzas, "policy-violation"),
-                    text="Query too long"
-                )
-
-            keywords = queries.prepare_keywords(
-                form.query.value,
-                self.min_keyword_length,
-            )
-            search_address = form.search_address.value
-            search_description = form.search_description.value
-            search_name = form.search_name.value
-
-            if (not search_address and
-                    not search_description and
-                    not search_name):
+            if (request.form is None or
+                    request.form.get_form_type() != xso.SearchForm.FORM_TYPE):
                 raise aioxmpp.errors.XMPPModifyError(
                     (namespaces.stanzas, "bad-request"),
-                    text="Search scope is empty"
+                    text="Form missing or invalid FORM_TYPE"
                 )
 
-            if not keywords:
+            try:
+                form = xso.SearchForm.from_xso(request.form)
+            except (ValueError, TypeError) as exc:
                 raise aioxmpp.errors.XMPPModifyError(
                     (namespaces.stanzas, "bad-request"),
-                    text="No valid search terms"
+                    text="Failed to parse search form ({})".format(exc)
                 )
 
-            if len(keywords) > self.max_keywords:
+            try:
+                base_query_func, key_func = self._helper_funcs[
+                    form.order_by.value
+                ]
+            except KeyError:
                 raise aioxmpp.errors.XMPPModifyError(
-                    (namespaces.stanzas, "policy-violation"),
-                    text="Too many search terms"
+                    (namespaces.stanzas, "bad-request"),
+                    text="Invalid key value"
                 )
 
-            return_all = False
-        else:
-            return_all = True
+            if form.query.value:
+                if len(form.query.value) > self.max_query_length:
+                    raise aioxmpp.errors.XMPPModifyError(
+                        (namespaces.stanzas, "policy-violation"),
+                        text="Query too long"
+                    )
+
+                keywords = queries.prepare_keywords(
+                    form.query.value,
+                    self.min_keyword_length,
+                )
+                search_address = form.search_address.value
+                search_description = form.search_description.value
+                search_name = form.search_name.value
+
+                if (not search_address and
+                        not search_description and
+                        not search_name):
+                    raise aioxmpp.errors.XMPPModifyError(
+                        (namespaces.stanzas, "bad-request"),
+                        text="Search scope is empty"
+                    )
+
+                if not keywords:
+                    raise aioxmpp.errors.XMPPModifyError(
+                        (namespaces.stanzas, "bad-request"),
+                        text="No valid search terms"
+                    )
+
+                if len(keywords) > self.max_keywords:
+                    raise aioxmpp.errors.XMPPModifyError(
+                        (namespaces.stanzas, "policy-violation"),
+                        text="Too many search terms"
+                    )
+
+                return_all = False
+            else:
+                return_all = True
 
         state = self._state
 
@@ -190,44 +205,33 @@ class Spokesman(utils.MuchopperService, aioxmpp.service.Service):
                 )
 
             q = q.limit(max_ + 1)
-            t0 = time.monotonic()
-            results = list(q)
-            t1 = time.monotonic()
-            self.logger.debug(
-                "query took %.3fs: keywords=%r, search_address=%r, "
-                "search_description=%r, search_name=%r, min_users=%r, "
-                "after=%r",
-                t1 - t0,
-                keywords if not return_all else None,
-                search_address if not return_all else None,
-                search_description if not return_all else None,
-                search_name if not return_all else None,
-                form.min_users.value,
-                after,
-            )
+            with time_optional(self._response_duration_metric, "query"):
+                results = list(q)
 
             more = len(results) > max_
             del results[max_:]
 
-            reply = xso.SearchResult()
-            for muc, public_info in results:
-                item_xso = xso.SearchResultItem()
-                item_xso.address = muc.address
-                item_xso.is_open = muc.is_open
-                item_xso.nusers = round(muc.nusers_moving_average)
-                item_xso.description = public_info.description
-                item_xso.name = public_info.name
-                item_xso.language = public_info.language
-                item_xso.anonymity_mode = muc.anonymity_mode
-                reply.items.append(item_xso)
+            with time_optional(self._response_duration_metric,
+                               "construct_result"):
+                reply = xso.SearchResult()
+                for muc, public_info in results:
+                    item_xso = xso.SearchResultItem()
+                    item_xso.address = muc.address
+                    item_xso.is_open = muc.is_open
+                    item_xso.nusers = round(muc.nusers_moving_average)
+                    item_xso.description = public_info.description
+                    item_xso.name = public_info.name
+                    item_xso.language = public_info.language
+                    item_xso.anonymity_mode = muc.anonymity_mode
+                    reply.items.append(item_xso)
 
-            reply.rsm = aioxmpp.rsm.xso.ResultSetMetadata()
-            if results:
-                reply.rsm.first = aioxmpp.rsm.xso.First()
-                reply.rsm.first.value = str(key_func(*results[0]))
-                reply.rsm.last = aioxmpp.rsm.xso.Last()
-                reply.rsm.last.value = str(key_func(*results[-1]))
-            reply.rsm.max_ = max_
+                reply.rsm = aioxmpp.rsm.xso.ResultSetMetadata()
+                if results:
+                    reply.rsm.first = aioxmpp.rsm.xso.First()
+                    reply.rsm.first.value = str(key_func(*results[0]))
+                    reply.rsm.last = aioxmpp.rsm.xso.Last()
+                    reply.rsm.last.value = str(key_func(*results[-1]))
+                reply.rsm.max_ = max_
 
             session.rollback()
 
