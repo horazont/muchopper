@@ -149,7 +149,8 @@ class MUCHopper:
                  components,
                  mirror_config,
                  spokesman_config,
-                 avatar_whitelist):
+                 avatar_whitelist,
+                 prometheus_config):
         self.logger = logging.getLogger("muclogger")
         self._loop = loop
         self._state = state
@@ -233,6 +234,13 @@ class MUCHopper:
                 mirror_config["client"]["pubsub_service"],
             )
             self._mirror_client.state = state
+
+        if prometheus_config.get("enable", False):
+            bind_host = prometheus_config["bind_address"]
+            bind_port = prometheus_config["port"]
+            self._prometheus_app = self._setup_prometheus(bind_host, bind_port)
+        else:
+            self._prometheus_app = None
 
         version_svc = self._client.summon(aioxmpp.VersionServer)
         version_svc.name = "search.jabber.network Crawler"
@@ -337,6 +345,13 @@ class MUCHopper:
             if self._watcher is not None:
                 await self._watcher.queue_request(address)
 
+    def _setup_prometheus(self, bind_host, bind_port):
+        from . import prometheus
+        metrics_endpoint = prometheus.PrometheusMetrics()
+        self._prometheus_bind_host = bind_host
+        self._prometheus_bind_port = bind_port
+        return prometheus.make_app(metrics_endpoint)
+
     async def run(self):
         self._loop.add_signal_handler(signal.SIGTERM, self._handle_intr)
         self._loop.add_signal_handler(signal.SIGINT, self._handle_intr)
@@ -345,6 +360,19 @@ class MUCHopper:
 
         tasks = []
         tasks.append(intr_fut)
+
+        if self._prometheus_app is not None:
+            from . import prometheus
+            self.logger.info(
+                "starting up prometheus endpoint at http://%s:%d/metrics",
+                self._prometheus_bind_host,
+                self._prometheus_bind_port,
+            )
+            prometheus_runner = await prometheus.start_app(
+                self._prometheus_app,
+                self._prometheus_bind_host,
+                self._prometheus_bind_port,
+            )
 
         async with self._client.connected():
             done, pending = await asyncio.wait(
@@ -363,3 +391,6 @@ class MUCHopper:
                 fut.result()
             except asyncio.CancelledError:
                 pass
+
+        if self._prometheus_app is not None:
+            await prometheus_runner.cleanup()

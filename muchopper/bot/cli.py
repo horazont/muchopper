@@ -59,6 +59,7 @@ async def amain(loop, args, cfg):
             map(aioxmpp.JID.fromstr,
                 cfg["muchopping"].get("avatar_whitelist", []))
         ),
+        prometheus_config=cfg.get("prometheus"),
     )
 
     for addr in cfg["muchopping"].get("seed", []):
