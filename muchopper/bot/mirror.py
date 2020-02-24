@@ -16,7 +16,7 @@ import aioxmpp.service
 from muchopper.common import model, queries
 
 from . import utils, worker_pool, xso
-from .promhelpers import time_optional, set_optional
+from .promhelpers import time_optional, set_optional, inc_optional
 
 
 def chop_to_batches(iterable, batch_size):
@@ -87,6 +87,28 @@ class MirrorServer(utils.MuchopperService, aioxmpp.service.Service):
             )
         )
 
+        try:
+            import prometheus_client
+        except ImportError:
+            self._initial_sync_duration_metric = None
+            self._update_duration_metric = None
+            self._lost_update_metric = None
+        else:
+            self._initial_sync_duration_metric = prometheus_client.Gauge(
+                "muclumbus_mirror_server_initial_sync_duration_seconds",
+                "Duration of various initial sync phases",
+                ["phase"],
+            )
+            self._update_duration_metric = prometheus_client.Summary(
+                "muclumbus_mirror_server_update_duration_seconds",
+                "Duration of the updates",
+                ["operation"],
+            )
+            self._lost_update_metric = prometheus_client.Counter(
+                "muclumbus_mirror_server_lost_update_count",
+                "Number of updates lost due to business",
+            )
+
     def _initialise(self, state_future):
         state = state_future.result()
         state.on_muc_changed.connect(
@@ -107,15 +129,11 @@ class MirrorServer(utils.MuchopperService, aioxmpp.service.Service):
         )
         self.logger.debug("mirror server service initialised")
 
-    @aioxmpp.service.depsignal(aioxmpp.Client, "on_stream_established",
-                               defer=True)
-    async def _stream_established(self):
-        if self.publish_target is None:
-            self.logger.warning(
-                "skipping auto-creation of node, because publish target is " "unconfigured"
-            )
-            return
+    async def _initial_sync(self):
 
+        t0 = time.monotonic()
+
+        self.logger.debug("init-sync: creating node")
         try:
             await self._pubsub.create(
                 self.publish_target,
@@ -138,6 +156,17 @@ class MirrorServer(utils.MuchopperService, aioxmpp.service.Service):
         except aioxmpp.errors.XMPPError as exc:
             self.logger.warning("failed to configure node: %s", exc)
 
+        try:
+            t_created = time.monotonic()
+            set_optional(
+                self._initial_sync_duration_metric,
+                t_created-t0,
+                labels=["create"]
+            )
+        except:
+            self.logger.error("foo!", exc_info=True)
+            raise
+
         self.logger.debug("init-sync: performing initial synchronisation")
 
         # we go ahead and delete all items which aren’t in our database anymore
@@ -156,6 +185,13 @@ class MirrorServer(utils.MuchopperService, aioxmpp.service.Service):
 
         existing_addresses = set(aioxmpp.JID.fromstr(item.name)
                                  for item in existing_items.items)
+
+        t_ids = time.monotonic()
+        set_optional(
+            self._initial_sync_duration_metric,
+            t_ids-t_created,
+            labels=["fetch_ids"]
+        )
 
         ncreated = 0
         nok = 0
@@ -181,6 +217,13 @@ class MirrorServer(utils.MuchopperService, aioxmpp.service.Service):
 
             session.rollback()
 
+        t_prepared = time.monotonic()
+        set_optional(
+            self._initial_sync_duration_metric,
+            t_prepared-t_ids,
+            labels=["prepare"]
+        )
+
         for update in updates:
             await self._worker_pool.enqueue(update)
 
@@ -193,8 +236,33 @@ class MirrorServer(utils.MuchopperService, aioxmpp.service.Service):
                 self._compose_muc_delete(address)
             )
 
+        t_queued = time.monotonic()
+        set_optional(
+            self._initial_sync_duration_metric,
+            t_queued-t_prepared,
+            labels=["queue"]
+        )
+
         self.logger.info("init-sync: %d creates, %d deletes; %d items exist",
                          ncreated, len(existing_addresses), nok)
+
+    @aioxmpp.service.depsignal(aioxmpp.Client, "on_stream_established",
+                               defer=True)
+    async def _stream_established(self):
+        if self.publish_target is None:
+            self.logger.warning(
+                "skipping auto-creation of node, because publish target is "
+                "unconfigured"
+            )
+            return
+
+        try:
+            await self._initial_sync()
+        except BaseException:
+            self.logger.error(
+                "init-sync: failed to synchronize",
+                exc_info=True
+            )
 
     async def _handle_item(self, item):
         # self.logger.debug("executing %s", item)
@@ -208,27 +276,31 @@ class MirrorServer(utils.MuchopperService, aioxmpp.service.Service):
                 "lost update due to overloaded worker! %r",
                 item,
             )
+            inc_optional(self._lost_update_metric)
 
     async def _do_muc_delete(self, address):
-        try:
-            await self._pubsub.retract(
-                self.publish_target,
-                xso.StateTransferV1_0Namespaces.MUCS.value,
-                id_=str(address),
-                notify=True,
-            )
-        except aioxmpp.errors.XMPPCancelError as exc:
-            if exc.condition == aioxmpp.errors.ErrorCondition.ITEM_NOT_FOUND:
-                return
-            raise
+        with time_optional(self._update_duration_metric, "retract"):
+            try:
+                await self._pubsub.retract(
+                    self.publish_target,
+                    xso.StateTransferV1_0Namespaces.MUCS.value,
+                    id_=str(address),
+                    notify=True,
+                )
+            except aioxmpp.errors.XMPPCancelError as exc:
+                if (exc.condition ==
+                        aioxmpp.errors.ErrorCondition.ITEM_NOT_FOUND):
+                    return
+                raise
 
     async def _do_muc_update(self, data):
-        await self._pubsub.publish(
-            self.publish_target,
-            xso.StateTransferV1_0Namespaces.MUCS.value,
-            data,
-            id_=str(data.address)
-        )
+        with time_optional(self._update_duration_metric, "publish"):
+            await self._pubsub.publish(
+                self.publish_target,
+                xso.StateTransferV1_0Namespaces.MUCS.value,
+                data,
+                id_=str(data.address)
+            )
 
     def _compose_muc_update(self, muc, public_info):
         data = xso.SyncItemMUC()

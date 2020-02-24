@@ -21,3 +21,12 @@ def set_optional(metric, value, *, labels=[]):
         metric.labels(*labels).set(value)
     else:
         metric.set(value)
+
+
+def inc_optional(metric, *, labels=[]):
+    if metric is None:
+        return
+    if labels:
+        metric.labels(*labels).inc()
+    else:
+        metric.inc()
