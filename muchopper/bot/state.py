@@ -653,8 +653,17 @@ else:
 
                 nmucs, npublicmucs, nopenmucs, nhiddenmucs, nusers = q.one()
 
-                ndomains, = session.query(
-                    sqlalchemy.func.count()
+                stale_threshold = datetime.utcnow() - timedelta(days=1)
+                ndomains, ndomains_stale = session.query(
+                    sqlalchemy.func.count(),
+                    sqlalchemy.func.sum(
+                        sqlalchemy.case(
+                            [
+                                (model.Domain.last_seen < stale_threshold, 1),
+                            ],
+                            else_=0
+                        )
+                    )
                 ).select_from(model.Domain).one()
 
             yield prometheus_client.core.GaugeMetricFamily(
@@ -684,3 +693,11 @@ else:
                 "Number of known domains",
                 value=ndomains,
             )
+
+            domains_by_state = prometheus_client.core.GaugeMetricFamily(
+                "muclumbus_state_domains_state_total",
+                "Number of domains by state",
+                labels=["state"],
+            )
+            domains_by_state.add_metric(["stale"], ndomains_stale)
+            yield domains_by_state
