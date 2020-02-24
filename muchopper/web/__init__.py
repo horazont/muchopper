@@ -22,6 +22,7 @@ import sqlalchemy
 import prometheus_client
 import prometheus_client.core
 import prometheus_client.exposition
+import prometheus_client.multiprocess
 
 import aioxmpp
 
@@ -43,6 +44,14 @@ app.config.from_envvar("MUCHOPPER_WEB_CONFIG")
 db = SQLAlchemy(app, metadata=model.Base.metadata)
 main_menu = Menu(app)
 
+MULTIPROCESS_ENVVAR = 'prometheus_multiproc_dir'
+USE_MULTIPROCESS_METRICS = MULTIPROCESS_ENVVAR in os.environ
+
+if USE_MULTIPROCESS_METRICS:
+    pathlib.Path(os.environ[MULTIPROCESS_ENVVAR]).mkdir(
+        exist_ok=True,
+        parents=True,
+    )
 
 try:
     from aioxmpp import jid_unescape
@@ -136,7 +145,8 @@ PROMETHEUS_METRIC_RESPONSE_TIME = prometheus_client.Summary(
 PROMETHEUS_METRIC_ENDPOINT_EXISTANCE = prometheus_client.Gauge(
     "muclumbus_http_endpoint_flag",
     "Existence of an endpoint in the code",
-    ["endpoint"]
+    ["endpoint"],
+    multiprocess_mode='max',
 )
 
 
@@ -1252,8 +1262,14 @@ class MetricCollector:
 @app.route("/metrics")
 @observe(app)
 def metrics():
+    if USE_MULTIPROCESS_METRICS:
+        registry = prometheus_client.CollectorRegistry()
+        prometheus_client.multiprocess.MultiProcessCollector(registry)
+    else:
+        registry = prometheus_client.REGISTRY
+
     return Response(
-        prometheus_client.exposition.generate_latest(),
+        prometheus_client.exposition.generate_latest(registry),
         mimetype=prometheus_client.exposition.CONTENT_TYPE_LATEST,
     )
 
