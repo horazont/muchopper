@@ -63,6 +63,7 @@ class Scanner(aioxmpp.service.Service,
             self._update_duration_metric = prometheus_client.Summary(
                 "muclumbus_scanner_update_duration_seconds",
                 "Duration of database updates",
+                ["operation"]
             )
             self._version_duration_metric = prometheus_client.Summary(
                 "muclumbus_scanner_version_duration_seconds",
@@ -98,7 +99,7 @@ class Scanner(aioxmpp.service.Service,
             software_version = version_info.version
             software_os = version_info.os
 
-        with time_optional(self._update_duration_metric):
+        with time_optional(self._update_duration_metric, "update"):
             state.update_domain(
                 domain,
                 identities=[
@@ -121,7 +122,9 @@ class Scanner(aioxmpp.service.Service,
             address = item.jid
             if not address.localpart and not address.resource:
                 # drive-by domain find! but don’t try to use that as MUC here
-                state.require_domain(address)
+                with time_optional(self._update_duration_metric,
+                                   "upsert"):
+                    state.require_domain(address)
                 continue
 
             info = state.get_address_metadata(address)
@@ -145,10 +148,12 @@ class Scanner(aioxmpp.service.Service,
                 continue
 
             # add domain to list for future scans
-            state.require_domain(
-                address,
-                seen=-self.non_muc_rescan_delay
-            )
+            with time_optional(self._update_duration_metric,
+                               "upsert"):
+                state.require_domain(
+                    address,
+                    seen=-self.non_muc_rescan_delay
+                )
 
     async def _process_item(self, state, item, fut):
         domain, last_seen, is_muc = item
