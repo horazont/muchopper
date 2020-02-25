@@ -48,6 +48,7 @@ class Scanner(aioxmpp.service.Service,
             self._disco_items_duration_metric = None
             self._pass_duration_metric = None
             self._last_pass_end_metric = None
+            self._update_duration_metric = None
         else:
             self._domain_scanned_metric = prometheus_client.Summary(
                 "muclumbus_scanner_domain_scan_duration",
@@ -58,6 +59,10 @@ class Scanner(aioxmpp.service.Service,
                 "muclumbus_scanner_disco_info_duration_seconds",
                 "Duration of info requests",
                 ["result"]
+            )
+            self._update_duration_metric = prometheus_client.Summary(
+                "muclumbus_scanner_update_duration_seconds",
+                "Duration of database updates",
             )
             self._version_duration_metric = prometheus_client.Summary(
                 "muclumbus_scanner_version_duration_seconds",
@@ -93,16 +98,17 @@ class Scanner(aioxmpp.service.Service,
             software_version = version_info.version
             software_os = version_info.os
 
-        state.update_domain(
-            domain,
-            identities=[
-                (identity.category, identity.type_)
-                for identity in info.identities
-            ],
-            software_name=software_name,
-            software_version=software_version,
-            software_os=software_os,
-        )
+        with time_optional(self._update_duration_metric):
+            state.update_domain(
+                domain,
+                identities=[
+                    (identity.category, identity.type_)
+                    for identity in info.identities
+                ],
+                software_name=software_name,
+                software_version=software_version,
+                software_os=software_os,
+            )
 
     async def _process_muc_domain(self, state, domain):
         suggester = await self._suggester_future
