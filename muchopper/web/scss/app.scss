@@ -786,3 +786,13 @@ div.search-scope-opt input[type="checkbox"] + label {
 body.no-copy .copy-to-clipboard {
 	display: none !important;
 }
+
+.ym-wbox {
+	display: flex;
+	flex-direction: column;
+	min-height: 100vh;
+}
+
+main {
+	flex: 1;
+}
