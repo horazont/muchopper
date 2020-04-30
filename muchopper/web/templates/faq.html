@@ -16,6 +16,10 @@
   Invite {% call copyable_thing() %}{{ config['APPJID'] }}{% endcall %} to your
   room. Note that it won’t join the room, but merely add it to the queue for
   scanning.</p>
+  <p>Also note that we do not list rooms which exist in other chat networks,
+  such as Matrix or Telegram. This service is intended to list rooms in the
+  Jabber network, not in third-party networks. (Though we might list gateways
+  for use from Jabber in the future.)</p>
 
   <h3>I invited the bot, but my room is still not listed.</h3>
   <p>Re-try inviting. If it does not work after more than three hours, {% call get_in_touch() %}{% endcall %}.</p>

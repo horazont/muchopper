@@ -4,7 +4,12 @@
 {% block content %}
 <article>
 	<h3>Domain listing criteria</h3>
-	<p>There are no criteria for a domain to be included in the crawl, except that we need to know about it. If rooms from your domain are not listed and you want them to be listed, follow the instructions in the <a href="{{ url_for('owners') }}">documentation for owners</a> to get a public room from your domain listed. The next crawl will then include all rooms published by your service.</p>
+	<p>For a domain to be included in the crawl, it must not be a gateway to
+	another network. We do not want to list rooms on other instant messaging
+	networks (such as Matrix) at this place. We may list gateway services in a
+	dedicated list in the future (if you host a gateway service and want to
+	be part of such a list, get in touch).</p>
+	<p>Other than that, there are no limitations, except that we need to know about the domain. If rooms from your domain are not listed and you want them to be listed, follow the instructions in the <a href="{{ url_for('owners') }}">documentation for owners</a> to get a public room from your domain listed. The next crawl will then include all rooms published by your service.</p>
 	<p>If rooms from your domain are still not included, ensure that your service actually does list public rooms in a <code>disco#items</code> request as per <a href="https://xmpp.org/extensions/xep-0045.html#disco-rooms">the relevant section in XEP-0045 (Multi User Chat)</a>. If you are sure this is the case and your rooms have not been included in the listing 24 hours after your invitation, please <a href="{{ url_for('contact') }}">get in touch</a>.</p>
 	<h3><a name="delisting"></a>Domain delisting</h3>
 	<p>If you are the owner of a domain and want it to be <em>completely</em> excluded from the listing, please <a href="{{ url_for('contact') }}">get in touch</a>. Be prepared to provide proof that you are the owner of the domain. A good (zero-roundtrip) way to do so is to contact us from an XMPP address which is listed in your service’s <a href="https://xmpp.org/extensions/xep-0157.html">contact addresses</a>.</p>
