@@ -3,12 +3,22 @@
 {% set title = "Legal notes & Contact" %}
 {% macro appname() %}<em>{{ config["APPNAME"] }}</em>{% endmacro %}
 {% block content %}
+{% set contact = config["CONTACT"] %}
 <h3>Contact</h3>
 <p>If you have questions, suggestions, a problem with {{ appname() }} or want to get in contact for another reason, feel free to contact:</p>
-<p>Jonas Schäfer<br/>via Jabber: <a href="xmpp:jonas@wielicki.name">jonas@wielicki.name</a><br/>via Email: <a href="mailto:jonas@wielicki.name">jonas@wielicki.name</a></p>
+<address>{{ contact["name"] }}<br/>Email: <a href="mailto:{{ contact["email"] }}">{{ contact["email"] }}</a><br/>Jabber: <a href="xmpp:{{ contact["jabber"] }}">{{ contact["jabber"] }}</a></address>
 <p>You can use English or German for your requests. When contacting via Jabber, <strong>do not use OMEMO</strong>, my clients do not support it, despite what your client may claim. For encrypted requests please use GPG-encrypted email. You can find my GPG key for example <a href="https://sks-keyservers.net/pks/lookup?op=get&search=0xE5EDE5AC679E300F">on the SKS Keyservers</a>.</p>
 <p>You may also <a href="https://github.com/horazont/muchopper/issues/new">create an issue on GitHub</a>.</p>
 <h3>Legal notes</h3>
+{% if config["LEGAL_CONTACT"] | default(False) %}
+{% set contact = config["LEGAL_CONTACT"] %}
+<h4>Imprint / Impressum</h4>
+<p>Responsible in terms of §5 TMG:</p>
+<address>{{ contact["name"] }}<br/>{{ contact["postal"] | safe }}</address>
+<p>Also reachable via:</p>
+<address>{{ contact["name"] }}<br/>Email: <a href="mailto:{{ contact["email"] }}">{{ contact["email"] }}</a><br/>Jabber: <a href="xmpp:{{ contact["jabber"] }}">{{ contact["jabber"] }}</a></address>
+</p>
+{% endif %}
 <h4>Licenses</h4>
 <p>This software is licensed under the terms of the GNU Affero General Public License Version 3 or later.</p>
 <p>The full terms of the license can be reviewed on <a href="https://www.gnu.org/licenses/agpl.html">the AGPLv3+ license page</a> (external link to GNU).</p>
