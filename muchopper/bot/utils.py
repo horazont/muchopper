@@ -294,17 +294,24 @@ class PeriodicBackgroundTask(MuchopperService,
 
 
 def disco_info_to_address_metadata(info):
-    if (not (any(ident.category == "conference" and
-                 ident.type_ == "text"  # we don’t want to enter IRC
-                 for ident in info.identities) and
-             "http://jabber.org/protocol/muc" in info.features)):
-        return AddressMetadata(
-            is_reachable=True,
-            is_muc=False,
-            is_joinable_muc=False,
-            is_indexable_muc=False,
-            is_banned=False,
-        )
+    not_a_muc = AddressMetadata(
+        is_reachable=True,
+        is_muc=False,
+        is_joinable_muc=False,
+        is_indexable_muc=False,
+        is_banned=False,
+    )
+
+    for ident in info.identities:
+        if ident.category == "gateway":
+            return not_a_muc
+        if ident.category == "conference" and ident.type_ == "text":
+            break
+    else:
+        return not_a_muc
+
+    if "http://jabber.org/protocol/muc" not in info.features:
+        return not_a_muc
 
     is_indexable_muc = (
         "muc_public" in info.features and
