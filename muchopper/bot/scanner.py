@@ -11,12 +11,57 @@ import random
 import time
 
 import aioxmpp
+import aioxmpp.disco.xso as disco_xso
 import aioxmpp.service
+import aioxmpp.rsm.xso as rsm_xso
 
 from datetime import timedelta, datetime
 
 from . import utils
 from .promhelpers import time_optional_late, set_optional, time_optional
+
+
+disco_xso.ItemsQuery.xep0059_set = aioxmpp.xso.Child(
+    [rsm_xso.ResultSetMetadata]
+)
+
+
+async def list_items_with_rsm(domain: aioxmpp.JID,
+                              client: aioxmpp.Client,
+                              page_size: int):
+    rsm = rsm_xso.ResultSetMetadata.limit(max_=page_size)
+    while True:
+        q = disco_xso.ItemsQuery()
+        q.xep0059_set = rsm
+        req = aioxmpp.IQ(
+            type_=aioxmpp.IQType.GET,
+            to=domain,
+            payload=q,
+        )
+        resp = await client.send(req)
+        if not resp.items:
+            break
+        rsm = resp.xep0059_set.next_page(max_=page_size)
+        yield resp.items
+
+
+async def list_items(domain: aioxmpp.JID,
+                     client: aioxmpp.Client):
+    disco_client = client.summon(aioxmpp.DiscoClient)
+    info = await disco_client.query_info(domain)
+    if "http://jabber.org/protocol/rsm" in info.features:
+        # XXX: page size: jabber.ietf.org is buggy.
+        # When you specify a page size > 100(?) (e.g. 1000), it will return
+        # only 100 items -- but from the *end* of the result set. When you
+        # try to force the beginning by adding <after/>, it rejects the query
+        # altogether.
+        # So we have to essentially guess the maximum and hope that no other
+        # implementation sucks that much.
+        async for item_batch in list_items_with_rsm(domain, client, 100):
+            yield item_batch
+        return
+
+    yield (await disco_client.query_items(domain)).items
 
 
 class Scanner(aioxmpp.service.Service,
@@ -38,6 +83,7 @@ class Scanner(aioxmpp.service.Service,
         self._disco_svc = self.dependencies[aioxmpp.DiscoClient]
         self.expire_after = timedelta(days=7)
         self.non_muc_rescan_delay = timedelta(hours=6)
+        self._worker_pool._timeout = timedelta(seconds=45)
 
         try:
             import prometheus_client
@@ -113,25 +159,28 @@ class Scanner(aioxmpp.service.Service,
 
     async def _process_muc_domain(self, state, domain):
         suggester = await self._suggester_future
-        result = await self._disco_svc.query_items(domain)
+        total = 0
+        async for item_batch in list_items(domain, self.client):
+            self.logger.debug("found a batch of %d items for domain %s",
+                              len(item_batch), domain)
+            total += len(item_batch)
+            for item in item_batch:
+                address = item.jid
+                if not address.localpart and not address.resource:
+                    # drive-by domain find! but don’t try to use that as MUC
+                    # here
+                    with time_optional(self._update_duration_metric,
+                                       "upsert"):
+                        state.require_domain(address)
+                    continue
 
-        self.logger.debug("got %d items for MUC domain %r",
-                          len(result.items),
-                          domain)
-        for item in result.items:
-            address = item.jid
-            if not address.localpart and not address.resource:
-                # drive-by domain find! but don’t try to use that as MUC here
-                with time_optional(self._update_duration_metric,
-                                   "upsert"):
-                    state.require_domain(address)
-                continue
-
-            info = state.get_address_metadata(address)
-            if info is None:
-                self.logger.debug("jid %s is not yet known, suggesting",
-                                  address)
-                await suggester(address, privileged=True)
+                info = state.get_address_metadata(address)
+                if info is None:
+                    self.logger.debug("jid %s is not yet known, suggesting",
+                                      address)
+                    await suggester(address, privileged=True)
+        self.logger.debug("processed %d items for domain %s",
+                          total, domain)
 
     async def _process_other_domain(self, state, domain):
         result = await self._disco_svc.query_items(domain)
