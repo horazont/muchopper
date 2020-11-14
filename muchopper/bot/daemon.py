@@ -254,7 +254,7 @@ class MUCHopper:
         version_svc.os = ""
 
         self._analysis_pool = worker_pool.WorkerPool(
-            4,
+            16,
             self._analyse_address,
             delay=0.5,
             max_queue_size=128,

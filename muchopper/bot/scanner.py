@@ -83,6 +83,7 @@ class Scanner(aioxmpp.service.Service,
         self._disco_svc = self.dependencies[aioxmpp.DiscoClient]
         self.expire_after = timedelta(days=7)
         self.non_muc_rescan_delay = timedelta(hours=6)
+        self._worker_pool._timeout = timedelta(seconds=45)
 
         try:
             import prometheus_client
