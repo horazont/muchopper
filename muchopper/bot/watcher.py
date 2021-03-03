@@ -41,7 +41,8 @@ class Watcher(aioxmpp.service.Service,
         self._disco_svc = self.dependencies[aioxmpp.DiscoClient]
         self._vcard_client = self.dependencies[aioxmpp.vcard.VCardService]
         self.expire_after = timedelta(days=2)
-        self.avatar_whitelist = []
+        self.avatar_whitelist = frozenset()
+        self.address_blocklist = frozenset()
 
         try:
             import prometheus_client
@@ -92,6 +93,9 @@ class Watcher(aioxmpp.service.Service,
 
     async def _process_item(self, state, item, fut):
         self.logger.debug("looking at %s", item)
+        if utils.is_address_in_list(item, self.address_blocklist):
+            self.logger.debug("skipping %s because it is blocked", item)
+            return
 
         with time_optional(self._room_scanned_metric):
             with time_optional_late(self._disco_info_duration_metric) as info_m:
@@ -120,9 +124,8 @@ class Watcher(aioxmpp.service.Service,
                         return
                     raise
 
-            if info.get("is_public") and (
-                    item in self.avatar_whitelist or
-                    item.replace(localpart=None) in self.avatar_whitelist):
+            if info.get("is_public") and utils.is_address_in_list(
+                    item, self.avatar_whitelist):
                 with time_optional_late(
                         self._avatar_fetch_duration_metric) as avatar_m:
                     avatar_m["labels"] = ["success"]

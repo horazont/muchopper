@@ -83,6 +83,7 @@ class Scanner(aioxmpp.service.Service,
         self._disco_svc = self.dependencies[aioxmpp.DiscoClient]
         self.expire_after = timedelta(days=7)
         self.non_muc_rescan_delay = timedelta(hours=6)
+        self.address_blocklist = frozenset()
         self._worker_pool._timeout = timedelta(seconds=45)
 
         try:
@@ -166,6 +167,14 @@ class Scanner(aioxmpp.service.Service,
             total += len(item_batch)
             for item in item_batch:
                 address = item.jid
+                if utils.is_address_in_list(address, self.address_blocklist):
+                    self.logger.debug(
+                        "ignoring %s in muc domain listing because it is "
+                        "blocked",
+                        address,
+                    )
+                    continue
+
                 if not address.localpart and not address.resource:
                     # drive-by domain find! but don’t try to use that as MUC
                     # here
@@ -196,6 +205,14 @@ class Scanner(aioxmpp.service.Service,
                 # discovery
                 continue
 
+            if utils.is_address_in_list(address, self.address_blocklist):
+                self.logger.debug(
+                    "ignoring %s in non-muc domain listing because it is "
+                    "blocked",
+                    address,
+                )
+                continue
+
             # add domain to list for future scans
             with time_optional(self._update_duration_metric,
                                "upsert"):
@@ -207,6 +224,10 @@ class Scanner(aioxmpp.service.Service,
     async def _process_item(self, state, item, fut):
         domain, last_seen, is_muc = item
         address = aioxmpp.JID(localpart=None, domain=domain, resource=None)
+
+        if utils.is_address_in_list(address, self.address_blocklist):
+            self.logger.debug("skipping %s because it is blocked", address)
+            return
 
         if not is_muc:
             threshold = datetime.utcnow() - self.non_muc_rescan_delay

@@ -55,9 +55,13 @@ async def amain(loop, args, cfg):
         components,
         mirror_config=cfg["muchopping"].get("mirror", {}),
         spokesman_config=cfg["muchopping"].get("spokesman", {}),
-        avatar_whitelist=list(
+        avatar_whitelist=frozenset(
             map(aioxmpp.JID.fromstr,
                 cfg["muchopping"].get("avatar_whitelist", []))
+        ),
+        address_blocklist=frozenset(
+            map(aioxmpp.JID.fromstr,
+                cfg["muchopping"].get("address_blocklist", [])),
         ),
         prometheus_config=cfg.get("prometheus"),
     )

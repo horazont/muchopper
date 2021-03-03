@@ -4,6 +4,7 @@ import collections
 import contextlib
 import logging
 import time
+import typing
 
 from datetime import timedelta
 
@@ -446,3 +447,13 @@ class WaitCounter:
 
     def wait(self):
         return self._event.wait()
+
+
+def is_address_in_list(
+        address: aioxmpp.JID,
+        addresslist: typing.Collection[aioxmpp.JID]) -> bool:
+    if address in addresslist:
+        return True
+    if address.localpart and address.replace(localpart=None) in addresslist:
+        return True
+    return False

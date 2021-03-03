@@ -151,6 +151,7 @@ class MUCHopper:
                  mirror_config,
                  spokesman_config,
                  avatar_whitelist,
+                 address_blocklist,
                  prometheus_config):
         self.logger = logging.getLogger("muclogger")
         self._loop = loop
@@ -164,6 +165,7 @@ class MUCHopper:
         self._client.summon(aioxmpp.DiscoServer)
         self._muc_svc = self._client.summon(aioxmpp.MUCClient)
         self._disco_svc = self._client.summon(aioxmpp.DiscoClient)
+        self.address_blocklist = address_blocklist
 
         if (Component.MIRROR_CLIENT in components and
                 (Component.WATCHER in components or
@@ -187,6 +189,7 @@ class MUCHopper:
             self._watcher.state = state
             self._watcher.suggester = self.suggest_new_address
             self._watcher.avatar_whitelist = avatar_whitelist
+            self._watcher.address_blocklist = address_blocklist
         else:
             self._watcher = None
 
@@ -194,6 +197,7 @@ class MUCHopper:
             self._scanner = self._client.summon(scanner.Scanner)
             self._scanner.state = state
             self._scanner.suggester = self.suggest_new_address
+            self._scanner.address_blocklist = address_blocklist
 
         if Component.INSIDEMAN in components:
             self._insideman = self._client.summon(insideman.InsideMan)
@@ -262,11 +266,22 @@ class MUCHopper:
         )
 
     async def suggest_new_address(self, address, privileged=False):
+        if utils.is_address_in_list(address, self.address_blocklist):
+            self.logger.debug(
+                "rejecting suggested address %s because it is blocked",
+                address,
+            )
+            return
         self.logger.debug("queue-ing JID for investigation: %s", address)
         await self._analysis_pool.enqueue((address, None, privileged))
         self.logger.debug("queued JID for investigation: %s", address)
 
     def suggest_new_address_nonblocking(self, address, privileged=False):
+        if utils.is_address_in_list(address, self.address_blocklist):
+            self.logger.debug(
+                "rejecting suggested address %s because it is blocked",
+            )
+            return
         try:
             self._analysis_pool.enqueue_nowait((address, None, privileged))
             self.logger.debug("queued JID for investigation: %s", address)
