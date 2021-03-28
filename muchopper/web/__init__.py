@@ -198,7 +198,7 @@ STATIC_RENDERED = set()
 def static_content(generator, path, mimetype):
     def generate_response():
         response = generator()
-        if isinstance(response, werkzeug.BaseResponse):
+        if isinstance(response, werkzeug.Response):
             content = b"".join(response.response)
             response.response = [content]
         elif isinstance(response, str):
@@ -282,7 +282,7 @@ def observe(app):
                     result = app.handle_user_exception(exc)
                 time_taken = time.monotonic() - t0
 
-                if not isinstance(result, werkzeug.BaseResponse):
+                if not isinstance(result, werkzeug.Response):
                     result = make_response(result)
 
                 status_code = result.status_code

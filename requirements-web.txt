@@ -1,0 +1,7 @@
+flask~=1.0
+flask-babel~=1.0
+flask-sqlalchemy~=2.5
+flask-menu~=0.7
+prometheus-client~=0.9
+aioxmpp~=0.12
+hsluv~=5.0
