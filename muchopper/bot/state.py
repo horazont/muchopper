@@ -58,13 +58,13 @@ def process_text(text, length_soft_limit, length_hard_limit=None):
     return text
 
 
-def _scale_avatar(indata: bytes, mimetype: str) -> bytes:
+def _scale_avatar(indata: bytes, mimetype: str) -> typing.Tuple[bytes, str]:
     try:
         import PIL.Image
         import PIL.PngImagePlugin
         import PIL.JpegImagePlugin
     except ImportError:
-        return None
+        return None, None
 
     plugin = {
         "image/png": PIL.PngImagePlugin.Image,
@@ -72,7 +72,7 @@ def _scale_avatar(indata: bytes, mimetype: str) -> bytes:
     }.get(mimetype)
 
     if plugin is None:
-        return None
+        return None, None
 
     infile = io.BytesIO(indata)
     img = plugin.open(infile)
