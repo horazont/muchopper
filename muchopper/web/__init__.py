@@ -886,6 +886,13 @@ def developers():
     return render_static_template("for_developers.html")
 
 
+@app.route("/report")
+@register_menu(app, "data.report", "Report a Room", order=4)
+@observe(app)
+def report_a_room():
+    return render_static_template("report.html")
+
+
 @app.route("/about")
 @register_menu(app, "meta.about", "About", order=1)
 @observe(app)

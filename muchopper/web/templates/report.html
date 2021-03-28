@@ -1,0 +1,7 @@
+{% extends "base.html" %}
+{% set title = "Report a room" %}
+{% macro appname() %}<em>{{ config["APPNAME"] }}</em>{% endmacro %}
+{% block content %}
+<p>If a room <strong>violates the <a href="{{ url_for("tos") }}#listing-policy">listing policy</a></strong>, we are keen on having it removed from the listing. If you have spotted a room which should not be listed or is otherwise problematic, you are welcome to <strong><a href="{{ url_for("contact") }}">report via XMPP or email</a></strong>.</p>
+<p>In addition to contacting us, we also <em>recommend</em> that you attempt to contact the admin of the room and/or the operator of the service the room is hosted at. We may be able to help you finding appropriate points of contact. Please let us know in your report if you need assistance.</p>
+{% endblock %}
