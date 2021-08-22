@@ -82,7 +82,7 @@ class JID(sqlalchemy.types.TypeDecorator):
     def process_result_value(self, value, dialect):
         if value is None:
             return value
-        return aioxmpp.JID.fromstr(value)
+        return aioxmpp.JID.fromstr(value, strict=False)
 
 
 class SimpleEnum(sqlalchemy.types.TypeDecorator):
