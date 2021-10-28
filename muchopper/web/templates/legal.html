@@ -7,7 +7,7 @@
 <h3>Contact</h3>
 <p>If you have questions, suggestions, a problem with {{ appname() }} or want to get in contact for another reason, feel free to contact:</p>
 <address>{{ contact["name"] }}<br/>Email: <a href="mailto:{{ contact["email"] }}">{{ contact["email"] }}</a><br/>Jabber: <a href="xmpp:{{ contact["jabber"] }}">{{ contact["jabber"] }}</a></address>
-<p>You can use English or German for your requests. When contacting via Jabber, <strong>do not use OMEMO</strong>, my clients do not support it, despite what your client may claim. For encrypted requests please use GPG-encrypted email. You can find my GPG key for example <a href="https://sks-keyservers.net/pks/lookup?op=get&search=0xE5EDE5AC679E300F">on the SKS Keyservers</a>.</p>
+<p>You can use English or German for your requests. When contacting via Jabber, <strong>do not use OMEMO</strong>, my clients do not support it, despite what your client may claim. For encrypted requests please use GPG-encrypted email. You can <a href="{{ url_for('contact_gpg') }}">download my GPG key from here</a>.</p>
 <p>You may also <a href="https://github.com/horazont/muchopper/issues/new">create an issue on GitHub</a>.</p>
 <h3>Legal notes</h3>
 {% if config["LEGAL_CONTACT"] | default(False) %}

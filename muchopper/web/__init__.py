@@ -1313,6 +1313,19 @@ def site_manifest():
     return static_content(generator, "site.manifest", "application/json")
 
 
+@app.route("/contact.gpg")
+@observe(app)
+def contact_gpg():
+    def generator():
+        return app.config["GPG_PUBKEY"]
+
+    return static_content(
+        generator,
+        "contact.gpg",
+        "application/pgp-keys",
+    )
+
+
 @app.route("/favicon.ico")
 @observe(app)
 def favicon():
