@@ -993,7 +993,7 @@ def api_rooms_safe():
     try:
         after = optional_typecast_argument(
             request.args, "after",
-            lambda x: aioxmpp.JID.fromstr(strict=False)
+            lambda x: aioxmpp.JID.fromstr(x, strict=False)
         )
         include_closed = request.args.get("include_closed") is not None
         min_users = optional_typecast_argument(
