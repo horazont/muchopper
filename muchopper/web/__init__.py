@@ -514,7 +514,7 @@ def room_list(pageno=1):
 @observe(app)
 def avatar_v1(address):
     try:
-        address = aioxmpp.JID.fromstr(address)
+        address = aioxmpp.JID.fromstr(address, strict=False)
     except (ValueError, TypeError):
         return abort(400, "bad address")
 
@@ -991,8 +991,10 @@ def api_rooms_safe():
     PAGE_SIZE = 200
 
     try:
-        after = optional_typecast_argument(request.args, "after",
-                                           aioxmpp.JID.fromstr)
+        after = optional_typecast_argument(
+            request.args, "after",
+            lambda x: aioxmpp.JID.fromstr(strict=False)
+        )
         include_closed = request.args.get("include_closed") is not None
         min_users = optional_typecast_argument(
             request.args, "min_users",
