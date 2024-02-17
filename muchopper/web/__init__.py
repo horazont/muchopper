@@ -618,7 +618,7 @@ def search():
         else:
             q = queries.common_query(
                 None,
-                min_users=0,
+                min_users=1,
                 q=queries.view_base_query(db.session),
             )
 
@@ -1041,7 +1041,7 @@ def api_search():
         search_description = payload.get("sindescr", True) is True
         search_name = payload.get("sinname", True) is True
         include_closed = payload.get("include_closed", True) is True
-        min_users = payload.get("min_users", 0)
+        min_users = payload.get("min_users", 1)
         after = payload.get("after", None)
     except KeyError as e:
         return abort_json(
@@ -1060,6 +1060,7 @@ def api_search():
                 )
             }
         )
+    min_users = max(min_users, 1)
 
     if after is not None and not isinstance(after, float):
         return abort_json(
@@ -1107,7 +1108,7 @@ def api_search():
 
     q = queries.common_query(
         None,
-        min_users=0,
+        min_users=min_users,
         q=queries.api_base_query(db.session),
     )
     if after is not None:
