@@ -156,7 +156,7 @@ class MUCHopper:
         self.logger = logging.getLogger("muclogger")
         self._loop = loop
         self._state = state
-        self._intr_event = asyncio.Event(loop=self._loop)
+        self._intr_event = asyncio.Event()
         self._client = aioxmpp.PresenceManagedClient(
             jid,
             security_layer,

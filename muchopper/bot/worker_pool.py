@@ -8,23 +8,21 @@ class WorkerPool:
     def __init__(self, nworkers, processor, *,
                  max_queue_size=0,
                  delay=None,
-                 loop=None,
                  timeout=timedelta(seconds=15.0),
                  logger=None):
         if nworkers <= 0:
             raise ValueError("need at least one worker")
-        loop = loop or asyncio.get_event_loop()
         self._logger = logger or logging.getLogger(
             ".".join([__name__, type(self).__qualname__, str(id(self))])
         )
         super().__init__()
         self._processor = processor
-        self._stop_event = asyncio.Event(loop=loop)
+        self._stop_event = asyncio.Event()
         self._delay = delay
-        self._queue = asyncio.Queue(max_queue_size, loop=loop)
+        self._queue = asyncio.Queue(max_queue_size)
         self._timeout = timeout
         self._workers = [
-            asyncio.ensure_future(self._worker(i), loop=loop)
+            asyncio.ensure_future(self._worker(i))
             for i in range(nworkers)
         ]
         for worker in self._workers:

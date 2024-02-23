@@ -432,11 +432,11 @@ async def fetch_avatar(vcard_client, address):
 
 
 class WaitCounter:
-    def __init__(self, max_, loop=None):
+    def __init__(self, max_):
         super().__init__()
         self._max = max_
         self._value = 0
-        self._event = asyncio.Event(loop=loop)
+        self._event = asyncio.Event()
         if max_ <= 0:
             self._event.set()
 

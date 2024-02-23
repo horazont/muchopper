@@ -87,8 +87,7 @@ class Spokesman(utils.MuchopperService, aioxmpp.service.Service):
         return muc.address
 
     @aioxmpp.service.iq_handler(aioxmpp.IQType.GET, xso.Search)
-    @asyncio.coroutine
-    def handle_search(self, request):
+    async def handle_search(self, request):
         if not self._state_future.done():
             raise aioxmpp.errors.XMPPWaitError(
                 (namespaces.stanzas, "internal-server-error"),
