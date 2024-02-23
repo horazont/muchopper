@@ -233,7 +233,7 @@ def static_content(generator, path, mimetype):
             rendered_path.is_file()):
         return send_file(str(rendered_path),
                          mimetype=mimetype,
-                         add_etags=CACHE_USE_ETAGS,
+                         etag=CACHE_USE_ETAGS,
                          conditional=True,
                          as_attachment=False)
 
