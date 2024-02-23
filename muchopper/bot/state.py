@@ -658,9 +658,7 @@ else:
                     sqlalchemy.func.count(),
                     sqlalchemy.func.sum(
                         sqlalchemy.case(
-                            [
-                                (model.Domain.last_seen < stale_threshold, 1),
-                            ],
+                            (model.Domain.last_seen < stale_threshold, 1),
                             else_=0
                         )
                     )

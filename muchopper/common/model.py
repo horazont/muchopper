@@ -56,11 +56,6 @@ def get_sqlite_engine(path: pathlib.Path) -> sqlalchemy.engine.Engine:
         # holy smokes, enforce foreign keys!!k
         dbapi_connection.execute('pragma foreign_keys=ON')
 
-    @sqlalchemy.event.listens_for(engine, "begin")
-    def do_begin(conn):
-        # emit our own BEGIN
-        conn.execute("BEGIN")
-
     return engine
 
 
@@ -69,6 +64,7 @@ def get_generic_engine(uri: str) -> sqlalchemy.engine.Engine:
 
 
 class JID(sqlalchemy.types.TypeDecorator):
+    cache_ok = True
     impl = sqlalchemy.types.VARCHAR
 
     def load_dialect_impl(self, dialect):

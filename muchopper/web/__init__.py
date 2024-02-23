@@ -16,6 +16,7 @@ import tempfile
 from datetime import datetime, timedelta
 
 import jinja2
+import markupsafe
 
 import sqlalchemy
 
@@ -32,7 +33,7 @@ from flask import (
     Flask, render_template, redirect, url_for, request, abort, jsonify,
     send_file, Response, make_response
 )
-from flask_sqlalchemy import SQLAlchemy, Pagination, BaseQuery
+from flask_sqlalchemy import SQLAlchemy
 from flask_menu import register_menu, Menu
 
 from ..common import model, queries
@@ -302,7 +303,7 @@ def observe(app):
 def process_text(s, highlight_keywords=[], linkify=False):
     s = str(s)
     if not highlight_keywords and not linkify:
-        return jinja2.Markup(html.escape(s))
+        return markupsafe.Markup(html.escape(s))
 
     re_parts = []
     if highlight_keywords:
@@ -335,13 +336,13 @@ def process_text(s, highlight_keywords=[], linkify=False):
 
     parts.append(html.escape(s[prev_end:]))
 
-    return jinja2.Markup("".join(parts))
+    return markupsafe.Markup("".join(parts))
 
 
 @app.template_filter("force_escape")
 def force_escape(s):
     s = str(s)
-    return jinja2.Markup(html.escape(s))
+    return markupsafe.Markup(html.escape(s))
 
 
 @app.template_filter("jid_unescape")
@@ -413,7 +414,7 @@ def pretty_number_info(n):
 @app.template_filter("prettify_number")
 def prettify_number(n):
     info = pretty_number_info(n)
-    return jinja2.Markup(
+    return markupsafe.Markup(
         "<span aria-hidden='true'>{}</span>"
         "<span class='a11y-text'>{}</span>".format(
             html.escape(info["short"]),
@@ -679,9 +680,7 @@ def get_metrics():
         sqlalchemy.func.count(),
         sqlalchemy.func.sum(
             sqlalchemy.case(
-                [
-                    (model.Domain.last_seen < stale_threshold, 1),
-                ],
+                (model.Domain.last_seen < stale_threshold, 1),
                 else_=0
             )
         )
@@ -1228,7 +1227,8 @@ def api_badge():
 
 class MetricCollector:
     def collect(self):
-        metrics = get_metrics()
+        with app.app_context():
+            metrics = get_metrics()
 
         yield prometheus_client.core.GaugeMetricFamily(
             "muclumbus_http_mucs_total",
