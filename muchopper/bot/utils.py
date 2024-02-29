@@ -428,7 +428,7 @@ async def collect_muc_metadata(
         except KeyError:
             pass
         else:
-            tags_match = TAGS_RE.search(description)
+            tags_match = TAGS_RE.search(description or "")
             tags = []
             if tags_match is not None:
                 for tag in TAG_RE.finditer(tags_match.group(0)):
