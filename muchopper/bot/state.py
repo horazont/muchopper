@@ -293,6 +293,18 @@ class State:
 
         return items
 
+    def _require_tag(self, session, tag):
+        try:
+            return session.query(model.Tag).filter(
+                model.Tag.key == tag,
+            ).one()
+        except sqlalchemy.orm.exc.NoResultFound:
+            with session.begin_nested():
+                obj = model.Tag()
+                obj.key = tag
+                session.add(obj)
+                return obj
+
     def _require_domain(self, session, domain, seen=True):
         if isinstance(domain, str):
             key = domain
@@ -387,7 +399,8 @@ class State:
                             is_saveable=UNCHANGED,
                             anonymity_mode=UNCHANGED,
                             http_logs_url=UNCHANGED,
-                            web_chat_url=UNCHANGED):
+                            web_chat_url=UNCHANGED,
+                            tags=UNCHANGED):
         muc_created = False
         now = datetime.utcnow()
 
@@ -457,7 +470,7 @@ class State:
 
             if (is_public or
                     (is_public is UNCHANGED and
-                     (subject or name or description))):
+                     (subject or name or description or tags))):
                 public_muc = model.PubliclyListedMUC.get(session, address)
                 if public_muc is None:
                     public_muc = model.PubliclyListedMUC()
@@ -481,6 +494,17 @@ class State:
                     merge(public_muc,
                           "web_chat_url",
                           web_chat_url) or has_changes
+                if tags is not UNCHANGED:
+                    current_tags = set(tag.key for tag in public_muc.tags)
+                    updated_tags = set(tags)
+                    new_tags = updated_tags - current_tags
+                    removed_tags = current_tags - updated_tags
+                    if removed_tags:
+                        for tag in list(public_muc.tags):
+                            if tag.key in removed_tags:
+                                public_muc.tags.remove(tag)
+                    for tag in new_tags:
+                        public_muc.tags.append(self._require_tag(session, tag))
 
             elif is_public is False:
                 public_muc = model.PubliclyListedMUC.get(session, address)

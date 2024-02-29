@@ -36,7 +36,7 @@ from flask import (
 from flask_sqlalchemy import SQLAlchemy
 from flask_menu import register_menu, Menu
 
-from ..common import model, queries
+from ..common import model, queries, TAGS_RE, TAG_RE
 
 from . import colour
 
@@ -300,7 +300,7 @@ def observe(app):
 
 
 @app.template_filter("process_text")
-def process_text(s, highlight_keywords=[], linkify=False):
+def process_text(s, highlight_keywords=[], linkify=False, taggify=False):
     s = str(s)
     if not highlight_keywords and not linkify:
         return markupsafe.Markup(html.escape(s))

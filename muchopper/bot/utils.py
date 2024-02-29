@@ -3,6 +3,7 @@ import asyncio
 import collections
 import contextlib
 import logging
+import re
 import time
 import typing
 
@@ -11,6 +12,7 @@ from datetime import timedelta
 import aioxmpp
 import aioxmpp.service
 
+from muchopper.common import TAGS_RE, TAG_RE
 from muchopper.common.model import AnonymityMode
 
 from . import worker_pool
@@ -420,6 +422,19 @@ async def collect_muc_metadata(
         # for those fields, absence means it should be dropped
         kwargs.setdefault("http_logs_url", None)
         kwargs.setdefault("web_chat_url", None)
+
+        try:
+            description = kwargs["description"]
+        except KeyError:
+            pass
+        else:
+            tags_match = TAGS_RE.search(description)
+            tags = []
+            if tags_match is not None:
+                for tag in TAG_RE.finditer(tags_match.group(0)):
+                    tag_value = tag.group(1)
+                    tags.append(tag_value)
+            kwargs["tags"] = tags
 
     return kwargs
 

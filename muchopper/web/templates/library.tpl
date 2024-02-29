@@ -75,7 +75,7 @@
 			<div class="addr"><a href="xmpp:{{ address }}?join" rel="nofollow">{% call room_address(address, keywords=keywords) %}{% endcall %}</a>{%- call clipboard_button() %}{{ address }}{% endcall -%}</div>
 			<p class="a11y-text">{{ (nusers | pretty_number_info)['accessible'] }} users online</p>
 			{% if show_descr -%}
-			<p class="descr"{% if set_lang_attr %} lang="{{ db_language }}"{% endif %}>{{ descr | process_text(keywords, config["DESCRIPTION_LINKS"] | default(False)) }}</p>
+			<p class="descr"{% if set_lang_attr %} lang="{{ db_language }}"{% endif %}>{{ descr | process_text(keywords, config["DESCRIPTION_LINKS"] | default(False), True) }}</p>
 			{%- endif %}
 			{%- if show_lang or is_nonanon or is_closed -%}
 			<div><ul class="inline slim">

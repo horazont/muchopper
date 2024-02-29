@@ -209,6 +209,17 @@ class DomainIdentity(Base):
             session.add(item)
 
 
+class Tag(Base):
+    __tablename__ = "tag"
+
+    key = Column(
+        "key",
+        Unicode(),
+        nullable=False,
+        primary_key=True,
+    )
+
+
 class MUC(Base):
     __tablename__ = "muc"
 
@@ -283,6 +294,30 @@ class MUC(Base):
             return None
 
 
+public_muc_tags = sqlalchemy.Table(
+    "public_muc_tags",
+    Base.metadata,
+    sqlalchemy.Column(
+        "tag",
+        sqlalchemy.ForeignKey(
+            "tag.key",
+            ondelete="CASCADE",
+            onupdate="CASCADE",
+        ),
+        primary_key=True,
+    ),
+    sqlalchemy.Column(
+        "public_muc",
+        sqlalchemy.ForeignKey(
+            "public_muc.address",
+            ondelete="CASCADE",
+            onupdate="CASCADE",
+        ),
+        primary_key=True,
+    ),
+)
+
+
 class PubliclyListedMUC(Base):
     __tablename__ = "public_muc"
 
@@ -333,6 +368,7 @@ class PubliclyListedMUC(Base):
     )
 
     muc = relationship(MUC)
+    tags = relationship(Tag, secondary=public_muc_tags)
 
     @classmethod
     def get(cls, session, address):

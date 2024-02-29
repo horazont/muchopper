@@ -152,7 +152,8 @@ class MUCHopper:
                  spokesman_config,
                  avatar_whitelist,
                  address_blocklist,
-                 prometheus_config):
+                 prometheus_config,
+                 tag_allowlist):
         self.logger = logging.getLogger("muclogger")
         self._loop = loop
         self._state = state
@@ -190,6 +191,7 @@ class MUCHopper:
             self._watcher.suggester = self.suggest_new_address
             self._watcher.avatar_whitelist = avatar_whitelist
             self._watcher.address_blocklist = address_blocklist
+            self._watcher.tag_allowlist = tag_allowlist
         else:
             self._watcher = None
 

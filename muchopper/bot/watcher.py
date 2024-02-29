@@ -43,6 +43,7 @@ class Watcher(aioxmpp.service.Service,
         self.expire_after = timedelta(days=2)
         self.avatar_whitelist = frozenset()
         self.address_blocklist = frozenset()
+        self.tag_allowlist = frozenset()
 
         try:
             import prometheus_client
@@ -143,6 +144,17 @@ class Watcher(aioxmpp.service.Service,
                         avatar = None, None
             else:
                 avatar = None, None
+
+            try:
+                tags = info["tags"]
+            except KeyError:
+                pass
+            else:
+                info["tags"] = set(
+                    tag
+                    for tag in tags
+                    if tag in self.tag_allowlist
+                )
 
             if fut is not None and not fut.done():
                 fut.set_result(info)

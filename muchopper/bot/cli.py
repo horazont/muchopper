@@ -64,6 +64,7 @@ async def amain(loop, args, cfg):
                 cfg["muchopping"].get("address_blocklist", [])),
         ),
         prometheus_config=cfg.get("prometheus"),
+        tag_allowlist=set(cfg["muchopping"].get("tag_allowlist", [])),
     )
 
     for addr in cfg["muchopping"].get("seed", []):
