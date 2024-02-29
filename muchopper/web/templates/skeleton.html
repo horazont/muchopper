@@ -34,6 +34,9 @@
 		<meta name="msapplication-TileColor" content="#da532c">
 		<meta name="theme-color" content="#ffffff">
 		{% endblock %}
+		{% if config["MASTODON_URL"] | default(False) %}
+		<link rel="me" href="{{ config["MASTODON_URL"] }}">
+		{% endif %}
 	</head>
 	<body class="no-copy">{% include "icons.html" %}<div class="ym-wrapper"><div class="ym-wbox">
 		{% block header %}
