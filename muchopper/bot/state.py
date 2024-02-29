@@ -337,6 +337,7 @@ class State:
         return result
 
     def update_domain(self, domain,
+                      abuse_contacts=UNCHANGED,
                       identities=UNCHANGED,
                       software_version=UNCHANGED,
                       software_name=UNCHANGED,
@@ -349,6 +350,13 @@ class State:
                     session,
                     domain_object,
                     identities,
+                )
+
+            if abuse_contacts is not UNCHANGED:
+                model.DomainContact.update_abuse_contacts(
+                    session,
+                    domain_object,
+                    abuse_contacts,
                 )
 
             if software_version is not UNCHANGED:

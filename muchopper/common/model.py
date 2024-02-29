@@ -22,6 +22,9 @@ from sqlalchemy.ext.declarative import declarative_base
 import aioxmpp
 
 
+ABUSE_CONTACT_LENGTH_LIMIT = 1023
+
+
 @contextlib.contextmanager
 def session_scope(sessionmaker):
     """Provide a transactional scope around a series of operations."""
@@ -206,6 +209,56 @@ class DomainIdentity(Base):
             item.domain_id = domain.id_
             item.category = category
             item.type_ = type_
+            session.add(item)
+
+
+class DomainContact(Base):
+    __tablename__ = "domain_contact"
+
+    id_ = Column(
+        "id",
+        Integer(),
+        primary_key=True,
+        nullable=False,
+        autoincrement=True,
+    )
+
+    domain_id = Column(
+        "domain_id",
+        Integer(),
+        ForeignKey(Domain.id_, ondelete="CASCADE", onupdate="CASCADE"),
+        nullable=False,
+    )
+
+    role = Column(
+        "role",
+        Unicode(),
+        nullable=False,
+    )
+
+    address = Column(
+        "address",
+        Unicode(),
+        nullable=False,
+    )
+
+    @classmethod
+    def update_abuse_contacts(cls, session, domain, contacts):
+        to_add = set(contacts)
+
+        for existing_item in session.query(cls).filter(
+                cls.domain_id == domain.id_).filter(cls.role == "abuse"):
+            try:
+                to_add.remove(existing_item.address)
+            except KeyError:
+                session.delete(existing_item)
+                continue
+
+        for address in to_add:
+            item = cls()
+            item.domain_id = domain.id_
+            item.role = "abuse"
+            item.address = address
             session.add(item)
 
 

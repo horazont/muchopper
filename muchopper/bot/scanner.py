@@ -17,6 +17,8 @@ import aioxmpp.rsm.xso as rsm_xso
 
 from datetime import timedelta, datetime
 
+import muchopper.common.model
+
 from . import utils
 from .promhelpers import time_optional_late, set_optional, time_optional
 
@@ -146,6 +148,19 @@ class Scanner(aioxmpp.service.Service,
             software_version = version_info.version
             software_os = version_info.os
 
+        abuse_contacts = []
+        for ext in info.exts:
+            if ext.get_form_type() != "http://jabber.org/network/serverinfo":
+                continue
+            for field in ext.fields:
+                if field.var != "abuse-addresses":
+                    continue
+                abuse_contacts.extend((
+                    value for value in field.values
+                    if (len(value) <=
+                        muchopper.common.model.ABUSE_CONTACT_LENGTH_LIMIT)
+                ))
+
         with time_optional(self._update_duration_metric, "update"):
             state.update_domain(
                 domain,
@@ -153,6 +168,7 @@ class Scanner(aioxmpp.service.Service,
                     (identity.category, identity.type_)
                     for identity in info.identities
                 ],
+                abuse_contacts=abuse_contacts,
                 software_name=software_name,
                 software_version=software_version,
                 software_os=software_os,
