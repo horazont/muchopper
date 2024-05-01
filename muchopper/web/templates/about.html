@@ -1,7 +1,0 @@
-{% extends "base.html" %}
-{% set title = "About" %}
-{% macro appname() %}<em>{{ config["APPNAME"] }}</em>{% endmacro %}
-{% block content %}
-<p>{{ appname() }} is a project to provide a list of public chat rooms in the Jabber Instant Messaging network.</p>
-<p>To learn more about the technical background of Jabber, visit <a href="https://xmpp.org">the home page of the XMPP Standards Foundation</a>. The XMPP Standards Foundation is the organization governing the technical development of XMPP. XMPP is the protocol on which Jabber is built.</p>
-{% endblock %}
